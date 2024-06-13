@@ -18,6 +18,7 @@ const userRouter = require("./routes/user.router.js")
 
 app.use("/api/v1/users", userRouter)
 
+
 // health check route
 
 app.get("/api/v1/healthCheck", (req, res)=>{
