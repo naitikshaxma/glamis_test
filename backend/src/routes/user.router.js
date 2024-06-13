@@ -11,4 +11,4 @@ router.route("/login").post(login)
 
 router.route("/logout").post(isAuthenticated, logout)
 
-module.exports = {router}
+module.exports = router;
