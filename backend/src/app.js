@@ -18,4 +18,13 @@ const userRouter = require("./routes/user.router.js")
 
 app.use("/api/v1/users", userRouter)
 
+// health check route
+
+app.get("/api/v1/healthCheck", (req, res)=>{
+    res.status(200).json({
+        status : "success",
+        message : "Health Check is OK"
+    })
+})
+
 module.exports = { app }
