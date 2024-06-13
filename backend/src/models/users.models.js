@@ -4,11 +4,15 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
 const userSchema = new mongoose.Schema({
-    first_name : {
-        type : String
+    name : {
+        type : String,
+        required : true
     },
-    last_name : {
-        type : String
+    email_id : {
+        type : String,
+        required : true,
+        unique : true,
+        index : true
     },
     phone : {
         type : Number,
@@ -25,15 +29,48 @@ const userSchema = new mongoose.Schema({
         type : String,
         required : true,  
         minLength : 4
-    },    
-    cash : {
-        type : Number,
-        default : 0
+    },
+    is_email_verified : {
+        type : Boolean,
+        default : false
     },
     refreshToken : {
         type : String
     }
 },{timestamps:true})
+
+
+const studentProfileSchema = new mongoose.Schema({
+    user : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "User"
+    },
+    avatar : {
+        type : String
+    },
+    course : {
+        type : String
+    },
+    branch : {
+        type : String
+    },
+    semester : {
+        type : Number
+    },
+    section : {
+        type : String
+    },
+    address : {
+        type : String
+    },
+    idCard : {
+        type : String
+    },
+    resume : {
+        type : String
+    },
+},{timestamps:true})
+
 
 userSchema.plugin(mongooseAggregatePaginate)
 
@@ -72,7 +109,9 @@ userSchema.methods.generateRefreshToken = function(){
 }
 
 const User = mongoose.model("User", userSchema)
+const Profile = mongoose.model("Profile", studentProfileSchema)
 
 module.exports = {
-    User
+    User,
+    Profile
 }
