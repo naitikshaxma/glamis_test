@@ -21,7 +21,6 @@ app.use("/api/v1/users", userRouter)
 
 
 // health check route
-app.use(RateLimiter15mins)
 
 app.get("/api/v1/healthCheck", (req, res)=>{
     res.status(200).json({
