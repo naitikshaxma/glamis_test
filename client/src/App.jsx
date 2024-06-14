@@ -1,23 +1,17 @@
-import './App.css'
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from './components/global_components/Sidebar';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
-function App() {
+const App = () => {
+    return (
+        <Router>
+                <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/" element={<SignupPage />} />
+                </Routes>
+        </Router>
+    );
+};
 
-  return (
-    <>
-      <Router>  
-        <Sidebar />
-        <Routes>
-          <Route path="/" element={<></>} />
-          <Route path="/about" element={<h1>About</h1>} />
-        </Routes>
-      </Router>
-
-      
-    </>
-  )
-}
-
-export default App
+export default App;
