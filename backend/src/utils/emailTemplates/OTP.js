@@ -72,7 +72,7 @@ const OTPTemplate = (otp) => {
       <!-- Header -->
       <div>
         <a href="https://skill-craft.onrender.com/">
-          <img class="logo" src="https://i.ibb.co/vkRqfTt/logo-yellow-email.png" alt="SkillCraft-Logo" />
+          <img class="logo" src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="SkillCraft-Logo" />
         </a>
       </div>
 
