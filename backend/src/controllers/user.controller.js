@@ -246,10 +246,37 @@ const verifyEmail = asyncHandler(async (req, res)=>{
     
 })
 
+const resendOTP = asyncHandler(async (req, res)=>{
+    const { email } = req.body;
+    console.log(email)
+
+    if(isEmpty(email)){
+        return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
+    }
+
+    const user = await User.findOne({email_id : email})
+
+    if(!user){
+        return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
+    }
+
+    const otp = createOtp();
+
+    sendMail(email, "OTP Verification", OTPTemplate(otp))
+
+    const redisClient = await connectRedis()
+
+    redisClient.set(email, otp);
+    redisClient.expire(email, 600);
+
+    return res.status(200).json(new ApiResponse(200, {}, "OTP Sent Successfully"))
+})
+
 module.exports = { 
     signup,
     login,
     logout,
     refreshAccessToken,
-    verifyEmail
+    verifyEmail,
+    resendOTP
 }
