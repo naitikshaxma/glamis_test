@@ -82,3 +82,4 @@ fabric.properties
 
 venv
 models
+__pycache__
