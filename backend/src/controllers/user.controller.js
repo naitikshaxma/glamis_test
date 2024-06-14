@@ -7,6 +7,7 @@ const { createOtp } = require("../utils/helpers.js")
 const jwt = require("jsonwebtoken")
 const sendMail = require("../utils/sendMail.js")
 const { connectRedis} = require("../db/redis.connect.js")
+const OTPTemplate = require("../utils/emailTemplates/OTP.js") 
 
 
 
@@ -48,7 +49,7 @@ const signup = asyncHandler(async (req, res)=>{
 
     const otp = createOtp();
 
-    sendMail(email_id, "OTP Verification", `Your OTP is ${otp}`)
+    sendMail(email_id, "OTP Verification", OTPTemplate(otp))
 
     
 
@@ -87,19 +88,19 @@ const login = asyncHandler(async (req, res)=>{
 
     /*
 
-    1. get phone number and password - done
-    2. check if phone number is validated or not and same with password - done
+    1. get email and password - done
+    2. check if email is validated or not and same with password - done
     3. if exists then validate password - done
     4. check if user exists or not, if yes geneate accesstoken and refresh token and send user in a cookies(Secure) - done
 
      */
 
-    const { phone, password } = req.body;
-    if(isEmpty(phone) || isEmpty(password)){
+    const { email, password } = req.body;
+    if(isEmpty(email) || isEmpty(password)){
         return res.status(401).json(ApiError(401, "Please Fill All the fields"))
     }
 
-    const isUser = await User.findOne({phone})
+    const isUser = await User.findOne({email_id : email})
 
     console.log(isUser)
 
@@ -110,6 +111,10 @@ const login = asyncHandler(async (req, res)=>{
     let isPasswordCorrectResponse = await isUser.isPasswordCorrect(password)
     if(!isPasswordCorrectResponse){
         return res.status(401).json(ApiError(401, "Password do not match"))
+    }
+
+    if(!isUser.is_email_verified){
+        return res.status(401).json(ApiError(401, "Please Verify Your Email"))
     }
 
     const { refreshToken, accessToken } = await generateAccessAndRefreshTokens(isUser._id)
@@ -200,9 +205,51 @@ const refreshAccessToken = asyncHandler(async (req, res)=>{
     }
 })
 
+
+const verifyEmail = asyncHandler(async (req, res)=>{
+    const { email, otp } = req.body;
+
+    if(isEmpty(email) || isEmpty(otp)){
+        return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
+    }
+
+    const user = await User.findOne({email_id : email})
+
+    if(!user){
+        return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
+    }
+
+    const redisClient = await connectRedis()
+
+    const expectedOTP = await redisClient.get(email)
+    if(user.is_email_verified){
+        return res.status(200).json(new ApiResponse(200, {}, "Email Verified Successfully"))
+    }
+    if(expectedOTP !== otp){
+        return res.status(401).json(new ApiError(401, "Invalid OTP"))
+    }
+    if(expectedOTP === otp){
+        await User.findByIdAndUpdate(user._id, {
+            $set : {
+                is_email_verified : true
+            }
+        },
+        {
+            new : true
+        })
+
+        return res.status(200).json(new ApiResponse(200, {}, "Email Verified Successfully"))
+    }
+    if(expectedOTP === null){
+        return res.status(401).json(new ApiError(401, "OTP Expired"))
+    }
+    
+})
+
 module.exports = { 
     signup,
     login,
     logout,
-    refreshAccessToken
+    refreshAccessToken,
+    verifyEmail
 }
