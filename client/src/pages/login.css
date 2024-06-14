@@ -1,0 +1,40 @@
+.gradient-custom-2 {
+  background: #069f31;
+  background: -webkit-linear-gradient(to right, #024608, #075523, #0a501b, #125e2a);
+  background: linear-gradient(to right,
+      #024608,
+      #075523,
+      #0a501b,
+      #125e2a);
+}
+
+.no-margin-padding {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.full-height {
+  height: 100vh;
+}
+
+.center-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+  padding: 2rem;
+}
+
+@media (min-width: 768px) {
+  .gradient-form {
+    height: 100vh !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .gradient-custom-2 {
+    border-top-right-radius: .3rem;
+    border-bottom-right-radius: .3rem;
+  }
+}
