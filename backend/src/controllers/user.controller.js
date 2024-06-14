@@ -5,6 +5,7 @@ const { User } =  require("../models/users.models.js")
 const { isEmpty } = require("../utils/isEmptyFields.js")
 const { createOtp } = require("../utils/helpers.js")
 const jwt = require("jsonwebtoken")
+const sendMail = require("../utils/sendMail.js")
 
 const generateAccessAndRefreshTokens = async (userId)=>{
     try {
@@ -25,26 +26,32 @@ const generateAccessAndRefreshTokens = async (userId)=>{
 }
 
 const signup = asyncHandler(async (req, res)=>{
+    const {name, email_id ,phone ,password ,confirm_password} = req.body;
 
-    const { first_name, last_name, phone, password, cash_amount } = req.body;
-
-    if(isEmpty(first_name) || isEmpty(last_name) || isEmpty(phone) || isEmpty(password)){
+    if(isEmpty(name) || isEmpty(email_id) || isEmpty(phone) || isEmpty(password) || isEmpty(confirm_password)){
         return res.status(401).json(ApiError(401, "All fields are required"))
     }
 
-    const user = await User.findOne({phone})
+    if(password !== confirm_password){
+        return res.status(401).json(ApiError(401, "Password do not match"))
+    }
+
+    const user = await User.findOne({$or : [{email_id}, {phone}]})
 
     if(user){
         return res.status(400).json(ApiError(400, "User already exists"))
     }
 
+    const otp = createOtp();
+
+    sendMail(email_id, "OTP Verification", `Your OTP is ${otp}`)
+
     const userCreating = await User.create({
-        first_name,
-        last_name,
-        otp : createOtp(),
+        name,
+        email_id,
         phone,
         password,
-        cash : cash_amount
+        otp
     })
 
     const createdUser = await User.findOne(userCreating._id).select(
