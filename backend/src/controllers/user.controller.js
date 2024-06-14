@@ -6,6 +6,10 @@ const { isEmpty } = require("../utils/isEmptyFields.js")
 const { createOtp } = require("../utils/helpers.js")
 const jwt = require("jsonwebtoken")
 const sendMail = require("../utils/sendMail.js")
+const { connectRedis} = require("../db/redis.connect.js")
+
+
+
 
 const generateAccessAndRefreshTokens = async (userId)=>{
     try {
@@ -46,12 +50,23 @@ const signup = asyncHandler(async (req, res)=>{
 
     sendMail(email_id, "OTP Verification", `Your OTP is ${otp}`)
 
+    
+
+    // push otp to redis cache
+    let redisClient;
+    try{
+        redisClient = await connectRedis()
+        redisClient.set(email_id, otp);
+        redisClient.expire(email_id, 600);
+    }catch(error){
+        console.log("Error while connecting to Redis", error)
+    }   
+
     const userCreating = await User.create({
         name,
         email_id,
         phone,
-        password,
-        otp
+        password
     })
 
     const createdUser = await User.findOne(userCreating._id).select(

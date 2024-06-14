@@ -21,10 +21,6 @@ const userSchema = new mongoose.Schema({
         unique : true,
         index : true
     },
-    otp : {
-        type : Number,
-        length : 6
-    },
     password : {
         type : String,
         required : true,  
@@ -88,7 +84,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 userSchema.methods.generateAccessToken = function(){
     return jwt.sign({
         _id : this._id,
-        phone : this.phone
+        email_id : this.email_id,
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
