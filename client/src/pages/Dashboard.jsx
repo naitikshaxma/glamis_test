@@ -1,10 +1,20 @@
-import React from 'react'
-import Sidebar from '../components/global_components/Sidebar'
+import React, { useState } from 'react';
+import Sidebar from '../components/global_components/Sidebar';
+import ProfilePage from './Profile';
 
 const Dashboard = () => {
-    return (
-        <Sidebar />
-    )
-}
+    const [activeLink, setActiveLink] = useState('profile');
 
-export default Dashboard
+    const handleSidebarLinkClick = (link) => {
+        setActiveLink(link);
+    };
+
+    return (
+        <div className="flex h-screen">
+            <Sidebar onLinkClick={handleSidebarLinkClick} activeLink={activeLink} />
+            <ProfilePage activeLink={activeLink} />
+        </div>
+    );
+};
+
+export default Dashboard;
