@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PersonalDetails from '../components/profile/PersonalDetails';
 import EducationalDetails from '../components/profile/EducationsDetails';
+import Resume from '../components/profile/Resume';
 
 const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState('personal');
@@ -47,26 +48,5 @@ const ProfilePage = () => {
         </div>
     );
 };
-
-// const PersonalDetails = () => (
-//     <div>
-//         <h2 className="text-xl font-semibold mb-2">Personal Details</h2>
-//         <p>Here are the personal details...</p>
-//     </div>
-// );
-
-// const EducationalDetails = () => (
-//     <div>
-//         <h2 className="text-xl font-semibold mb-2">Educational Details</h2>
-//         <p>Here are the educational details...</p>
-//     </div>
-// );
-
-const Resume = () => (
-    <div>
-        <h2 className="text-xl font-semibold mb-2">Resume</h2>
-        <p>Here is the resume...</p>
-    </div>
-);
 
 export default ProfilePage;
