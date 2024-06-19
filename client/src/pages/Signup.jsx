@@ -153,14 +153,15 @@ export default function Signup() {
                                 type="submit"
                                 fullWidth
                                 variant="contained"
-                                sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030" }}
+                                sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030", '&:hover': { backgroundColor: "#1c3d1f" } }}
                             >
                                 Sign Up
                             </Button>
                             <Grid container>
                                 <Grid item>
-                                    <Link href="#" variant="body2">
-                                        {"Already have an account? Sign In"}
+                                    Already have an account?&nbsp;
+                                    <Link href="#">
+                                        {"Sign In"}
                                     </Link>
                                 </Grid>
                             </Grid>
