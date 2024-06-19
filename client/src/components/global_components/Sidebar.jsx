@@ -65,7 +65,7 @@ export default function Sidebar() {
                         </svg>
 
                     </ListItemPrefix>
-                    Upcoming Interviews
+                    My Interviews
                     <ListItemSuffix>
                         <Chip value="14" size="sm" variant="ghost" color="green" className="rounded-full" />
                     </ListItemSuffix>

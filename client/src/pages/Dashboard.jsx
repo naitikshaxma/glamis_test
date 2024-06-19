@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import Sidebar from '../components/global_components/Sidebar';
+
+import React from 'react'
+import Sidebar from '../components/global_components/Sidebar'
+import MyInterview from './MyInterview'
 import ProfilePage from './Profile';
+
 
 const Dashboard = () => {
     const [activeLink, setActiveLink] = useState('profile');
@@ -10,6 +13,7 @@ const Dashboard = () => {
     };
 
     return (
+
         <div className="flex h-screen">
             <Sidebar onLinkClick={handleSidebarLinkClick} activeLink={activeLink} />
             <ProfilePage activeLink={activeLink} />
