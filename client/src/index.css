@@ -5,3 +5,7 @@
 * {
     font-family: "Red Rose", serif;
 }
+
+input:focus {
+    outline-color: green;
+}
