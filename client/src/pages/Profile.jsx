@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PersonalDetails from '../components/profile/PersonalDetails';
+import EducationalDetails from '../components/profile/EducationsDetails';
 
 const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState('personal');
@@ -54,12 +55,12 @@ const ProfilePage = () => {
 //     </div>
 // );
 
-const EducationalDetails = () => (
-    <div>
-        <h2 className="text-xl font-semibold mb-2">Educational Details</h2>
-        <p>Here are the educational details...</p>
-    </div>
-);
+// const EducationalDetails = () => (
+//     <div>
+//         <h2 className="text-xl font-semibold mb-2">Educational Details</h2>
+//         <p>Here are the educational details...</p>
+//     </div>
+// );
 
 const Resume = () => (
     <div>

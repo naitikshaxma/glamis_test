@@ -6,6 +6,6 @@
     font-family: "Red Rose", serif;
 }
 
-input:focus {
+input:focus, select:focus {
     outline-color: green;
 }
