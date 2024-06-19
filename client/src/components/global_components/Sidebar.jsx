@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
     Card,
     Typography,
@@ -35,7 +36,7 @@ export default function Sidebar() {
     };
 
     return (
-        <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5 h-screen">
+        <Card className="w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
             <div className="mb-2 flex items-center gap-4 p-4">
                 <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-8 w-8" />
                 <Typography variant="h5" color="blue-gray">
@@ -49,12 +50,14 @@ export default function Sidebar() {
                     </ListItemPrefix>
                     Dashboard
                 </ListItem>
-                <ListItem>
-                    <ListItemPrefix>
-                        <UserCircleIcon className="h-5 w-5" />
-                    </ListItemPrefix>
-                    Profile
-                </ListItem>
+                <Link to="/profile">
+                    <ListItem>
+                        <ListItemPrefix>
+                            <UserCircleIcon className="h-5 w-5" />
+                        </ListItemPrefix>
+                        Profile
+                    </ListItem>
+                </Link>
                 <ListItem>
                     <ListItemPrefix>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">

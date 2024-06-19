@@ -4,6 +4,7 @@ import LoginPage from "./pages/Login";
 // import EnterOTP from "./pages/EnterOTP";
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
+import Profile from "./pages/Profile";
 
 const App = () => {
     return (
