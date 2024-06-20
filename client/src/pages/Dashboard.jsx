@@ -1,7 +1,7 @@
 
 import React from 'react'
 import Sidebar from '../components/global_components/Sidebar'
-import MyInterview from './MyInterview'
+import MyInterview from './Interviews'
 import ProfilePage from './Profile';
 import Interviews from './Interviews';
 import DashboardContent from './DashboardContent';
@@ -21,7 +21,7 @@ const Dashboard = () => {
         switch (activeLink) {
             case 'Profile':
                 return <ProfilePage />;
-            case 'Upcoming Interviews':
+            case 'myInterview':
                 return <Interviews />;
             case 'History':
                 return <History />;
@@ -39,8 +39,6 @@ const Dashboard = () => {
             <div className="flex-grow p-4">
                 {renderContent()}
             </div>
-            {/* {activeLink === 'profile' ? <ProfilePage activeLink={activeLink} /> : */}
-             <MyInterview activeLink={activeLink} />
         </div>
     );
 };
