@@ -20,7 +20,7 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="flex flex-col w-full p-6 bg-white shadow-md rounded-lg">
+        <div className="flex flex-col w-full p-6 shadow-md rounded-lg">
             <h1 className="text-2xl font-semibold mb-4">Profile</h1>
             <div className="flex border-b mb-6">
                 <button
