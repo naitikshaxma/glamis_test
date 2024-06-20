@@ -5,6 +5,8 @@ import LoginPage from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
+import History from "./pages/History";
+
 
 const App = () => {
     return (
@@ -14,6 +16,8 @@ const App = () => {
                 <Route path="/" element={<Signup />} />
                 {/* <Route path="/enter-otp" element={<EnterOTP />} /> */}
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/history" element={<History />} />
             </Routes>
         </Router>
     );
