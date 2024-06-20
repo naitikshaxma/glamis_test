@@ -11,9 +11,7 @@ function History() {
     };
 
     return (
-        <div className="flex h-screen">
-            <Sidebar onLinkClick={handleSidebarLinkClick} activeLink={activeLink} />
-            <div className="flex flex-col w-full p-6 bg-white shadow-md rounded-lg">
+            <div className="flex flex-col w-full p-6 bg-white rounded-lg">
                 <h1 className="text-2xl font-semibold mb-4">History</h1>
                 <div className="w-11/12 overflow-hidden mt-5">
                     <Table />
@@ -22,7 +20,6 @@ function History() {
                     <Pagination />
                 </div>
             </div>
-        </div>
     )
 }
 
