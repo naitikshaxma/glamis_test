@@ -60,15 +60,7 @@ export default function Sidebar({ onLinkClick, activeLink }) {
                     </ListItemPrefix>
                     Profile
                 </ListItem>
-                <ListItem className={activeLink === 'Upcoming Interviews' ? 'bg-gray-300' : ''} onClick={() => handleItemClick('Upcoming Interviews')}>
-                    <ListItem onClick={()=>{
-                        onLinkClick('profile')
-                    }}>
-                        <ListItemPrefix>
-                            <UserCircleIcon className="h-5 w-5" />
-                        </ListItemPrefix>
-                        Profile
-                    </ListItem>
+                
                 <ListItem 
                 onClick={()=>{
                 onLinkClick('myInterview')
