@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import Sidebar from '../components/global_components/Sidebar';
+
+import React from 'react'
+import Sidebar from '../components/global_components/Sidebar'
+import MyInterview from './MyInterview'
 import ProfilePage from './Profile';
 import Interviews from './Interviews';
 import DashboardContent from './DashboardContent';
@@ -7,6 +9,7 @@ import Result from './Result';
 import History from './History';
 
 
+import { useState } from 'react';
 const Dashboard = () => {
     const [activeLink, setActiveLink] = useState('Dashboard');
 
@@ -30,11 +33,14 @@ const Dashboard = () => {
     };
 
     return (
+
         <div className="flex h-screen">
             <Sidebar onLinkClick={handleSidebarLinkClick} activeLink={activeLink} />
             <div className="flex-grow p-4">
                 {renderContent()}
             </div>
+            {/* {activeLink === 'profile' ? <ProfilePage activeLink={activeLink} /> : */}
+             <MyInterview activeLink={activeLink} />
         </div>
     );
 };
