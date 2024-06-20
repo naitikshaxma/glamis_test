@@ -99,7 +99,8 @@ const Interviews = () => {
                 return <PastInterview />;
             default:
                 return <OngoingInerview />;
-        }}
+        }
+    }
 
     return (
         <div className="flex flex-col w-full p-6 bg-white shadow-md rounded-lg">
@@ -125,7 +126,7 @@ const Interviews = () => {
                     Past Interviews
                 </button>
 
-                
+
             </div>
 
             <div>
@@ -165,7 +166,7 @@ const UpcomingInterview = () => {
 
 const PastInterview = () => {
     return (
-        <div className="flex mb-6 w-full flex-wrap">
+        <div className="flex flex-wrap">
             {interviews.filter(interview => interview.status === 'Past Interview').map(interview => (
                 <InterviewCard
                     key={interview.id}
@@ -178,5 +179,5 @@ const PastInterview = () => {
 
 export default Interviews;
 
-     
+
 
