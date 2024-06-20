@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import {
     Card,
     Typography,
@@ -8,24 +7,11 @@ import {
     ListItemPrefix,
     ListItemSuffix,
     Chip,
-    Accordion,
-    AccordionHeader,
-    AccordionBody,
-    Alert,
 } from "@material-tailwind/react";
 import {
-    PresentationChartBarIcon,
-    ShoppingBagIcon,
     UserCircleIcon,
-    Cog6ToothIcon,
     InboxIcon,
-    PowerIcon,
 } from "@heroicons/react/24/solid";
-import {
-    ChevronRightIcon,
-    ChevronDownIcon,
-    CubeTransparentIcon,
-} from "@heroicons/react/24/outline";
 
 export default function Sidebar({ onLinkClick, activeLink }) {
     const [open, setOpen] = React.useState(0);
