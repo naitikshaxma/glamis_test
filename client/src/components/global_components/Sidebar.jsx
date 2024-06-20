@@ -27,7 +27,7 @@ import {
     CubeTransparentIcon,
 } from "@heroicons/react/24/outline";
 
-export default function Sidebar() {
+export default function Sidebar({onLinkClick, activeLink}) {
     const [open, setOpen] = React.useState(0);
     const [openAlert, setOpenAlert] = React.useState(true);
 
@@ -36,7 +36,7 @@ export default function Sidebar() {
     };
 
     return (
-        <Card className="w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
+        <Card className="w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5 h-screen">
             <div className="mb-2 flex items-center gap-4 p-4">
                 <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-8 w-8" />
                 <Typography variant="h5" color="blue-gray">
@@ -50,15 +50,19 @@ export default function Sidebar() {
                     </ListItemPrefix>
                     Dashboard
                 </ListItem>
-                <Link to="/profile">
-                    <ListItem>
+                    <ListItem onClick={()=>{
+                        onLinkClick('profile')
+                    }}>
                         <ListItemPrefix>
                             <UserCircleIcon className="h-5 w-5" />
                         </ListItemPrefix>
                         Profile
                     </ListItem>
-                </Link>
-                <ListItem>
+                <ListItem 
+                onClick={()=>{
+                onLinkClick('myInterview')
+            }}
+                >
                     <ListItemPrefix>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
