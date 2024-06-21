@@ -1,37 +1,37 @@
 import { Card, Typography } from "@material-tailwind/react";
 import { Button } from "@material-tailwind/react";
  
-const TABLE_HEAD = ["S.No", "Interview Name", "Time", "Result"];
- 
-const TABLE_ROWS = [
-  {
-    title: "Full Stack Developer",
-    time: "17.04PM",
-    status: true
-  },
-  {
-    title: "Full Stack Developer",
-    time: "17.04PM",
-    status: true
-  },
-  {
-    title: "Full Stack Developer",
-    time: "17.04PM",
-    status: true
-  },
-  {
-    title: "Full Stack Developer",
-    time: "17.04PM",
-    status: true
-  },
-  {
-    title: "Full Stack Developer",
-    time: "17.04PM",
-    status: true
-  }
-];
- 
 export default function Table() {
+  const TABLE_HEAD = ["S.No", "Interview Name", "Time", "Result"];
+   
+  const TABLE_ROWS = [
+    {
+      title: "Full Stack Developer",
+      time: "17.04PM",
+      status: true
+    },
+    {
+      title: "Full Stack Developer",
+      time: "17.04PM",
+      status: true
+    },
+    {
+      title: "Full Stack Developer",
+      time: "17.04PM",
+      status: true
+    },
+    {
+      title: "Full Stack Developer",
+      time: "17.04PM",
+      status: true
+    },
+    {
+      title: "Full Stack Developer",
+      time: "17.04PM",
+      status: true
+    }
+  ];
+   
   return (
     <Card className="h-full w-full">
       <table className="w-full min-w-max table-auto text-left border-collapse bg-gray-100 rounded">

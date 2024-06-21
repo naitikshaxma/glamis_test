@@ -103,7 +103,7 @@ const Interviews = () => {
     }
 
     return (
-        <div className="flex flex-col w-full p-6 bg-white shadow-md rounded-lg">
+        <div className="flex flex-col w-full p-6 bg-white h-screen rounded-lg">
             <h1 className="text-2xl font-semibold mb-4">My Interviews</h1>
 
             <div className="flex border-b mb-6">
@@ -139,7 +139,7 @@ const Interviews = () => {
 const OngoingInerview = () => {
     return (
 
-        <div className="flex mb-6 w-full flex-wrap">
+        <div className="flex mb-6 w-full">
             {interviews.filter(interview => interview.status === 'active now').map(interview => (
                 <InterviewCard
                     key={interview.id}
