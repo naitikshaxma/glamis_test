@@ -13,7 +13,9 @@ import Result from "./pages/Result";
 const MainLayout = ({ children }) => (
     <div style={{ display: 'flex' }}>
         <Sidebar />
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1 ,
+        marginLeft: '20rem'
+        }}>
             {children}
         </div>
     </div>
