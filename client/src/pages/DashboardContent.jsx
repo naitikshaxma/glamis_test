@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, Pie, Cell, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const attendenceData = [
   { name: 'Present', value: 400, },
@@ -23,10 +23,14 @@ const DashboardContent = () => {
       <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
       <div className="flex justify-between">
         <div className="w-1/3 mr-1">
-          <Attendance />
+          <ResponsiveContainer width="100%" height={300}>
+            <Attendance />
+          </ResponsiveContainer>
         </div>
         <div className="w-2/3 ml-1">
-          <OverallPerformance />
+          <ResponsiveContainer width="100%" height={300}>
+            <OverallPerformance />
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
