@@ -2,6 +2,8 @@ import React from 'react';
 import Attendance from '../components/dashboard/Attendance';
 import OverallPerformance from '../components/dashboard/OverallPerformance';
 import Loader from '../components/Loader';
+import { ResponsiveContainer } from 'recharts';
+
 
 const DashboardContent = () => {
   return (
