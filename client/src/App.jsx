@@ -43,10 +43,6 @@ const App = () => {
                     path="/history" 
                     element={<MainLayout><History /></MainLayout>} 
                 />
-                <Route 
-                    path="/result" 
-                    element={<MainLayout><Result /></MainLayout>}
-                />
             </Routes>
         </Router>
     );

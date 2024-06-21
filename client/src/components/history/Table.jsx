@@ -2,7 +2,7 @@ import { Card, Typography } from "@material-tailwind/react";
 import { Button } from "@material-tailwind/react";
  
 export default function Table() {
-  const TABLE_HEAD = ["S.No", "Interview Name", "Time", "Result"];
+  const TABLE_HEAD = ["S.No", "Interview Name", "Time", 'status', "Result"];
    
   const TABLE_ROWS = [
     {
@@ -65,6 +65,11 @@ export default function Table() {
               <td className="p-4">
                 <Typography variant="small" color="blue-gray" className="font-normal text-center">
                   {time}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography variant="small" color="blue-gray" className="font-normal text-center">
+                  {status?"Active":"Expired"}
                 </Typography>
               </td>
               <td className="p-4 flex justify-center">
