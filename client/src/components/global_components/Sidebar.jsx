@@ -1,9 +1,14 @@
 import React from "react";
-import { Card, Typography, List, ListItem, ListItemPrefix, ListItemSuffix, Chip } from "@material-tailwind/react";
+import { Card, Typography, List, ListItem, ListItemPrefix, ListItemSuffix, Chip, Alert, Button, } from "@material-tailwind/react";
 import { UserCircleIcon, InboxIcon } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
+import {
+    CubeTransparentIcon,
+  } from "@heroicons/react/24/outline";
+
 
 export default function Sidebar() {
+    const [openAlert, setOpenAlert] = React.useState(true);
 
     const navItems = [{
         name: 'Dashboard',
@@ -59,6 +64,52 @@ export default function Sidebar() {
                     </Link>
                 ))}
             </List>
+            <div className="mt-auto">
+
+
+            <Alert open={openAlert}onClose={() => setOpenAlert(false)}>
+        <Typography variant="h6" className="mb-1">
+            GLAMIS - Notify
+        </Typography>
+        <Typography variant="small" className="font-normal opacity-80">
+        🚀 You have 3 tokens left! Conduct 3 interviews this month on your own! 🌟💼
+
+
+
+        </Typography>
+        <div className="mt-4 flex gap-3">
+          <Typography
+            as="a"
+            href="#"
+            variant="small"
+            className="font-medium opacity-80"
+            onClick={() => setOpenAlert(false)}
+            >
+            Dismiss
+          </Typography>
+        </div>
+      </Alert>
+      <div className="my-3">
+        {/* a circular profile and a name associated with it */}
+        <div className="flex items-center gap-2 my-3">
+          <img src="../../assets/avatar.jpeg" alt="profile" className="h-8 w-8 rounded-full" />
+          <div>
+            <Typography color="blue-gray"
+            className="font-semibold ml-2"
+            >
+                Gourav Bathla
+            </Typography>
+          </div>
+        </div>
+        {/* a button for logout */}
+        <Button color="#2b6030"
+        className="w-full"
+        variant="outlined" block={true} ripple="light">
+            Logout
+        </Button>
+
+      </div>
+            </div>
         </Card>
     );
 }

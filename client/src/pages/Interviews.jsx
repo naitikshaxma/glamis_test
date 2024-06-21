@@ -76,8 +76,8 @@ const interviews = [
     },
     {
         id: 9,
-        title: "React Native Interview | GLA University",
-        description: "React Native Interview | GLA University",
+        title: "React Interview | GLA University",
+        description: "React Interview | GLA University",
         status: "Past Interview",
         date: "01/12/2021",
         time: "01:00 PM",
@@ -153,7 +153,7 @@ const OngoingInerview = () => {
 
 const UpcomingInterview = () => {
     return (
-        <div className="flex mb-6 w-full flex-wrap ">
+        <div className="flex mb-6 w-full">
             {interviews.filter(interview => interview.status === 'Upcoming Interview').map(interview => (
                 <InterviewCard
                     key={interview.id}
@@ -166,7 +166,7 @@ const UpcomingInterview = () => {
 
 const PastInterview = () => {
     return (
-        <div className="flex flex-wrap">
+        <div className="flex mb-6 w-full">
             {interviews.filter(interview => interview.status === 'Past Interview').map(interview => (
                 <InterviewCard
                     key={interview.id}
