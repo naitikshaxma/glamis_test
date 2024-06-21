@@ -4,6 +4,7 @@ import OverallPerformance from '../components/dashboard/OverallPerformance';
 import Loader from '../components/Loader';
 import { ResponsiveContainer } from 'recharts';
 
+
 const DashboardContent = () => {
   return (
     <div className="flex flex-col w-full p-6 bg-white rounded-lg">

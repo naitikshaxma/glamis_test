@@ -10,6 +10,7 @@ import {
 export default function Sidebar() {
     const [openAlert, setOpenAlert] = React.useState(true);
 
+
     const navItems = [{
         name: 'Dashboard',
         icon: <InboxIcon className="h-5 w-5" />,

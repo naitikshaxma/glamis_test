@@ -167,6 +167,7 @@ const UpcomingInterview = () => {
 const PastInterview = () => {
     return (
         <div className="flex mb-6 w-full">
+
             {interviews.filter(interview => interview.status === 'Past Interview').map(interview => (
                 <InterviewCard
                     key={interview.id}
