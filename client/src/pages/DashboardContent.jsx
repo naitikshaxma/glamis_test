@@ -3,12 +3,20 @@ import Attendance from '../components/dashboard/Attendance';
 import OverallPerformance from '../components/dashboard/OverallPerformance';
 import Loader from '../components/Loader';
 import { ResponsiveContainer } from 'recharts';
+import { Button } from "@material-tailwind/react";
 
 
 const DashboardContent = () => {
   return (
     <div className="flex flex-col w-full p-6 bg-white rounded-lg">
+      <div className="flex justify-between w-full">
       <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
+
+      <Button variant="gradient" color="#2b6030" className='mb-4' size="md">  
+        Start a Interview
+      </Button>
+
+      </div>
       <div className="flex justify-between">
         <div className="w-1/3 mr-1">
           <ResponsiveContainer width="100%" height={300}>

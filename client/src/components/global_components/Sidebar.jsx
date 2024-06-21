@@ -6,6 +6,8 @@ import {
     CubeTransparentIcon,
   } from "@heroicons/react/24/outline";
 
+import avatar from "../../assets/avatar.jpeg";
+
 
 export default function Sidebar() {
     const [openAlert, setOpenAlert] = React.useState(true);
@@ -91,9 +93,9 @@ export default function Sidebar() {
         </div>
       </Alert>
       <div className="my-3">
-        {/* a circular profile and a name associated with it */}
+        <div className="flex justify-between items-center gap-2 px-2">
         <div className="flex items-center gap-2 my-3">
-          <img src="../../assets/avatar.jpeg" alt="profile" className="h-8 w-8 rounded-full" />
+          <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border border-green-600 border-2" />
           <div>
             <Typography color="blue-gray"
             className="font-semibold ml-2"
@@ -101,6 +103,8 @@ export default function Sidebar() {
                 Gourav Bathla
             </Typography>
           </div>
+          </div>
+          <img width="32" height="32" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1"/>
         </div>
         {/* a button for logout */}
         <Button color="#2b6030"
