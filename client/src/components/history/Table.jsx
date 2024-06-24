@@ -1,9 +1,9 @@
 import { Card, Typography } from "@material-tailwind/react";
 import { Button } from "@material-tailwind/react";
- 
+
 export default function Table() {
   const TABLE_HEAD = ["S.No", "Interview Name", "Time", 'status', "Result"];
-   
+
   const TABLE_ROWS = [
     {
       title: "Full Stack Developer",
@@ -13,12 +13,12 @@ export default function Table() {
     {
       title: "Full Stack Developer",
       time: "17.04PM",
-      status: true
+      status: false
     },
     {
       title: "Full Stack Developer",
       time: "17.04PM",
-      status: true
+      status: false
     },
     {
       title: "Full Stack Developer",
@@ -31,7 +31,7 @@ export default function Table() {
       status: true
     }
   ];
-   
+
   return (
     <Card className="h-full w-full">
       <table className="w-full min-w-max table-auto text-left border-collapse bg-gray-100 rounded">
@@ -68,12 +68,12 @@ export default function Table() {
                 </Typography>
               </td>
               <td className="p-4">
-                <Typography variant="small" color="blue-gray" className="font-normal text-center">
-                  {status?"Active":"Expired"}
+                <Typography variant="small" color={status ? '#2b6030' : 'red'} className="font-normal text-center">
+                  {status ? "Active" : "Expired"}
                 </Typography>
               </td>
               <td className="p-4 flex justify-center">
-                <Button className="bg-[#2b6030]">{status?"View Result":"Expired"}</Button>
+                <Button className={`${status ? 'bg-[#2b6030]' : 'bg-gray-400 disabled text-black'} `}>{status ? "View Result" : "Expired"}</Button>
               </td>
             </tr>
           ))}

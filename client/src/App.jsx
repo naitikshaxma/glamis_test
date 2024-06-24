@@ -8,6 +8,7 @@ import History from "./pages/History";
 import Interviews from "./pages/Interviews";
 import Sidebar from "./components/global_components/Sidebar";
 import Result from "./pages/Result";
+import LiveInterview from "./pages/LiveInterview";
 
 // Layout component that includes Sidebar
 const MainLayout = ({ children }) => (
@@ -42,6 +43,10 @@ const App = () => {
                 <Route 
                     path="/history" 
                     element={<MainLayout><History /></MainLayout>} 
+                />
+                <Route
+                    path="/live"
+                    element={<LiveInterview />}
                 />
             </Routes>
         </Router>

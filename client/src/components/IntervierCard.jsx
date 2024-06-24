@@ -62,7 +62,7 @@ import {
           ) : props.status === 'Upcoming Interview' ? (
                 <Button color="lightGreen"
                 className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
-                >Comming Soon</Button>
+                >Coming Soon</Button>
           ) : (
                 <Button color="lightGreen" 
                 className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
