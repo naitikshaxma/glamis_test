@@ -16,7 +16,7 @@ const Attendance = () => {
       <div className="shadow-md rounded-lg p-4">
         <h1 className="text-xl font-semibold">Attendance</h1>
         <div className="flex justify-between pt-6">
-          <PieChart width={300} height={300}>
+          <PieChart width={300} height={250}>
             <Pie dataKey="value" data={attendenceData} cx={170} outerRadius={100} fill="#8884d8" label>
               {
                 attendenceData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)

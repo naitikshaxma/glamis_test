@@ -1,16 +1,16 @@
 import React from "react";
-import { Card, Typography, List, ListItem, ListItemPrefix, ListItemSuffix, Chip, Alert, Button, } from "@material-tailwind/react";
+import { Card, Typography, List, ListItem, ListItemPrefix, Alert, Button } from "@material-tailwind/react";
 import { UserCircleIcon, InboxIcon } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
-import {
-    CubeTransparentIcon,
-  } from "@heroicons/react/24/outline";
+import { CubeTransparentIcon } from "@heroicons/react/24/outline";
+import { UisBars } from '@iconscout/react-unicons-solid';
+import { SidebarContext } from "../../hooks/SideBarContextHook";
 
 import avatar from "../../assets/avatar.jpeg";
 
-
 export default function Sidebar() {
     const [openAlert, setOpenAlert] = React.useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
 
     const navItems = [{
@@ -40,73 +40,76 @@ export default function Sidebar() {
 ]
 
     return (
-        <Card className="w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5 h-screen fixed top-0 left-0 bg-white flex flex-col">
-            <div className="mb-2 flex items-center gap-4 p-4">
-                <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-8 w-8" />
-                <Typography variant="h5" color="blue-gray">
-                    GLAMIS
-                </Typography>
-            </div>
-            <List>
-                {navItems.map((item, index) => (
-                    <Link to={item.href} key={index}>
-                        <ListItem>
-                            <ListItemPrefix>
-                                {item.icon}
-                            </ListItemPrefix>
-                            {item.name}
-                        </ListItem>
-                    </Link>
-                ))}
-            </List>
-            <div className="mt-auto">
-
-
-            <Alert open={openAlert}onClose={() => setOpenAlert(false)}>
-        <Typography variant="h6" className="mb-1">
-            GLAMIS - Notify
-        </Typography>
-        <Typography variant="small" className="font-normal opacity-80">
-        🚀 You have 3 tokens left! Conduct 3 interviews this month on your own! 🌟💼
-
-
-
-        </Typography>
-        <div className="mt-4 flex gap-3">
-          <Typography
-            as="a"
-            href="#"
-            variant="small"
-            className="font-medium opacity-80"
-            onClick={() => setOpenAlert(false)}
-            >
-            Dismiss
-          </Typography>
+        <div className="flex">
+            {isSidebarOpen && (
+                <Card className="w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5 h-screen fixed top-0 left-0 bg-white flex flex-col">
+                    <div className="mb-2 flex items-center gap-4 p-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-8 w-8" />
+                        <Typography variant="h5" color="blue-gray">
+                            GLAMIS
+                        </Typography>
+                        <UisBars className="ml-20 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />
+                    </div>
+                    <List>
+                        {navItems.map((item, index) => (
+                            <Link to={item.href} key={index}>
+                                <ListItem>
+                                    <ListItemPrefix>
+                                        {item.icon}
+                                    </ListItemPrefix>
+                                    {item.name}
+                                </ListItem>
+                            </Link>
+                        ))}
+                    </List>
+                    <div className="mt-auto">
+                        <Alert open={openAlert} onClose={() => setOpenAlert(false)}>
+                            <Typography variant="h6" className="mb-1">
+                                GLAMIS - Notify
+                            </Typography>
+                            <Typography variant="small" className="font-normal opacity-80">
+                                🚀 You have 3 tokens left! Conduct 3 interviews this month on your own! 🌟💼
+                            </Typography>
+                            <div className="mt-4 flex gap-3">
+                                <Typography
+                                    as="a"
+                                    href="#"
+                                    variant="small"
+                                    className="font-medium opacity-80"
+                                    onClick={() => setOpenAlert(false)}
+                                >
+                                    Dismiss
+                                </Typography>
+                            </div>
+                        </Alert>
+                        <div className="my-3">
+                            <div className="flex justify-between items-center gap-2 px-2">
+                                <div className="flex items-center gap-2 my-3">
+                                    <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border border-green-600 border-2" />
+                                    <div>
+                                        <Typography color="blue-gray" className="font-semibold ml-2">
+                                            Gourav Bathla
+                                        </Typography>
+                                    </div>
+                                </div>
+                                <img width="32" height="32" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1" />
+                            </div>
+                            <Button
+                                color="#2b6030"
+                                className="w-full"
+                                variant="outlined"
+                                block={true}
+                                ripple="light"
+                            >
+                                Logout
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            )}
+            {!isSidebarOpen && (
+                <UisBars className="ml-4 mt-4 cursor-pointer" onClick={() => setIsSidebarOpen(true)} />
+            )}
         </div>
-      </Alert>
-      <div className="my-3">
-        <div className="flex justify-between items-center gap-2 px-2">
-        <div className="flex items-center gap-2 my-3">
-          <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border border-green-600 border-2" />
-          <div>
-            <Typography color="blue-gray"
-            className="font-semibold ml-2"
-            >
-                Gourav Bathla
-            </Typography>
-          </div>
-          </div>
-          <img width="32" height="32" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1"/>
-        </div>
-        {/* a button for logout */}
-        <Button color="#2b6030"
-        className="w-full"
-        variant="outlined" block={true} ripple="light">
-            Logout
-        </Button>
-
-      </div>
-            </div>
-        </Card>
     );
 }

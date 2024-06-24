@@ -21,7 +21,7 @@ const Resume = () => (
                     <iframe
                         src={SamplePDF}
                         title="Resume Preview"
-                        className="w-full h-[22rem]"
+                        className="w-full h-[21rem]"
                     ></iframe>
                 </div>
             </div>

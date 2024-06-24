@@ -15,8 +15,8 @@ const OverallPerformance = () => {
         <h1 className="text-xl font-semibold">Overall Performance</h1>
         <div className="flex justify-between pt-6">
           <LineChart
-            width={700}
-            height={300}
+            width={720}
+            height={250}
             data={performanceData}
             margin={{
               top: 5,

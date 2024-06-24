@@ -4,6 +4,8 @@ import OverallPerformance from '../components/dashboard/OverallPerformance';
 import Loader from '../components/Loader';
 import { ResponsiveContainer } from 'recharts';
 import { Button } from "@material-tailwind/react";
+import TechnicalPerformance from '../components/dashboard/TechnicalPerformance';
+import VerbalPerformance from '../components/dashboard/VerbalPerformance';
 
 
 const DashboardContent = () => {
@@ -17,20 +19,31 @@ const DashboardContent = () => {
       </Button>
 
       </div>
-      <div className="flex justify-between">
-        <div className="w-1/3 mr-1">
-          <ResponsiveContainer width="100%" height={300}>
+
+      <div className="flex justify-between flex-wrap">
+        <div className="w-1/3">
+          <ResponsiveContainer width="100%" height={270}>
             <Attendance />
           </ResponsiveContainer>
         </div>
-        <div className="w-2/3 ml-1">
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="w-2/3">
+          <ResponsiveContainer width="100%" height={270}>
             <OverallPerformance />
+          </ResponsiveContainer>
+        </div>
+
+        <div className="w-1/2 mt-20">
+          <ResponsiveContainer width="100%" height={270}>
+            <TechnicalPerformance />
+          </ResponsiveContainer>
+        </div>
+        <div className="w-1/2 mt-20">
+          <ResponsiveContainer width="100%" height={270}>
+            <VerbalPerformance />
           </ResponsiveContainer>
         </div>
       </div>
     </div>
-    // <Loader />
   )
 }
 
