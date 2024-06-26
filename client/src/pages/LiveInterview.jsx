@@ -1,58 +1,79 @@
-import React, { useState } from 'react';
-import {
-    Card,
-    CardBody,
-    Input,
-    Button,
-    Typography
-} from '@material-tailwind/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button } from "@material-tailwind/react";
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+
+const Timer = () => {
+    return (
+        <CountdownCircleTimer
+            size={100}
+            isPlaying
+            duration={60}
+            colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+            colorsTime={[45, 30, 15, 0]}
+        >
+            {({ remainingTime }) => remainingTime}
+        </CountdownCircleTimer>
+    );
+}
 
 const LiveInterview = () => {
-    const [question, setQuestion] = useState('');
-    const [response, setResponse] = useState('Dummy AI response'); // Add state for AI response
+    const [open, setOpen] = useState(true);
+    const questions = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React";
 
-    const handleQuestionChange = (e) => {
-        setQuestion(e.target.value);
-    };
+    // use live video stream
+    const localVideoRef = useRef();
+    const [localVideoTrack, setLocalVideoTrack] = useState('');
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // TODO: Handle submitting the question to the AI
-        setResponse('The AI is thinking...'); // Simulate AI response update
-        setQuestion('');
+    useEffect(() => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((stream) => {
+                localVideoRef.current.srcObject = stream;
+                setLocalVideoTrack(window.URL.createObjectURL(stream));
+            })
+            .catch((error) => {
+                console.error('Error accessing media devices.', error);
+            });
+    }, []);
+
+    const handleClose = () => {
+        setOpen(false);
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <Card className="w-full max-w-md shadow-lg">
-                <CardBody>
-                    <Typography variant="h4" className="text-center mb-6">
-                        Live Interview
-                    </Typography>
-                    <div className="bg-gray-200 p-4 rounded mb-6 flex justify-center items-center">
-                        {/* TODO: Add live video component */}
-                        <Typography variant="h6">Live Video Placeholder</Typography>
-                    </div>
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                        <Input
-                            type="text"
-                            value={question}
-                            onChange={handleQuestionChange}
-                            placeholder="Ask a question"
-                            size="lg"
-                        />
-                        <Button type="submit" color="blue">
-                            Submit
-                        </Button>
-                    </form>
-                    <div className="mt-6">
-                        {/* Display AI's response */}
-                        <Typography variant="paragraph" className="text-gray-700">
-                            {response}
-                        </Typography>
-                    </div>
-                </CardBody>
-            </Card>
+        <div className="flex flex-col items-center h-screen bg-gray-900 text-white">
+            <div className="flex justify-between items-center w-full p-4">
+                <div className='w-1/12 flex items-center justify-center'>
+                    <Timer />
+                </div>
+                <div className="w-9/12 ml-20">
+                    <p className="text-lg font-semibold">React.js Developer Interview
+                        <span className="block text-sm font-normal">Gourav Bathla - 2115000976</span>
+                    </p>
+                </div>
+                <Button
+                    variant='filled'
+                    className='w-2/12'
+                    color='red'
+                    size='regular'
+                    onClick={handleClose}
+                >
+                    End Interview
+                </Button>
+            </div>
+            <div className="flex flex-col items-center w-full my-4">
+                <div className="w-8/12 p-4 rounded-lg bg-opacity-50 bg-gray-800 h-80">
+                    <p className="text-lg font-semibold">Question 1 : {questions}</p>
+                </div>
+            </div>
+            <div className="flex items-center justify-between w-full mt-auto p-4">
+                <div className="flex justify-center w-[25rem] mb-3">
+                    <video ref={localVideoRef} autoPlay muted className="rounded-lg" width={400} height={200}></video>
+                </div>
+                <div className="flex justify-center space-x-4">
+                    <Button variant='filled' color='blue' size='regular'>Skip</Button>
+                    <Button variant='filled' color='blue' size='regular'>Next</Button>
+                </div>
+            </div>
         </div>
     );
 };
