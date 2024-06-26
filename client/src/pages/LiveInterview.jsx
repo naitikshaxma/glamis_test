@@ -18,7 +18,7 @@ const Timer = () => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
-    const questions = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React";
+    const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React";
 
     // use live video stream
     const localVideoRef = useRef();
@@ -54,7 +54,7 @@ const LiveInterview = () => {
                     variant='filled'
                     className='w-2/12'
                     color='red'
-                    size='regular'
+                    size='lg'
                     onClick={handleClose}
                 >
                     End Interview
@@ -62,16 +62,16 @@ const LiveInterview = () => {
             </div>
             <div className="flex flex-col items-center w-full my-4">
                 <div className="w-8/12 p-4 rounded-lg bg-opacity-50 bg-gray-800 h-80">
-                    <p className="text-lg font-semibold">Question 1 : {questions}</p>
+                    <p className="text-lg font-semibold">Question 1 : {question}</p>
                 </div>
             </div>
             <div className="flex items-center justify-between w-full mt-auto p-4">
-                <div className="flex justify-center w-[25rem] mb-3">
-                    <video ref={localVideoRef} autoPlay muted className="rounded-lg" width={400} height={200}></video>
+                <div className="flex justify-center w-[25rem]">
+                    <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[16rem]"></video>
                 </div>
-                <div className="flex justify-center space-x-4">
-                    <Button variant='filled' color='blue' size='regular'>Skip</Button>
-                    <Button variant='filled' color='blue' size='regular'>Next</Button>
+                <div className="flex justify-center space-x-4 mt-[12rem]">
+                    <Button variant='filled' color='blue' size='lg' className="w-44">Skip</Button>
+                    <Button variant='outlined' color='blue' size='lg' className="w-44">Next</Button>
                 </div>
             </div>
         </div>
