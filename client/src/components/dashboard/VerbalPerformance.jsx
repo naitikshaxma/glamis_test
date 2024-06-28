@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'rec
 
 const VerbalPerformance = () => {
     const data = [
-        { date: "2021-01-01", grammar: 100, fluency: 20, pronunciation: 15, vocabulary: 5 },
+        { date: "2021-01-01", grammar: 100, fluency: 80, pronunciation: 10, vocabulary: 100 },
         { date: "2021-01-02", grammar: 75, fluency: 85, pronunciation: 80, vocabulary: 90 },
         { date: "2021-01-03", grammar: 85, fluency: 80, pronunciation: 70, vocabulary: 88 },
         { date: "2021-01-04", grammar: 90, fluency: 88, pronunciation: 82, vocabulary: 92 },

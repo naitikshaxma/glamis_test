@@ -1,4 +1,3 @@
-
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
 const OverallPerformance = () => {

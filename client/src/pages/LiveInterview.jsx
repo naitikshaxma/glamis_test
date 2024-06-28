@@ -1,6 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@material-tailwind/react";
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+import { AudioVisualizer } from 'react-audio-visualize';
+import Visualizer from './test';
+
+// audio visualizer component
+const AudioVisualizerComponent = (props) => {
+    return (
+        <>
+            <AudioVisualizer
+                ref={props.localAudioRef}
+                width={500}
+                height={75}
+                barWidth={1}
+                gap={0}
+                barColor={'#f76565'}
+            />
+        </>
+    )
+}
 
 const Timer = () => {
     return (
@@ -23,12 +41,21 @@ const LiveInterview = () => {
     // use live video stream
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
+    const [localAudioTrack, setLocalAudioTrack] = useState('');
+    const localAudioRef = useRef();
+
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
                 localVideoRef.current.srcObject = stream;
                 setLocalVideoTrack(window.URL.createObjectURL(stream));
+                localAudioRef.current = new MediaRecorder(stream);
+                localAudioRef.current.ondataavailable = (event) => {
+                    setLocalAudioTrack(event.data);
+                };
+
+                localAudioRef.current.start();
             })
             .catch((error) => {
                 console.error('Error accessing media devices.', error);
@@ -63,12 +90,16 @@ const LiveInterview = () => {
             <div className="flex flex-col items-center w-full my-4">
                 <div className="w-8/12 p-4 rounded-lg bg-opacity-50 bg-gray-800 h-80">
                     <p className="text-lg font-semibold">Question 1 : {question}</p>
+
+                    {/* <Visualizer /> */}
                 </div>
             </div>
             <div className="flex items-center justify-between w-full mt-auto p-4">
                 <div className="flex justify-center w-[25rem]">
                     <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[16rem]"></video>
+                    {/* <audio ref={localVideoRef} autoPlay className="rounded-lg h-[16rem]"></audio> */}
                 </div>
+                <AudioVisualizerComponent localAudioRef={localAudioRef} />
                 <div className="flex justify-center space-x-4 mt-[12rem]">
                     <Button variant='filled' color='blue' size='lg' className="w-44">Skip</Button>
                     <Button variant='outlined' color='blue' size='lg' className="w-44">Next</Button>
