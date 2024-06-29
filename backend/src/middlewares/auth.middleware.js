@@ -1,8 +1,8 @@
-const { asyncHandler } = require( "../utils/asyncHandler.js");
-const { isEmpty } = require( "../utils/isEmptyFields.js");
-const { ApiError } = require( "../utils/ApiError.js");
-const jwt = require( "jsonwebtoken");
-const { User } = require( "../models/users.models.js");
+import { User } from "../models/users.models.js";
+import { isEmpty } from "../utils/isEmptyFields.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import jwt from "jsonwebtoken";
 
 const isAuthenticated = asyncHandler(async(req, res, next) => {
     try {
@@ -25,6 +25,4 @@ const isAuthenticated = asyncHandler(async(req, res, next) => {
     }
 })
 
-module.exports = {
-    isAuthenticated
-}
+export default isAuthenticated;

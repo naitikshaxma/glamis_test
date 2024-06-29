@@ -5,6 +5,6 @@ const isEmpty = (value) => {
     return false;
 };
 
-module.exports = {
+export {
     isEmpty
 }

@@ -1,7 +1,8 @@
-const express = require("express")
-const cors = require("cors")
-const cookieParser = require("cookie-parser")
-const {RateLimiter15mins} = require("./utils/RateLimiter.js")
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+// import { RateLimiter15mins } from "./utils/RateLimiter.js";
+import userRouter from './routes/user.router.js';
 
 const app = express()
 
@@ -15,7 +16,6 @@ app.use(cookieParser())
 
 // Routes Import
 
-const userRouter = require("./routes/user.router.js")
 
 app.use("/api/v1/users", userRouter)
 
@@ -29,4 +29,4 @@ app.get("/api/v1/healthCheck", (req, res)=>{
     })
 })
 
-module.exports = { app }
+export default app;

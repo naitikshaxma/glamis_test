@@ -1,7 +1,7 @@
-const mongoose = require("mongoose")
-const mongooseAggregatePaginate = require("mongoose-aggregate-paginate-v2")
-const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
+import mongoose from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
     name : {
@@ -107,7 +107,4 @@ userSchema.methods.generateRefreshToken = function(){
 const User = mongoose.model("User", userSchema)
 const Profile = mongoose.model("Profile", studentProfileSchema)
 
-module.exports = {
-    User,
-    Profile
-}
+export { User, Profile };

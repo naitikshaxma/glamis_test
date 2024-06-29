@@ -5,4 +5,4 @@ const ApiError = (statusCode, message = "Something Went Wrong") => {
     }
 }
 
-module.exports = { ApiError }
+export { ApiError };

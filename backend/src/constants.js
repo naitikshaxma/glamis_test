@@ -1,5 +1,3 @@
 const DB_NAME = "glamis"
 
-module.exports = {
-    DB_NAME
-}
+export default DB_NAME;

@@ -38,7 +38,7 @@ const Timer = () => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
-    const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React";
+    const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React Explain the features of React. What is JSX?";
 
     // use live video stream
     const localVideoRef = useRef();
@@ -73,48 +73,36 @@ const LiveInterview = () => {
 
             <div className="flex flex-col items-center h-screen w-3/4">
                 {/* <Watermark text="Interviewer" /> */}
-                <div className="flex justify-between items-center w-full p-4">
-                    <div className='w-2/12 flex items-center justify-center'>
-                        {/* <Timer /> */}
-
-                        <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-24 mb-7" />
+                <div className="timer-tab w-full flex justify-between p-4 items-center">
+                    {/* <div className="flex items-center"> */}
+                    <div className="logo mr-4">
+                        <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
                     </div>
-                    <div className="w-10/12 ml-20">
-                        <p className="text-lg font-semibold">React.js Developer Interview
-                            <span className="block text-sm font-normal">Gourav Bathla - 2115000976</span>
-                        </p>
+                    <div className="title-and-name ml-4">
+                        <p className="text-2xl font-semibold">Full Stack Interview</p>
+                        <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
                     </div>
-                </div>
-                <div className="flex flex-col items-center w-full my-4">
-                    <div className="w-8/12 p-4 rounded-lg bg-opacity-50 bg-gray-300 h-80">
-                        <p className="text-lg font-semibold">Question 1 : {question}</p>
-                    </div>
-                </div>
-                {/* 3 buttons one to skip the question , tap to speak ,and last is to go on next answer */}
-                <div className="flex justify-center w-full mt-auto p-4">
-                    <div className="w-2/12 flex">
-
+                    {/* </div> */}
+                    <div className="timer">
                         <Timer />
                     </div>
-                    <div className="w-10/12 flex">
-                        
-                        <div className="flex justify-center space-x-28">
-                            <Button variant='filled' color='blue' size='md' className="w-44">Skip</Button>
-                            <Button variant='filled' color='blue' size='lg' className="w-fit rounded-full p-4">
-                                <MicIcon />
-                            </Button>
-                            <Button variant='filled' color='blue' size='md' className="w-44" disabled>Next </Button>
+                </div>
+                <div className="quesion-and-action w-full mt-8">
+                    <div className="w-2/3 mx-auto h-[36rem] flex flex-col justify-between">
+                        <div className="question bg-gray-200 rounded-lg text-justify">
+                            <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                                {question}
+                            </p>
+                        </div>
+                        <div className="actions w-full flex justify-between">
+                            <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
+                            <Button color="blue" ripple="light" size="lg" className="p-4 rounded-full"><MicIcon /></Button>
+                            <Button color="blue" ripple="light" size="lg" className="w-1/3" disabled>Next</Button>
                         </div>
                     </div>
-                    
+
                 </div>
-                {/* <div className="flex items-center justify-between w-full mt-auto p-4">
-                    <AudioVisualizerComponent localAudioRef={localAudioRef} />
-                    <div className="flex justify-center space-x-4 mt-[12rem]">
-                        <Button variant='filled' color='blue' size='lg' className="w-44">Skip</Button>
-                        <Button variant='outlined' color='blue' size='lg' className="w-44">Next</Button>
-                    </div>
-                </div> */}
+                {/* 3 buttons one to skip the question , tap to speak ,and last is to go on next answer */}
             </div>
             <div className="flex flex-col w-1/4 h-screen bg-blue-gray-100 bg-opacity-50 items-center">
                 <div className="flex justify-center w-[25rem] m-3">

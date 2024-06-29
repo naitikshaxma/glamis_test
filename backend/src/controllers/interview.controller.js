@@ -1,9 +1,7 @@
-const OpenAI = require("openai");
-const readlineSync = require("readline-sync");
-const fs = require('fs');
-const path = require('path');
-
-
+import fs from "fs";
+import OpenAI from "openai";
+import readlineSync from "readline-sync";
+import path from "path";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
