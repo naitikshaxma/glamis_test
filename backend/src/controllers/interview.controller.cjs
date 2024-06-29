@@ -1,9 +1,15 @@
 const OpenAI = require("openai");
 const readlineSync = require("readline-sync");
+const fs = require('fs');
+const path = require('path');
+
+
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
 });
+
+const speechFile = path.resolve("./output.mp3");
 
 /**
  * Generate questions on a particular subject using OpenAI API
@@ -64,6 +70,7 @@ async function evaluateAnswer(answer, question) {
 async function startInterview(subject) {
     const questions = await generateQuestions(subject);
     for (const question of questions) {
+        textToSpeech(question);
         console.log(`Question: ${question}`);
 
         const answer = readlineSync.question('Your answer: ');
@@ -73,6 +80,17 @@ async function startInterview(subject) {
     }
 
     console.log('Interview complete!');
+}
+
+async function textToSpeech(input) {
+    const mp3 = await openai.audio.speech.create({
+        model: "tts-1",
+        voice: "nova",
+        input: input,
+    });
+
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    await fs.promises.writeFile(speechFile, buffer);
 }
 
 // Example usage:

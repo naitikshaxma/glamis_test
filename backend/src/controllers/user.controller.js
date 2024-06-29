@@ -9,9 +9,6 @@ const sendMail = require("../utils/sendMail.js")
 const { connectRedis} = require("../db/redis.connect.js")
 const OTPTemplate = require("../utils/emailTemplates/OTP.js") 
 
-
-
-
 const generateAccessAndRefreshTokens = async (userId)=>{
     try {
         const user = await User.findById(userId);
