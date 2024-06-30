@@ -44,8 +44,12 @@ async function evaluateAnswerWithPrompt(answer, question) {
     Your feedback should include a score out of 100 and comments on the strengths and weaknesses of the answer.
     -answer should be in json format.
     -for eg: if my answer is scoring 90/100 and due to any possible reasons so your response should be like :
-    - {'score': '90/100', 'explaination':'The answer provided is a repetition of the question rather than a standalone response'}
+    - {'score': '90/100', 'explanation':'The answer provided is a repetition of the question rather than a standalone response'}
     -i want only json in the response. 
+    -keys must be score and explanation
+    -score should be out of 100
+    -explanation should be a string
+    -format should be like {'score': '90/100', 'explanation':'The answer provided is a repetition of the question rather than a standalone response'}
     `;
 
     const completion = await openai.chat.completions.create({

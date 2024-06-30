@@ -27,3 +27,11 @@ input:focus,
 select:focus {
     outline-color: green;
 }
+
+.loader {
+	border-radius: 50%;
+	border-top: 3px solid white;
+	width: 20px;
+	height: 20px;
+	animation: spin 1s linear infinite forwards;
+}
