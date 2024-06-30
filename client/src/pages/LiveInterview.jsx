@@ -23,13 +23,10 @@ const Timer = () => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
-    // const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React Explain the features of React. What is JSX?";
 
-    // use live video stream
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
 
-    //audio
     const [isRecording, setIsRecording] = useState(false);
     const audioCtxRef = useRef(null);
     const analyserRef = useRef(null);
@@ -37,7 +34,7 @@ const LiveInterview = () => {
     const canvasRef = useRef(null);
     const sourceRef = useRef(null);
     const mediaRecorderRef = useRef(null);
-    const chunksRef = useRef([]);
+    const audioChunksRef = useRef([]);
 
     const startRecording = async () => {
         setIsRecording(true);
@@ -51,8 +48,11 @@ const LiveInterview = () => {
         dataArrayRef.current = new Uint8Array(bufferLength);
         draw();
 
+        // Initialize MediaRecorder
         mediaRecorderRef.current = new MediaRecorder(stream);
-        mediaRecorderRef.current.addEventListener('dataavailable', handleDataAvailable);
+        mediaRecorderRef.current.ondataavailable = (event) => {
+            audioChunksRef.current.push(event.data);
+        };
         mediaRecorderRef.current.start();
     };
 
@@ -63,6 +63,11 @@ const LiveInterview = () => {
         }
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
+            mediaRecorderRef.current.onstop = () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                convertToMp3(audioBlob);
+                audioChunksRef.current = [];
+            };
         }
     };
 
@@ -71,13 +76,29 @@ const LiveInterview = () => {
     };
 
     const handleSaveRecording = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'recording.webm';
-        a.click();
-        chunksRef.current = [];
+        setIsRecording(false);
+        if (audioCtxRef.current) {
+            audioCtxRef.current.close();
+        }
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            mediaRecorderRef.current.onstop = async () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('answerAudio', audioBlob, 'answer01.webm');
+                try {
+                    const response = await axios.post('http://localhost:8000/api/v1/interview/evaluateQuestion' , formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        }
+                    });
+                    console.log('Response:', response.data);
+                } catch (error) {
+                    console.error('Error uploading audio:', error);
+                }
+                audioChunksRef.current = [];
+            }
+        }
     };
 
     const draw = () => {
@@ -134,10 +155,10 @@ const LiveInterview = () => {
 
         const fetchQuestion = async () => {
             let data = {
-                "subject": "react js"
+                "subject": "Data Structures and Algorithms",
             };
             try {
-                const response = await axios.post('http://localhost:8000/api/v1/interview/generateQuestion', data, {
+                const response = await axios.post('http://100.25.45.160:8000/api/v1/interview/generateQuestion', data, {
                     headers: {
                         'Content-Type': 'application/json',
                     }
@@ -213,19 +234,19 @@ const LiveInterview = () => {
                     <div className="flex flex-col items-center w-full mt-4">
                         <div className="flex justify-between w-full">
                             <p className="text-lg">Total Questions</p>
-                            <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">5</span>
+                            <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">10</span>
                         </div>
                         <div className="flex justify-between w-full mt-2">
                             <p className="text-lg">Total Skipped</p>
-                            <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">2</span>
+                            <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">0</span>
                         </div>
                         <div className="flex justify-between w-full mt-2">
                             <p className="text-lg">Total Answered</p>
-                            <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">2</span>
+                            <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">0</span>
                         </div>
                         <div className="flex justify-between w-full mt-2">
                             <p className="text-lg">Total Left</p>
-                            <span className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">1</span>
+                            <span className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">10</span>
                         </div>
                     </div>
                 </div>
