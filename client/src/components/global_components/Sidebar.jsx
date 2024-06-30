@@ -1,14 +1,18 @@
 import React from "react";
 import { Card, Typography, List, ListItem, ListItemPrefix, Alert, Button } from "@material-tailwind/react";
 import { UserCircleIcon, InboxIcon } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
 import { UisBars } from '@iconscout/react-unicons-solid';
 import { SidebarContext } from "../../hooks/SideBarContextHook";
 
 import avatar from "../../assets/avatar.jpeg";
+import Cookies from "js-cookie";
+
 
 export default function Sidebar() {
+
+    const navigate = useNavigate();
     const [openAlert, setOpenAlert] = React.useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
@@ -100,6 +104,10 @@ export default function Sidebar() {
                                 variant="outlined"
                                 block={true}
                                 ripple="light"
+                                onClick={()=>{
+                                    Cookies.remove("accessToken");
+                                    navigate("/login");
+                                }}
                             >
                                 Logout
                             </Button>

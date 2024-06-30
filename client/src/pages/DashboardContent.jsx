@@ -6,15 +6,22 @@ import { ResponsiveContainer } from 'recharts';
 import { Button } from "@material-tailwind/react";
 import TechnicalPerformance from '../components/dashboard/TechnicalPerformance';
 import VerbalPerformance from '../components/dashboard/VerbalPerformance';
+import { useNavigate } from 'react-router-dom';
 
 
 const DashboardContent = () => {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col w-full p-6 bg-white rounded-lg">
       <div className="flex justify-between w-full">
       <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
 
-      <Button variant="gradient" color="#2b6030" className='mb-4' size="md">  
+      <Button variant="gradient" color="#2b6030" className='mb-4' size="md"
+      onClick={() =>{
+        navigate('/live')
+      }
+      }
+      >  
         Start a Interview
       </Button>
 
