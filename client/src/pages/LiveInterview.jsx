@@ -33,11 +33,8 @@ const LiveInterview = () => {
     const dataArrayRef = useRef(null);
     const canvasRef = useRef(null);
     const sourceRef = useRef(null);
-<<<<<<< Updated upstream
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
-=======
->>>>>>> Stashed changes
 
     const startRecording = async () => {
         setIsRecording(true);
@@ -50,7 +47,6 @@ const LiveInterview = () => {
         const bufferLength = analyserRef.current.frequencyBinCount;
         dataArrayRef.current = new Uint8Array(bufferLength);
         draw();
-<<<<<<< Updated upstream
 
         // Initialize MediaRecorder
         mediaRecorderRef.current = new MediaRecorder(stream);
@@ -58,8 +54,6 @@ const LiveInterview = () => {
             audioChunksRef.current.push(event.data);
         };
         mediaRecorderRef.current.start();
-=======
->>>>>>> Stashed changes
     };
 
     const stopRecording = () => {
@@ -67,7 +61,6 @@ const LiveInterview = () => {
         if (audioCtxRef.current) {
             audioCtxRef.current.close();
         }
-<<<<<<< Updated upstream
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
             mediaRecorderRef.current.onstop = () => {
@@ -109,8 +102,6 @@ const LiveInterview = () => {
                 audioChunksRef.current = [];
             }
         }
-=======
->>>>>>> Stashed changes
     };
 
     const draw = () => {
@@ -230,11 +221,7 @@ const LiveInterview = () => {
                         </div>
                         <div className="actions w-full flex justify-between mt-4">
                             <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
-<<<<<<< Updated upstream
                             <Button color={isRecording ? "red" : "blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? "" : startRecording} title='Tap to Speak'>
-=======
-                            <Button color={isRecording? "red":"blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording : startRecording} title='Tap to Speak'>
->>>>>>> Stashed changes
                                 {isRecording ? <StopIcon /> : <MicIcon />}
                             </Button>
                             <Button color="blue" ripple="light" size="lg" className="w-1/3"
