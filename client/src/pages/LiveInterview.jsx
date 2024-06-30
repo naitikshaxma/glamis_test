@@ -6,6 +6,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
 
+//timer
 const Timer = () => {
     return (
         <CountdownCircleTimer
@@ -28,12 +29,15 @@ const LiveInterview = () => {
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
 
+    //audio
     const [isRecording, setIsRecording] = useState(false);
     const audioCtxRef = useRef(null);
     const analyserRef = useRef(null);
     const dataArrayRef = useRef(null);
     const canvasRef = useRef(null);
     const sourceRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
+    const chunksRef = useRef([]);
 
     const startRecording = async () => {
         setIsRecording(true);
@@ -46,6 +50,10 @@ const LiveInterview = () => {
         const bufferLength = analyserRef.current.frequencyBinCount;
         dataArrayRef.current = new Uint8Array(bufferLength);
         draw();
+
+        mediaRecorderRef.current = new MediaRecorder(stream);
+        mediaRecorderRef.current.addEventListener('dataavailable', handleDataAvailable);
+        mediaRecorderRef.current.start();
     };
 
     const stopRecording = () => {
@@ -53,6 +61,23 @@ const LiveInterview = () => {
         if (audioCtxRef.current) {
             audioCtxRef.current.close();
         }
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+        }
+    };
+
+    const handleDataAvailable = (event) => {
+        chunksRef.current.push(event.data);
+    };
+
+    const handleSaveRecording = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'recording.webm';
+        a.click();
+        chunksRef.current = [];
     };
 
     const draw = () => {
@@ -96,12 +121,6 @@ const LiveInterview = () => {
             .then((stream) => {
                 localVideoRef.current.srcObject = stream;
                 setLocalVideoTrack(window.URL.createObjectURL(stream));
-                localAudioRef.current = new MediaRecorder(stream);
-                localAudioRef.current.ondataavailable = (event) => {
-                    setLocalAudioTrack(event.data);
-                };
-
-                localAudioRef.current.start();
             })
             .catch((error) => {
                 console.error('Error accessing media devices.', error);
@@ -174,7 +193,7 @@ const LiveInterview = () => {
                         </div>
                         <div className="actions w-full flex justify-between mt-4">
                             <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
-                            <Button color={isRecording? "red":"blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording : startRecording} title='Tap to Speak'>
+                            <Button color={isRecording ? "red" : "blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording && handleSaveRecording : startRecording} title='Tap to Speak'>
                                 {isRecording ? <StopIcon /> : <MicIcon />}
                             </Button>
                             <Button color="blue" ripple="light" size="lg" className="w-1/3" disabled>Next</Button>
