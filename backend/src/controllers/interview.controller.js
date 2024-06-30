@@ -84,16 +84,16 @@ async function textToSpeech(input) {
 
 
 
-export const evaluateAnswer = asyncHandler(async (req, res) => {
-    const { question } = req.body;
+// export const evaluateAnswer = asyncHandler(async (req, res) => {
+//     const { question } = req.body;
 
-    const {speechFile} = req.file;
+//     const {speechFile} = req.file;
 
-    const answer = await speechToText(speechFile);
+//     const answer = await speechToText(speechFile);
 
-    const feedback = await evaluateAnswer(answer, question);
+//     const feedback = await evaluateAnswer(answer, question);
 
-    return res.status(200).json(
-        new ApiResponse(200, {feedback}, "Answer evaluated successfully")
-    )
-})
+//     return res.status(200).json(
+//         new ApiResponse(200, {feedback}, "Answer evaluated successfully")
+//     )
+// })

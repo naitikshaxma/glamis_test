@@ -13,6 +13,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SidePic from '../assets/SidePic.png';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Cookies from "js-cookie";
 
 function Copyright(props) {
     return (
@@ -32,13 +35,39 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignInSide() {
-    const handleSubmit = (event) => {
+    const navigate = useNavigate();
+    const [login, setLogin] = React.useState({
+        email: '',
+        password: ''
+    });
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+        if(login.email === '' || login.password === ''){
+            alert('Please fill all the fields')
+        }
+        console.log(login);
+
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/login`, login,
+        {
+            headers : {
+                'Content-Type' : 'application/json'
+            }
+        }
+        )
+
+        console.log(response.data);
+
+        if(response.status == 201){
+            Cookies.set('accessToken', response.data.data.accessToken);
+            navigate('/dashboard')
+            return;
+        }
+        alert("something went wrong")
+
+
+        
+
+
     };
 
     return (
@@ -80,6 +109,7 @@ export default function SignInSide() {
                                 required
                                 fullWidth
                                 id="email"
+                                onChange={(e) => setLogin({ ...login, email: e.target.value })}
                                 label="Email Address"
                                 name="email"
                                 autoComplete="email"
@@ -90,6 +120,7 @@ export default function SignInSide() {
                                 required
                                 fullWidth
                                 name="password"
+                                onChange={(e) => setLogin({ ...login, password: e.target.value })}
                                 label="Password"
                                 type="password"
                                 id="password"
@@ -100,7 +131,7 @@ export default function SignInSide() {
                                 label="Remember me"
                             />
                             <Button
-                                type="submit"
+                                onClick={handleSubmit}
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030" }}
