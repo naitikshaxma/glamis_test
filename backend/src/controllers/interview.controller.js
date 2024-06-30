@@ -1,14 +1,16 @@
-const OpenAI = require("openai");
-const readlineSync = require("readline-sync");
+import fs from "fs";
+import OpenAI from "openai";
+import readlineSync from "readline-sync";
+import path from "path";
+import { ApiResponse } from "../utils/ApiResponse";
+import { ApiError } from "../utils/ApiError";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
 });
 
-/**
- * Generate questions on a particular subject using OpenAI API
- * @param {string} subject - The subject to generate questions about
- */
+const speechFile = path.resolve("./output.mp3");
+
 async function generateQuestions(subject) {
     try {
         const prompt = `Generate a list of questions about the following subject: ${subject}`;
@@ -23,19 +25,16 @@ async function generateQuestions(subject) {
         });
 
         const questions = completion.choices[0].message.content.split('\n').filter(line => line.trim() !== '').map(line => line.trim());
-        return questions;
+
+        return res.status(201).json(
+            new ApiResponse(200, questions, "Question Generated Successfully")
+        )
 
     } catch (error) {
-        console.error("Error generating questions:", error);
-        return [];
+        return res.status(500).json(ApiError(500, error.message));
     }
 }
 
-/**
- * Evaluate the user's answer
- * @param {string} answer - The user's answer
- * @param {string} question - The question that was asked
- */
 async function evaluateAnswer(answer, question) {
     const prompt = `
     You are an interviewer. I will provide you with a question and its answer.
@@ -57,13 +56,10 @@ async function evaluateAnswer(answer, question) {
     return completion.choices[0].message.content;
 }
 
-/**
- * Main function to handle the interview process
- * @param {string} subject - The subject of the interview
- */
 async function startInterview(subject) {
     const questions = await generateQuestions(subject);
     for (const question of questions) {
+        textToSpeech(question);
         console.log(`Question: ${question}`);
 
         const answer = readlineSync.question('Your answer: ');
@@ -75,6 +71,16 @@ async function startInterview(subject) {
     console.log('Interview complete!');
 }
 
-// Example usage:
+async function textToSpeech(input) {
+    const mp3 = await openai.audio.speech.create({
+        model: "tts-1",
+        voice: "nova",
+        input: input,
+    });
+
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    await fs.promises.writeFile(speechFile, buffer);
+}
+
 const subject = readlineSync.question('Enter the subject for the interview: ');
 startInterview(subject);

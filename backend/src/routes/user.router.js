@@ -1,7 +1,7 @@
-const { Router } = require("express")
-const { login, logout, refreshAccessToken, signup, verifyEmail, resendOTP } = require("../controllers/user.controller.js");
-const { isAuthenticated }  = require("../middlewares/auth.middleware.js")
-const { RateLimiter15mins } = require("../utils/RateLimiter.js")
+import { Router } from "express";
+import { login, logout, refreshAccessToken, signup, verifyEmail, resendOTP } from "../controllers/user.controller.js";
+import isAuthenticated from "../middlewares/auth.middleware.js";
+import { RateLimiter15mins } from "../utils/RateLimiter.js";
 
 const router = Router()
 
@@ -14,4 +14,4 @@ router.route("/resend-otp").post(RateLimiter15mins, resendOTP)
 
 router.route("/logout").post(isAuthenticated, logout)
 
-module.exports = router;
+export default router;

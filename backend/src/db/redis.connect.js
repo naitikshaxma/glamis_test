@@ -1,4 +1,4 @@
-const redis = require('redis')
+import redis from 'redis';
 
 let redisClient;
 
@@ -22,4 +22,4 @@ async function connectRedis() {
       }
 
 
-module.exports = { connectRedis }
+export default connectRedis;

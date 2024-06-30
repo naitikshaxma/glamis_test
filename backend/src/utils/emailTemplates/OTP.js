@@ -1,7 +1,7 @@
 
 
 const OTPTemplate = (otp) => {
-    return `
+  return `
 	<!DOCTYPE html>
 	<html lang="en">
   <head>
@@ -96,4 +96,4 @@ const OTPTemplate = (otp) => {
 	`}
 
 
-module.exports = OTPTemplate;
+export default OTPTemplate;

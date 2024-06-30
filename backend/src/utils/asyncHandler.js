@@ -1,15 +1,15 @@
 const asyncHandler = (fnToExecute) => {
-    return async (req, res, next)=>{
+    return async (req, res, next) => {
         try {
             fnToExecute(req, res, next)
         } catch (error) {
             res.status(error.code || 500).json({
-                success : false,
-                message : error.message
+                success: false,
+                message: error.message
             })
         }
     }
 }
 
 
-module.exports = { asyncHandler }
+export { asyncHandler }

@@ -1,16 +1,13 @@
-const { asyncHandler } =  require("../utils/asyncHandler.js")
-const { ApiError } = require("../utils/ApiError.js")
-const { ApiResponse } =  require("../utils/ApiResponse.js")
-const { User } =  require("../models/users.models.js")
-const { isEmpty } = require("../utils/isEmptyFields.js")
-const { createOtp } = require("../utils/helpers.js")
-const jwt = require("jsonwebtoken")
-const sendMail = require("../utils/sendMail.js")
-const { connectRedis} = require("../db/redis.connect.js")
-const OTPTemplate = require("../utils/emailTemplates/OTP.js") 
-
-
-
+import { User } from "../models/users.models.js"
+import { isEmpty } from "../utils/isEmptyFields.js"
+import { createOtp } from "../utils/helpers.js"
+import jwt from "jsonwebtoken"
+import sendMail from "../utils/sendMail.js"
+import connectRedis from "../db/redis.connect.js"
+import OTPTemplate from "../utils/emailTemplates/OTP.js"
+import { ApiError } from "../utils/ApiError.js"
+import { ApiResponse } from "../utils/ApiResponse.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
 
 const generateAccessAndRefreshTokens = async (userId)=>{
     try {
@@ -272,7 +269,7 @@ const resendOTP = asyncHandler(async (req, res)=>{
     return res.status(200).json(new ApiResponse(200, {}, "OTP Sent Successfully"))
 })
 
-module.exports = { 
+export {
     signup,
     login,
     logout,

@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 // const clgDev = require('./clgDev');
 
 const sendMail = async (toEmail, subject, body) => {
@@ -27,4 +27,4 @@ const sendMail = async (toEmail, subject, body) => {
   }
 };
 
-module.exports = sendMail;
+export default sendMail;

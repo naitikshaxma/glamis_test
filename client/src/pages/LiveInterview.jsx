@@ -1,24 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@material-tailwind/react";
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
-import { AudioVisualizer } from 'react-audio-visualize';
-import Visualizer from './test';
-
-// audio visualizer component
-const AudioVisualizerComponent = (props) => {
-    return (
-        <>
-            <AudioVisualizer
-                ref={props.localAudioRef}
-                width={500}
-                height={75}
-                barWidth={1}
-                gap={0}
-                barColor={'#f76565'}
-            />
-        </>
-    )
-}
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 
 const Timer = () => {
     return (
@@ -36,15 +20,74 @@ const Timer = () => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
-    const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React";
+    const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React Explain the features of React. What is JSX?";
 
     // use live video stream
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
-    const [localAudioTrack, setLocalAudioTrack] = useState('');
-    const localAudioRef = useRef();
 
+    const [isRecording, setIsRecording] = useState(false);
+    const audioCtxRef = useRef(null);
+    const analyserRef = useRef(null);
+    const dataArrayRef = useRef(null);
+    const canvasRef = useRef(null);
+    const sourceRef = useRef(null);
 
+    const startRecording = async () => {
+        setIsRecording(true);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        analyserRef.current = audioCtxRef.current.createAnalyser();
+        sourceRef.current = audioCtxRef.current.createMediaStreamSource(stream);
+        sourceRef.current.connect(analyserRef.current);
+        analyserRef.current.fftSize = 2048;
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        dataArrayRef.current = new Uint8Array(bufferLength);
+        draw();
+    };
+
+    const stopRecording = () => {
+        setIsRecording(false);
+        if (audioCtxRef.current) {
+            audioCtxRef.current.close();
+        }
+    };
+
+    const draw = () => {
+        const canvasCtx = canvasRef.current.getContext('2d');
+        const WIDTH = canvasRef.current.width;
+        const HEIGHT = canvasRef.current.height;
+        const drawVisual = requestAnimationFrame(draw);
+
+        analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
+
+        canvasCtx.fillStyle = 'rgb(256, 256, 256)';
+        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+        canvasCtx.beginPath();
+
+        let sliceWidth = (WIDTH * 1.0) / analyserRef.current.frequencyBinCount;
+        let x = 0;
+
+        for (let i = 0; i < analyserRef.current.frequencyBinCount; i++) {
+            let v = dataArrayRef.current[i] / 128.0;
+            let y = (v * HEIGHT) / 2;
+
+            if (i === 0) {
+                canvasCtx.moveTo(x, y);
+            } else {
+                canvasCtx.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+        }
+
+        canvasCtx.lineTo(WIDTH, HEIGHT / 2);
+        canvasCtx.stroke();
+    };
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
@@ -62,47 +105,91 @@ const LiveInterview = () => {
             });
     }, []);
 
+    useEffect(() => {
+        const fetchQuestion = async () => {
+            // fetch questions from the server if needed
+        }
+
+        fetchQuestion();
+    }, []);
+
+
     const handleClose = () => {
         setOpen(false);
     };
 
     return (
-        <div className="flex flex-col items-center h-screen bg-gray-900 text-white">
-            <div className="flex justify-between items-center w-full p-4">
-                <div className='w-1/12 flex items-center justify-center'>
-                    <Timer />
+        <div className="flex w-full">
+            <div className="flex flex-col items-center h-screen w-3/4">
+                <div className="timer-tab w-full flex justify-between p-4 items-center">
+                    <div className="logo mr-4">
+                        <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
+                    </div>
+                    <div className="title-and-name ml-4">
+                        <p className="text-2xl font-semibold">Full Stack Interview</p>
+                        <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
+                    </div>
+                    <div className="timer">
+                        <Timer />
+                    </div>
                 </div>
-                <div className="w-9/12 ml-20">
-                    <p className="text-lg font-semibold">React.js Developer Interview
-                        <span className="block text-sm font-normal">Gourav Bathla - 2115000976</span>
-                    </p>
+                <div className="quesion-and-action w-full mt-8">
+                    <div className="w-2/3 mx-auto h-[36rem] flex flex-col justify-between">
+                        <div className="question bg-gray-200 rounded-lg text-justify">
+                            <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                                {question}
+                            </p>
+                        </div>
+                        <div className="audio-visualizer mt-4">
+                            <div className="audio-visualizer">
+                                <canvas ref={canvasRef} width="640" height="200" />
+                            </div>
+                        </div>
+                        <div className="actions w-full flex justify-between mt-4">
+                            <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
+                            <Button color="blue" ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording : startRecording}>
+                                {isRecording ? <MicOffIcon /> : <MicIcon />}
+                            </Button>
+                            <Button color="blue" ripple="light" size="lg" className="w-1/3" disabled>Next</Button>
+                        </div>
+                    </div>
                 </div>
-                <Button
-                    variant='filled'
-                    className='w-2/12'
-                    color='red'
-                    size='lg'
-                    onClick={handleClose}
-                >
-                    End Interview
-                </Button>
             </div>
-            <div className="flex flex-col items-center w-full my-4">
-                <div className="w-8/12 p-4 rounded-lg bg-opacity-50 bg-gray-800 h-80">
-                    <p className="text-lg font-semibold">Question 1 : {question}</p>
-
-                    {/* <Visualizer /> */}
+            <div className="flex flex-col w-1/4 h-screen bg-blue-gray-100 bg-opacity-50 items-center">
+                <div className="flex justify-center w-[25rem] m-3">
+                    <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[15rem]"></video>
                 </div>
-            </div>
-            <div className="flex items-center justify-between w-full mt-auto p-4">
-                <div className="flex justify-center w-[25rem]">
-                    <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[16rem]"></video>
-                    {/* <audio ref={localVideoRef} autoPlay className="rounded-lg h-[16rem]"></audio> */}
+                <div className="flex flex-col items-center w-full p-4">
+                    <p className="text-lg font-semibold">Interview Summary</p>
+                    <div className="flex flex-col items-center w-full mt-4">
+                        <div className="flex justify-between w-full">
+                            <p className="text-lg">Total Questions</p>
+                            <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">5</span>
+                        </div>
+                        <div className="flex justify-between w-full mt-2">
+                            <p className="text-lg">Total Skipped</p>
+                            <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">2</span>
+                        </div>
+                        <div className="flex justify-between w-full mt-2">
+                            <p className="text-lg">Total Answered</p>
+                            <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">2</span>
+                        </div>
+                        <div className="flex justify-between w-full mt-2">
+                            <p className="text-lg">Total Left</p>
+                            <span className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">1</span>
+                        </div>
+                    </div>
                 </div>
-                <AudioVisualizerComponent localAudioRef={localAudioRef} />
-                <div className="flex justify-center space-x-4 mt-[12rem]">
-                    <Button variant='filled' color='blue' size='lg' className="w-44">Skip</Button>
-                    <Button variant='outlined' color='blue' size='lg' className="w-44">Next</Button>
+                <div className="flex justify-center w-full mt-auto my-4 p-4">
+                    <Button
+                        variant='filled'
+                        color='red'
+                        size='lg'
+                        onClick={handleClose}
+                        className='w-full mx-3'
+                    >
+                        End Interview
+                    </Button>
                 </div>
             </div>
         </div>
