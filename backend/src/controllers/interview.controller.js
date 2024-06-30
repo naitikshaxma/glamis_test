@@ -2,38 +2,35 @@ import fs from "fs";
 import OpenAI from "openai";
 import readlineSync from "readline-sync";
 import path from "path";
-import { ApiResponse } from "../utils/ApiResponse";
-import { ApiError } from "../utils/ApiError";
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
-});
+import { ApiResponse } from "../utils/ApiResponse.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
+import { generateQuestionPrompt } from "../utils/prompts/prompt.js";
 
 const speechFile = path.resolve("./output.mp3");
 
-async function generateQuestions(subject) {
-    try {
-        const prompt = `Generate a list of questions about the following subject: ${subject}`;
+export const generateQuestion = asyncHandler(async (req, res) => {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
+    });
+    const { subject, answer } = req.body;
 
-        const completion = await openai.chat.completions.create({
-            messages: [
-                { role: "system", content: "You are a helpful assistant." },
-                { role: "user", content: prompt }
-            ],
-            model: "gpt-3.5-turbo",
-            max_tokens: 150,
-        });
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: generateQuestionPrompt(subject, answer)}
+        ],
+        model: "gpt-3.5-turbo",
+        max_tokens: 50,
+    });
 
-        const questions = completion.choices[0].message.content.split('\n').filter(line => line.trim() !== '').map(line => line.trim());
+    const question = completion.choices[0].message.content.trim();
 
-        return res.status(201).json(
-            new ApiResponse(200, questions, "Question Generated Successfully")
-        )
+    console.log(`Question: ${question}`);
 
-    } catch (error) {
-        return res.status(500).json(ApiError(500, error.message));
-    }
-}
+    return res.status(201).json(
+        new ApiResponse(200, {question}, "Question generated successfully")
+    )
+})
 
 async function evaluateAnswer(answer, question) {
     const prompt = `
@@ -82,5 +79,5 @@ async function textToSpeech(input) {
     await fs.promises.writeFile(speechFile, buffer);
 }
 
-const subject = readlineSync.question('Enter the subject for the interview: ');
-startInterview(subject);
+// const subject = readlineSync.question('Enter the subject for the interview: ');
+// startInterview(subject);

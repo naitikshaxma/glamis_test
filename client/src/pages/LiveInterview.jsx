@@ -3,6 +3,8 @@ import { Button } from "@material-tailwind/react";
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
+import StopIcon from '@mui/icons-material/Stop';
+import axios from 'axios';
 
 const Timer = () => {
     return (
@@ -20,7 +22,7 @@ const Timer = () => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
-    const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React Explain the features of React. What is JSX?";
+    // const question = "What is React? Explain the features of React. What is JSX? Explain the difference between Real DOM and Virtual DOM. What is the significance of keys in React Explain the features of React. What is JSX?";
 
     // use live video stream
     const localVideoRef = useRef();
@@ -88,6 +90,7 @@ const LiveInterview = () => {
         canvasCtx.lineTo(WIDTH, HEIGHT / 2);
         canvasCtx.stroke();
     };
+
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
@@ -105,12 +108,36 @@ const LiveInterview = () => {
             });
     }, []);
 
+    const [question, setQuestion] = useState('');
+
     useEffect(() => {
+        let didCancel = false;
+
         const fetchQuestion = async () => {
-            // fetch questions from the server if needed
-        }
+            let data = {
+                "subject": "react js"
+            };
+            try {
+                const response = await axios.post('http://localhost:8000/api/v1/interview/generateQuestion', data, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                if (!didCancel) {
+                    setQuestion(response.data.data.question);
+                }
+            } catch (error) {
+                if (!didCancel) {
+                    console.error('Error fetching question:', error);
+                }
+            }
+        };
 
         fetchQuestion();
+
+        return () => {
+            didCancel = true;
+        };
     }, []);
 
 
@@ -140,15 +167,15 @@ const LiveInterview = () => {
                                 {question}
                             </p>
                         </div>
-                        <div className="audio-visualizer mt-4">
+                        <div className="audio-visualizer mt-4 flex justify-center">
                             <div className="audio-visualizer">
                                 <canvas ref={canvasRef} width="640" height="200" />
                             </div>
                         </div>
                         <div className="actions w-full flex justify-between mt-4">
                             <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
-                            <Button color="blue" ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording : startRecording}>
-                                {isRecording ? <MicOffIcon /> : <MicIcon />}
+                            <Button color={isRecording? "red":"blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording : startRecording} title='Tap to Speak'>
+                                {isRecording ? <StopIcon /> : <MicIcon />}
                             </Button>
                             <Button color="blue" ripple="light" size="lg" className="w-1/3" disabled>Next</Button>
                         </div>
