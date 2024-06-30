@@ -81,3 +81,19 @@ async function textToSpeech(input) {
 
 // const subject = readlineSync.question('Enter the subject for the interview: ');
 // startInterview(subject);
+
+
+
+export const evaluateAnswer = asyncHandler(async (req, res) => {
+    const { question } = req.body;
+
+    const {speechFile} = req.file;
+
+    const answer = await speechToText(speechFile);
+
+    const feedback = await evaluateAnswer(answer, question);
+
+    return res.status(200).json(
+        new ApiResponse(200, {feedback}, "Answer evaluated successfully")
+    )
+})
