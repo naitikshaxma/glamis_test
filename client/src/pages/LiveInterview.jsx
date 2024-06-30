@@ -163,7 +163,7 @@ const LiveInterview = () => {
                     <p className="text-lg font-semibold">Interview Summary</p>
                     <div className="flex flex-col items-center w-full mt-4">
                         <div className="flex justify-between w-full">
-                            <p className="text-lg">Total Questions In Interview</p>
+                            <p className="text-lg">Total Questions</p>
                             <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">5</span>
                         </div>
                         <div className="flex justify-between w-full mt-2">
