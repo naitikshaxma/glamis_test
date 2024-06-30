@@ -5,6 +5,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
+import Link from '@mui/material/Link';
 
 //timer
 const Timer = () => {
@@ -90,7 +91,7 @@ const LiveInterview = () => {
                 formData.append('question', question)
                 formData.append('answerAudio', audioBlob, 'answer01.webm');
                 try {
-                    const response = await axios.post('http://localhost:8000/api/v1/interview/evaluateQuestion' , formData, {
+                    const response = await axios.post('http://localhost:8000/api/v1/interview/evaluateQuestion', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         }
@@ -100,6 +101,7 @@ const LiveInterview = () => {
                     console.error('Error uploading audio:', error);
                 }
                 audioChunksRef.current = [];
+                window.location.href = '/evaluation';
             }
         }
     };

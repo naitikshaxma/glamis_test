@@ -63,7 +63,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
 async function startInterview(subject) {
     const questions = await generateQuestions(subject);
     for (const question of questions) {
-        textToSpeech(question);
+        await textToSpeech(question);
         console.log(`Question: ${question}`);
 
         const answer = readlineSync.question('Your answer: ');
