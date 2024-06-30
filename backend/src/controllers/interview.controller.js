@@ -32,13 +32,20 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     )
 })
 
-async function evaluateAnswer(answer, question) {
+async function evaluateAnswerWithPrompt(answer, question) {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
+    });
     const prompt = `
     You are an interviewer. I will provide you with a question and its answer.
     I want you to evaluate the answer on a scale of 0 to 100 and give constructive feedback.
     Here is the question: "${question}"
     Here is the answer: "${answer}"
     Your feedback should include a score out of 100 and comments on the strengths and weaknesses of the answer.
+    -answer should be in json format.
+    -for eg: if my answer is scoring 90/100 and due to any possible reasons so your response should be like :
+    - {'score': '90/100', 'explaination':'The answer provided is a repetition of the question rather than a standalone response'}
+    -i want only json in the response. 
     `;
 
     const completion = await openai.chat.completions.create({
@@ -84,16 +91,15 @@ async function textToSpeech(input) {
 
 
 
-// const evaluateAnswer = asyncHandler(async (req, res) => {
-//     const { question } = req.body;
+export const evaluateAnswer = asyncHandler(async (req, res) => {
+    const { question } = req.body;
+    const answer = req.extractedAnswer;
 
-//     const {speechFile} = req.file;
+    const feedback = await evaluateAnswerWithPrompt(answer, question);
+    console.log(feedback)
+    // jsonify feedback
 
-//     const answer = await speechToText(speechFile);
-
-//     const feedback = await evaluateAnswer(answer, question);
-
-//     return res.status(200).json(
-//         new ApiResponse(200, {feedback}, "Answer evaluated successfully")
-//     )
-// })
+    return res.status(200).json(
+        new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully")
+    )
+})

@@ -82,6 +82,8 @@ const LiveInterview = () => {
         chunksRef.current.push(event.data);
     };
 
+    const [question, setQuestion] = useState('');
+
     const handleSaveRecording = () => {
         setIsRecording(false);
         if (audioCtxRef.current) {
@@ -92,6 +94,7 @@ const LiveInterview = () => {
             mediaRecorderRef.current.onstop = async () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
                 const formData = new FormData();
+                formData.append('question', question)
                 formData.append('answerAudio', audioBlob, 'answer01.webm');
                 try {
                     const response = await axios.post('http://localhost:8000/api/v1/interview/evaluateQuestion' , formData, {
@@ -163,8 +166,6 @@ const LiveInterview = () => {
             });
     }, []);
 
-    const [question, setQuestion] = useState('');
-
     useEffect(() => {
         let didCancel = false;
 
@@ -173,7 +174,7 @@ const LiveInterview = () => {
                 "subject": "Data Structures and Algorithms",
             };
             try {
-                const response = await axios.post('http://100.25.45.160:8000/api/v1/interview/generateQuestion', data, {
+                const response = await axios.post('http://localhost:8000/api/v1/interview/generateQuestion', data, {
                     headers: {
                         'Content-Type': 'application/json',
                     }
