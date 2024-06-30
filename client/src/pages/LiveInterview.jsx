@@ -6,6 +6,8 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
 
+
+
 //timer
 const Timer = () => {
     return (
@@ -157,6 +159,9 @@ const LiveInterview = () => {
             });
     }, []);
 
+    const [questionAudio, setQuestionAudio] = useState('');
+    const questionAudioRef = useRef(null);
+
     useEffect(() => {
         let didCancel = false;
 
@@ -171,7 +176,15 @@ const LiveInterview = () => {
                     }
                 });
                 if (!didCancel) {
-                    setQuestion(response.data.data.question);
+
+                    setQuestion(response.data.question);
+                    setQuestionAudio(response.data.audio);
+
+
+                    
+
+        
+
                 }
             } catch (error) {
                 if (!didCancel) {
@@ -194,6 +207,10 @@ const LiveInterview = () => {
 
     return (
         <div className="flex w-full">
+            {
+                questionAudio && (
+                    <audio src={questionAudio} autoPlay className='hidden'></audio> )
+            }
             <div className="flex flex-col items-center h-screen w-3/4">
                 <div className="timer-tab w-full flex justify-between p-4 items-center">
                     <div className="logo mr-4">
