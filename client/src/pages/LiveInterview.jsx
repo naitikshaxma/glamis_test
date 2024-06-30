@@ -98,7 +98,7 @@ const LiveInterview = () => {
                 formData.append('question', question)
                 formData.append('answerAudio', audioBlob, 'answer01.webm');
                 try {
-                    const response = await axios.post('http://localhost:8000/api/v1/interview/evaluateQuestion', formData, {
+                    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         }
@@ -179,7 +179,7 @@ const LiveInterview = () => {
                 "subject": "Data Structures and Algorithms",
             };
             try {
-                const response = await axios.post('http://localhost:8000/api/v1/interview/generateQuestion', data, {
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
                     headers: {
                         'Content-Type': 'application/json',
                     }
