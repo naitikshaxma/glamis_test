@@ -56,7 +56,6 @@ export default function Signup() {
                 >
                     <img src={SidePic} className='mt-10 p-20' />
                 </Grid>
-
                 <Grid item xs={12} sm={8} md={7} component={Paper} elevation={6} square>
                     <Box
                         sx={{

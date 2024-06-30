@@ -1,5 +1,13 @@
-import router from 'express';
-import interviewController from '../controllers/interview.controller.js';
-import { isAuthenticated } from '../middlewares/auth.middleware.js';
+import { Router } from "express";
+import {
+    generateQuestion
+} from '../controllers/interview.controller.js';
+// import { isAuthenticated } from '../middlewares/auth.middleware.js';
 
-router.post('/start', isAuthenticated, interviewController.startInterview);
+const router = Router()
+
+// router.route('/generateQuestion').post(isAuthenticated, generateQuestion);
+router.route('/generateQuestion').post(generateQuestion); // removed isAuthenticated middleware for testing purposes
+
+export default router;
+
