@@ -64,6 +64,14 @@ const LiveInterview = () => {
             });
     }, []);
 
+    useEffect(() => {
+        const fetchQuestion = async () => {
+            
+        }
+        
+        fetchQuestion()
+    })
+
     const handleClose = () => {
         setOpen(false);
     };
