@@ -3,12 +3,13 @@ import OpenAI from "openai";
 
 const openai = new OpenAI();
 
-async function main() {
+async function speechToText(audio) {
     const transcription = await openai.audio.transcriptions.create({
-        file: fs.createReadStream("./output.mp3"),
+        file: fs.createReadStream(audio),
         model: "whisper-1",
     });
 
-    console.log(transcription.text);
+    return transcription.text
 }
-main();
+
+export default speechToText;
