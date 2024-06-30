@@ -5,8 +5,10 @@ const openai = new OpenAI();
 
 async function speechToText(audio) {
     const transcription = await openai.audio.transcriptions.create({
-        file: fs.createReadStream("./answer01.webm"),
+        file: fs.createReadStream(audio),
         model: "whisper-1",
+        response_format: "json",
+        prompt: "input will be in english language only",
     });
 
     return transcription.text
