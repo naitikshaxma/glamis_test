@@ -4,7 +4,11 @@ import { Card, CardBody, Typography } from '@material-tailwind/react';
 
 
 const EvaluationResult = ({ data }) => {
-    const { score, explanation } = data;
+    let { score, explanation } = data;
+
+    // score is like "20/100", so we need to extract the first part
+    score = parseInt(score.split('/')[0]);
+
     const donutData = [{ name: 'Score', value: score }, { name: 'Remaining', value: 100 - score }];
 
     const COLORS = ['#0088FE', '#FFBB28'];

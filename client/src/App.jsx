@@ -14,7 +14,7 @@ import EvaluationResult from "./pages/EvaluationResult";
 const response = {
     statusCode: 200,
     data: {
-        score: "10/100",
+        score: 10,
         explanation: "The answer provided is merely a repetition of the question without providing any actual information about the advantages and disadvantages of using hash tables. It lacks depth and substance required in a comprehensive answer."
     },
     message: "Answer evaluated successfully",
