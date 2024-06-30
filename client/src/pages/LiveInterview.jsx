@@ -1,26 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@material-tailwind/react";
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
-import { AudioVisualizer } from 'react-audio-visualize';
-import Visualizer from './test';
-import Watermark from '../components/global_components/Watermark';
 import MicIcon from '@mui/icons-material/Mic';
-
-// audio visualizer component
-const AudioVisualizerComponent = (props) => {
-    return (
-        <>
-            <AudioVisualizer
-                ref={props.localAudioRef}
-                width={500}
-                height={75}
-                barWidth={1}
-                gap={0}
-                barColor={'#f76565'}
-            />
-        </>
-    )
-}
+import MicOffIcon from '@mui/icons-material/MicOff';
 
 const Timer = () => {
     return (
@@ -43,10 +25,69 @@ const LiveInterview = () => {
     // use live video stream
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
-    const [localAudioTrack, setLocalAudioTrack] = useState('');
-    const localAudioRef = useRef();
 
+    const [isRecording, setIsRecording] = useState(false);
+    const audioCtxRef = useRef(null);
+    const analyserRef = useRef(null);
+    const dataArrayRef = useRef(null);
+    const canvasRef = useRef(null);
+    const sourceRef = useRef(null);
 
+    const startRecording = async () => {
+        setIsRecording(true);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        analyserRef.current = audioCtxRef.current.createAnalyser();
+        sourceRef.current = audioCtxRef.current.createMediaStreamSource(stream);
+        sourceRef.current.connect(analyserRef.current);
+        analyserRef.current.fftSize = 2048;
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        dataArrayRef.current = new Uint8Array(bufferLength);
+        draw();
+    };
+
+    const stopRecording = () => {
+        setIsRecording(false);
+        if (audioCtxRef.current) {
+            audioCtxRef.current.close();
+        }
+    };
+
+    const draw = () => {
+        const canvasCtx = canvasRef.current.getContext('2d');
+        const WIDTH = canvasRef.current.width;
+        const HEIGHT = canvasRef.current.height;
+        const drawVisual = requestAnimationFrame(draw);
+
+        analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
+
+        canvasCtx.fillStyle = 'rgb(256, 256, 256)';
+        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+        canvasCtx.beginPath();
+
+        let sliceWidth = (WIDTH * 1.0) / analyserRef.current.frequencyBinCount;
+        let x = 0;
+
+        for (let i = 0; i < analyserRef.current.frequencyBinCount; i++) {
+            let v = dataArrayRef.current[i] / 128.0;
+            let y = (v * HEIGHT) / 2;
+
+            if (i === 0) {
+                canvasCtx.moveTo(x, y);
+            } else {
+                canvasCtx.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+        }
+
+        canvasCtx.lineTo(WIDTH, HEIGHT / 2);
+        canvasCtx.stroke();
+    };
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
@@ -66,11 +107,12 @@ const LiveInterview = () => {
 
     useEffect(() => {
         const fetchQuestion = async () => {
-            
+            // fetch questions from the server if needed
         }
-        
-        fetchQuestion()
-    })
+
+        fetchQuestion();
+    }, []);
+
 
     const handleClose = () => {
         setOpen(false);
@@ -78,11 +120,8 @@ const LiveInterview = () => {
 
     return (
         <div className="flex w-full">
-
             <div className="flex flex-col items-center h-screen w-3/4">
-                {/* <Watermark text="Interviewer" /> */}
                 <div className="timer-tab w-full flex justify-between p-4 items-center">
-                    {/* <div className="flex items-center"> */}
                     <div className="logo mr-4">
                         <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
                     </div>
@@ -90,7 +129,6 @@ const LiveInterview = () => {
                         <p className="text-2xl font-semibold">Full Stack Interview</p>
                         <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
                     </div>
-                    {/* </div> */}
                     <div className="timer">
                         <Timer />
                     </div>
@@ -102,23 +140,25 @@ const LiveInterview = () => {
                                 {question}
                             </p>
                         </div>
-                        <div className="actions w-full flex justify-between">
+                        <div className="audio-visualizer mt-4">
+                            <div className="audio-visualizer">
+                                <canvas ref={canvasRef} width="640" height="200" />
+                            </div>
+                        </div>
+                        <div className="actions w-full flex justify-between mt-4">
                             <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
-                            <Button color="blue" ripple="light" size="lg" className="p-4 rounded-full"><MicIcon /></Button>
+                            <Button color="blue" ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? stopRecording : startRecording}>
+                                {isRecording ? <MicOffIcon /> : <MicIcon />}
+                            </Button>
                             <Button color="blue" ripple="light" size="lg" className="w-1/3" disabled>Next</Button>
                         </div>
                     </div>
-
                 </div>
-                {/* 3 buttons one to skip the question , tap to speak ,and last is to go on next answer */}
             </div>
             <div className="flex flex-col w-1/4 h-screen bg-blue-gray-100 bg-opacity-50 items-center">
                 <div className="flex justify-center w-[25rem] m-3">
                     <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[15rem]"></video>
-                    {/* <audio ref={localVideoRef} autoPlay className="rounded-lg h-[16rem]"></audio> */}
                 </div>
-                {/* a div that showes Total question asked , total skiped, total asnwered, total left and many more */}
-
                 <div className="flex flex-col items-center w-full p-4">
                     <p className="text-lg font-semibold">Interview Summary</p>
                     <div className="flex flex-col items-center w-full mt-4">
@@ -140,7 +180,6 @@ const LiveInterview = () => {
                         </div>
                     </div>
                 </div>
-                {/* a button of end interview at the bottom-end */}
                 <div className="flex justify-center w-full mt-auto my-4 p-4">
                     <Button
                         variant='filled'
@@ -152,7 +191,6 @@ const LiveInterview = () => {
                         End Interview
                     </Button>
                 </div>
-
             </div>
         </div>
     );
