@@ -7,6 +7,7 @@ import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
 import Link from '@mui/material/Link';
 import EvaluationResult from './EvaluationResult';
+import { Skeleton } from '@mui/material';
 
 
 
@@ -80,7 +81,7 @@ const LiveInterview = () => {
     };
 
     const [question, setQuestion] = useState('');
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
     const [resultCanva, setResultCanva] = useState(false);
     const [resultAnswer, setResultAnswer] = useState();
 
@@ -170,11 +171,13 @@ const LiveInterview = () => {
 
     const [questionAudio, setQuestionAudio] = useState('');
     const questionAudioRef = useRef(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         let didCancel = false;
 
         const fetchQuestion = async () => {
+            setLoading(true);
             let data = {
                 "subject": "Data Structures and Algorithms",
             };
@@ -185,21 +188,15 @@ const LiveInterview = () => {
                     }
                 });
                 if (!didCancel) {
-
                     setQuestion(response.data.question);
                     setQuestionAudio(response.data.audio);
-
-
-                    
-
-        
-
                 }
             } catch (error) {
                 if (!didCancel) {
                     console.error('Error fetching question:', error);
                 }
             }
+            // setLoading(false);
         };
 
         fetchQuestion();
@@ -236,13 +233,16 @@ const LiveInterview = () => {
                             <Timer />
                         </div>
                     </div>
+
                     <div className="quesion-and-action w-full mt-8">
                         <div className="w-2/3 mx-auto h-[36rem] flex flex-col justify-between">
+                        {loading? <Skeleton animation="wave" className='p-8 h-fit min-h-[20vh] rounded-lg max-h-[40vh]' /> :
                             <div className="question bg-gray-200 rounded-lg text-justify">
                                 <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
                                     {question}
                                 </p>
                             </div>
+                        }
                             <div className="audio-visualizer mt-4 flex justify-center">
                                 <div className="audio-visualizer">
                                     <canvas ref={canvasRef} width="640" height="200" />
