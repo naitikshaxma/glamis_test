@@ -38,36 +38,33 @@ export default function SignInSide() {
     const navigate = useNavigate();
     const [login, setLogin] = React.useState({
         email: '',
-        password: ''
+        password: '',
+        role: "student"
     });
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-        if(login.email === '' || login.password === ''){
+        if (login.email === '' || login.password === '') {
             alert('Please fill all the fields')
         }
         console.log(login);
 
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/login`, login,
-        {
-            headers : {
-                'Content-Type' : 'application/json'
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         )
 
         console.log(response.data);
 
-        if(response.status == 201){
+        if (response.status == 201) {
             Cookies.set('accessToken', response.data.data.accessToken);
             navigate('/dashboard')
             return;
         }
         alert("something went wrong")
-
-
-        
-
-
     };
 
     return (
@@ -86,7 +83,7 @@ export default function SignInSide() {
                         backgroundPosition: 'center',
                     }}
                 >
-                    <img src={SidePic} className='mt-10 p-20'/>
+                    <img src={SidePic} className='mt-10 p-20' />
                 </Grid>
 
                 <Grid item xs={12} sm={8} md={7} component={Paper} elevation={6} square>
@@ -113,8 +110,20 @@ export default function SignInSide() {
                                 label="Email Address"
                                 name="email"
                                 autoComplete="email"
-                                className='focus:outline-green-800'
+                                sx={{
+                                    '& .MuiInput-underline:after': {
+                                        borderBottomColor: '#2b6030',
+                                    },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2b6030',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#2b6030',
+                                    },
+                                }}
                             />
+
+
                             <TextField
                                 margin="normal"
                                 required
@@ -125,6 +134,17 @@ export default function SignInSide() {
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
+                                sx={{
+                                    '& .MuiInput-underline:after': {
+                                        borderBottomColor: '#2b6030',
+                                    },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2b6030',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#2b6030',
+                                    },
+                                }}
                             />
                             <FormControlLabel
                                 control={<Checkbox value="remember" color="primary" />}
@@ -134,19 +154,28 @@ export default function SignInSide() {
                                 onClick={handleSubmit}
                                 fullWidth
                                 variant="contained"
-                                sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030" }}
+                                sx={{
+                                    mt: 3,
+                                    mb: 2,
+                                    backgroundColor: "#2b6030",
+                                    '&:hover': {
+                                        backgroundColor: "#17371a"
+                                    }
+                                }}
+                                className='hover:bg-green-800'
                             >
                                 Sign In
                             </Button>
-                            <Grid container>
-                                <Grid item xs>
-                                    <Link href="#" variant="body2">
+                            <Grid container className='flex justify-between items-center'>
+                                <Grid item>
+                                    <Link href="#">
                                         Forgot password?
                                     </Link>
                                 </Grid>
-                                <Grid item>
-                                    <Link href="#" variant="body2">
-                                        {"Don't have an account? Sign Up"}
+                                <Grid item className='text-sm'>
+                                    <span>Don't have an account?</span>
+                                    <Link href="#">
+                                        {" Sign Up"}
                                     </Link>
                                 </Grid>
                             </Grid>
@@ -155,6 +184,6 @@ export default function SignInSide() {
                     </Box>
                 </Grid>
             </Grid>
-        </ThemeProvider>
+        </ThemeProvider >
     );
 }

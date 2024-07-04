@@ -81,7 +81,17 @@ export default function Signup() {
                                 label='Name'
                                 name='name'
                                 autoComplete='name'
-                                className='focus:outline-green-800'
+                                sx={{
+                                    '& .MuiInput-underline:after': {
+                                        borderBottomColor: '#2b6030',
+                                    },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2b6030',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#2b6030',
+                                    },
+                                }}
                             />
 
                             {/* email */}
@@ -95,7 +105,17 @@ export default function Signup() {
                                 label="Email Address"
                                 name="email"
                                 autoComplete="email"
-                                className='focus:outline-green-800'
+                                sx={{
+                                    '& .MuiInput-underline:after': {
+                                        borderBottomColor: '#2b6030',
+                                    },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2b6030',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#2b6030',
+                                    },
+                                }}
                             />
                             {/* phone */}
                             <TextField
@@ -106,16 +126,23 @@ export default function Signup() {
                                 label="Phone"
                                 name="phone"
                                 autoComplete="phone"
-                                className='focus:outline-green-800'
+                                sx={{
+                                    '& .MuiInput-underline:after': {
+                                        borderBottomColor: '#2b6030',
+                                    },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2b6030',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#2b6030',
+                                    },
+                                }}
                             />
                             {/* password */}
                             <div className="flex">
                                 <TextField
                                     margin="normal"
                                     required
-                                    sx={{
-                                        marginRight: '0.5rem'
-                                    }}
                                     className='w-1/2'
                                     name="password"
                                     label="Password"
@@ -127,14 +154,23 @@ export default function Signup() {
                                             {showConfirmPassword ? <VisibilityOff className='cursor-pointer' onClick={handleClickShowPassword} /> : <VisibilityIcon className='cursor-pointer' onClick={handleClickShowConfirmPassword} />}
                                         </InputAdornment>,
                                     }}
+                                    sx={{
+                                        '& .MuiInput-underline:after': {
+                                            borderBottomColor: '#2b6030',
+                                        },
+                                        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#2b6030',
+                                        },
+                                        '& .MuiInputLabel-root.Mui-focused': {
+                                            color: '#2b6030',
+                                        },
+                                        marginRight: '0.5rem'
+                                    }}
                                 />
                                 {/* confirm password */}
                                 <TextField
                                     margin="normal"
                                     required
-                                    sx={{
-                                        marginRight: '0.5rem'
-                                    }}
                                     className='w-1/2'
                                     name="password"
                                     label="Password"
@@ -146,6 +182,18 @@ export default function Signup() {
                                             {showPassword ? <VisibilityOff className='cursor-pointer' onClick={handleClickShowPassword} /> : <VisibilityIcon className='cursor-pointer' onClick={handleClickShowPassword} />}
                                         </InputAdornment>,
                                     }}
+                                    sx={{
+                                        '& .MuiInput-underline:after': {
+                                            borderBottomColor: '#2b6030',
+                                        },
+                                        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#2b6030',
+                                        },
+                                        '& .MuiInputLabel-root.Mui-focused': {
+                                            color: '#2b6030',
+                                        },
+                                        marginRight: '0.5rem'
+                                    }}
                                 />
                             </div>
                             <Button
@@ -156,14 +204,12 @@ export default function Signup() {
                             >
                                 Sign Up
                             </Button>
-                            <Grid container>
-                                <Grid item>
-                                    Already have an account?&nbsp;
-                                    <Link href="/login">
-                                        {"Sign In"}
-                                    </Link>
-                                </Grid>
-                            </Grid>
+                            <div className="flex justify-center">
+                                <span>Already have an account?&nbsp;</span>
+                                <Link href="/login">
+                                    {"Sign In"}
+                                </Link>
+                            </div>
                         </Box>
                     </Box>
                 </Grid>

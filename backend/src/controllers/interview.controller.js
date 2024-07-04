@@ -27,7 +27,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     const completion = await openai.chat.completions.create({
         messages: [
             { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: generateQuestionPrompt(subject, answer)}
+            { role: "user", content: generateQuestionPrompt(subject, answer) }
         ],
         model: "gpt-3.5-turbo",
         max_tokens: 50,
@@ -49,7 +49,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
 
     let upload = "https://glamis-ai.s3.amazonaws.com/output.mp3"
 
-    s3.upload(params, function(err, data) {
+    s3.upload(params, function (err, data) {
         if (err) {
             throw err;
         }
@@ -58,13 +58,13 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         upload = data.Location;
     })
 
-    setTimeout(() => {
+    // setTimeout(() => {
 
 
-        return res.status(200).json({question, audio : upload});
-    
+    return res.status(200).json({ question, audio: upload });
 
-    }, 5000);
+
+    // }, 5000);
 
 
 

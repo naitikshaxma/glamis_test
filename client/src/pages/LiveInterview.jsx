@@ -173,6 +173,8 @@ const LiveInterview = () => {
     const questionAudioRef = useRef(null);
     const [loading, setLoading] = useState(false);
 
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
     useEffect(() => {
         let didCancel = false;
 
@@ -190,13 +192,17 @@ const LiveInterview = () => {
                 if (!didCancel) {
                     setQuestion(response.data.question);
                     setQuestionAudio(response.data.audio);
+                    setTimeout(() => {
+                        setIsAudioPlaying(true);
+                    }, 5000
+                    )
                 }
             } catch (error) {
                 if (!didCancel) {
                     console.error('Error fetching question:', error);
                 }
             }
-            // setLoading(false);
+            setLoading(false);
         };
 
         fetchQuestion();
@@ -213,101 +219,101 @@ const LiveInterview = () => {
 
     return (
         <>
-        {!resultCanva && (
-            <>
-            <div className="flex w-full">
-            {
-                questionAudio && (
-                    <audio src={questionAudio} autoPlay className='hidden'></audio> )
-            }
-                <div className="flex flex-col items-center h-screen w-3/4">
-                    <div className="timer-tab w-full flex justify-between p-4 items-center">
-                        <div className="logo mr-4">
-                            <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
-                        </div>
-                        <div className="title-and-name ml-4">
-                            <p className="text-2xl font-semibold">Full Stack Interview</p>
-                            <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
-                        </div>
-                        <div className="timer">
-                            <Timer />
-                        </div>
-                    </div>
-
-                    <div className="quesion-and-action w-full mt-8">
-                        <div className="w-2/3 mx-auto h-[36rem] flex flex-col justify-between">
-                        {loading? <Skeleton animation="wave" className='p-8 h-fit min-h-[20vh] rounded-lg max-h-[40vh]' /> :
-                            <div className="question bg-gray-200 rounded-lg text-justify">
-                                <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
-                                    {question}
-                                </p>
-                            </div>
+            {!resultCanva && (
+                <>
+                    <div className="flex w-full">
+                        {
+                            questionAudio && isAudioPlaying && (
+                                <audio src={questionAudio} autoPlay className='hidden'></audio>)
                         }
-                            <div className="audio-visualizer mt-4 flex justify-center">
-                                <div className="audio-visualizer">
-                                    <canvas ref={canvasRef} width="640" height="200" />
+                        <div className="flex flex-col items-center h-screen w-3/4">
+                            <div className="timer-tab w-full flex justify-between p-4 items-center">
+                                <div className="logo mr-4">
+                                    <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
+                                </div>
+                                <div className="title-and-name ml-4">
+                                    <p className="text-2xl font-semibold">Full Stack Interview</p>
+                                    <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
+                                </div>
+                                <div className="timer">
+                                    <Timer />
                                 </div>
                             </div>
-                            <div className="actions w-full flex justify-between mt-4">
-                                <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
-                                <Button color={isRecording ? "red" : "blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? "" : startRecording} title='Tap to Speak'>
-                                    {isRecording ? <StopIcon /> : <MicIcon />}
-                                </Button>
-                                <Button color="blue" ripple="light" size="lg" className="w-1/3"
-                                    disabled={loading}
-                                    onClick={isRecording && stopRecording && handleSaveRecording}
-                                >
-                                    {loading ? "Preparing result" : "Next"}</Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex flex-col w-1/4 h-screen bg-blue-gray-100 bg-opacity-50 items-center">
-                    <div className="flex justify-center w-[25rem] m-3">
-                        <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[15rem]"></video>
-                    </div>
-                    <div className="flex flex-col items-center w-full p-4">
-                        <p className="text-lg font-semibold">Interview Summary</p>
-                        <div className="flex flex-col items-center w-full mt-4">
-                            <div className="flex justify-between w-full">
-                                <p className="text-lg">Total Questions</p>
-                                <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">10</span>
-                            </div>
-                            <div className="flex justify-between w-full mt-2">
-                                <p className="text-lg">Total Skipped</p>
-                                <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">0</span>
-                            </div>
-                            <div className="flex justify-between w-full mt-2">
-                                <p className="text-lg">Total Answered</p>
-                                <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">0</span>
-                            </div>
-                            <div className="flex justify-between w-full mt-2">
-                                <p className="text-lg">Total Left</p>
-                                <span className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">10</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex justify-center w-full mt-auto my-4 p-4">
-                        <Button
-                            variant='filled'
-                            color='red'
-                            size='lg'
-                            onClick={handleClose}
-                            className='w-full mx-3'
-                        >
-                            End Interview
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            </>
-        )}
 
-        {resultCanva && (
-            <>
-                <EvaluationResult data={resultAnswer} />
-            </>
-        )}
+                            <div className="quesion-and-action w-full mt-8">
+                                <div className="w-2/3 mx-auto h-[36rem] flex flex-col justify-between">
+                                    {loading ? <Skeleton animation="wave" className='p-8 h-fit min-h-[20vh] rounded-lg max-h-[40vh]' /> :
+                                        <div className="question bg-gray-200 rounded-lg text-justify">
+                                            <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                                                {question}
+                                            </p>
+                                        </div>
+                                    }
+                                    <div className="audio-visualizer mt-4 flex justify-center">
+                                        <div className="audio-visualizer">
+                                            <canvas ref={canvasRef} width="640" height="200" />
+                                        </div>
+                                    </div>
+                                    <div className="actions w-full flex justify-between mt-4">
+                                        <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
+                                        <Button color={isRecording ? "red" : "blue"} ripple="light" size="lg" className="p-4 rounded-full" onClick={isRecording ? "" : startRecording} title='Tap to Speak'>
+                                            {isRecording ? <StopIcon /> : <MicIcon />}
+                                        </Button>
+                                        <Button color="blue" ripple="light" size="lg" className="w-1/3"
+                                            disabled={loading}
+                                            onClick={isRecording && stopRecording && handleSaveRecording}
+                                        >
+                                            {loading ? "Preparing result" : "Next"}</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col w-1/4 h-screen bg-blue-gray-100 bg-opacity-50 items-center">
+                            <div className="flex justify-center w-[25rem] m-3">
+                                <video ref={localVideoRef} autoPlay muted className="rounded-lg h-[15rem]"></video>
+                            </div>
+                            <div className="flex flex-col items-center w-full p-4">
+                                <p className="text-lg font-semibold">Interview Summary</p>
+                                <div className="flex flex-col items-center w-full mt-4">
+                                    <div className="flex justify-between w-full">
+                                        <p className="text-lg">Total Questions</p>
+                                        <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">10</span>
+                                    </div>
+                                    <div className="flex justify-between w-full mt-2">
+                                        <p className="text-lg">Total Skipped</p>
+                                        <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">0</span>
+                                    </div>
+                                    <div className="flex justify-between w-full mt-2">
+                                        <p className="text-lg">Total Answered</p>
+                                        <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">0</span>
+                                    </div>
+                                    <div className="flex justify-between w-full mt-2">
+                                        <p className="text-lg">Total Left</p>
+                                        <span className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">10</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-center w-full mt-auto my-4 p-4">
+                                <Button
+                                    variant='filled'
+                                    color='red'
+                                    size='lg'
+                                    onClick={handleClose}
+                                    className='w-full mx-3'
+                                >
+                                    End Interview
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {resultCanva && (
+                <>
+                    <EvaluationResult data={resultAnswer} />
+                </>
+            )}
         </>
     );
 };
