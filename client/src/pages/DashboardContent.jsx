@@ -18,7 +18,7 @@ const DashboardContent = () => {
 
       <Button variant="gradient" color="#2b6030" className='mb-4' size="md"
       onClick={() =>{
-        navigate('/live')
+        navigate('/interview/create')
       }
       }
       >  

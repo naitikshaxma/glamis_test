@@ -99,11 +99,7 @@ const LiveInterview = () => {
                 formData.append('question', question)
                 formData.append('answerAudio', audioBlob, 'answer01.webm');
                 try {
-<<<<<<< Updated upstream
                     const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
-=======
-                    const response = await axios.post('http://44.202.157.207:8000/api/v1/interview/evaluateQuestion', formData, {
->>>>>>> Stashed changes
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         }

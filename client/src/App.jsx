@@ -10,6 +10,7 @@ import Sidebar from "./components/global_components/Sidebar";
 import Result from "./pages/Result";
 import LiveInterview from "./pages/LiveInterview";
 import EvaluationResult from "./pages/EvaluationResult";
+import CreateInterview from "./pages/CreateInterview";
 const response = {
     statusCode: 200,
     data: {
@@ -63,6 +64,10 @@ const App = () => {
                 <Route
                     path="/evaluation"
                     element={<EvaluationResult data={response.data} />}
+                    />
+                <Route
+                    path="/interview/create"
+                    element={<CreateInterview />}
                     />
             </Routes>
         </Router>
