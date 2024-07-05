@@ -10,7 +10,6 @@ import "dotenv/config.js";
 
 import AWS from 'aws-sdk';
 
-
 const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -18,16 +17,33 @@ const s3 = new AWS.S3({
 
 const speechFile = path.resolve("./output.mp3");
 
+// Store conversation history in memory
+let conversationHistory = [];
+
 export const generateQuestion = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const { subject, answer } = req.body;
 
+    // Add the current question and answer to the conversation history
+    if (conversationHistory.length > 0) {
+        const lastInteraction = conversationHistory[conversationHistory.length - 1];
+        lastInteraction.answer = answer;
+    }
+    conversationHistory.push({ subject });
+
+    // Create a prompt with conversation history
+    const historyPrompt = conversationHistory.map((interaction, index) => {
+        return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
+    }).join("\n");
+
+    const prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new question for the subject: "${subject}"`;
+
     const completion = await openai.chat.completions.create({
         messages: [
             { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: generateQuestionPrompt(subject, answer) }
+            { role: "user", content: prompt }
         ],
         model: "gpt-3.5-turbo",
         max_tokens: 50,
@@ -58,17 +74,10 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         upload = data.Location;
     })
 
-    // setTimeout(() => {
-
-
-    return res.status(200).json({ question, audio: upload });
-
-
-    // }, 5000);
-
-
-
-})
+    setTimeout(() => {
+        return res.status(200).json({ question, audio: upload });
+    }, 5000);
+});
 
 async function evaluateAnswerWithPrompt(answer, question) {
     const openai = new OpenAI({
@@ -125,7 +134,6 @@ async function textToSpeech(input) {
         model: "tts-1",
         voice: "nova",
         input: input,
-
     });
 
     const buffer = Buffer.from(await mp3.arrayBuffer());
@@ -134,8 +142,6 @@ async function textToSpeech(input) {
 
 // const subject = readlineSync.question('Enter the subject for the interview: ');
 // startInterview(subject);
-
-
 
 export const evaluateAnswer = asyncHandler(async (req, res) => {
     const { question } = req.body;
@@ -148,4 +154,4 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully")
     )
-})
+});
