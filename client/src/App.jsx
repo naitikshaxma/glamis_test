@@ -10,7 +10,6 @@ import Sidebar from "./components/global_components/Sidebar";
 import Result from "./pages/Result";
 import LiveInterview from "./pages/LiveInterview";
 import EvaluationResult from "./pages/EvaluationResult";
-
 const response = {
     statusCode: 200,
     data: {
@@ -36,6 +35,7 @@ const MainLayout = ({ children }) => (
 
 const App = () => {
     return (
+
         <Router>
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
@@ -43,11 +43,11 @@ const App = () => {
                 <Route
                     path="/dashboard"
                     element={<MainLayout><Dashboard /></MainLayout>}
-                />
+                    />
                 <Route
                     path="/myInterview"
                     element={<MainLayout><Interviews /></MainLayout>}
-                />
+                    />
                 <Route
                     path="/profile"
                     element={<MainLayout><Profile /></MainLayout>}
@@ -55,15 +55,15 @@ const App = () => {
                 <Route
                     path="/history"
                     element={<MainLayout><History /></MainLayout>}
-                />
+                    />
                 <Route
                     path="/live"
                     element={<LiveInterview />}
-                />
+                    />
                 <Route
                     path="/evaluation"
                     element={<EvaluationResult data={response.data} />}
-                />
+                    />
             </Routes>
         </Router>
     );

@@ -6,13 +6,18 @@ import { CubeTransparentIcon } from "@heroicons/react/24/outline";
 import { UisBars } from '@iconscout/react-unicons-solid';
 import { SidebarContext } from "../../hooks/SideBarContextHook";
 
+
 import avatar from "../../assets/avatar.jpeg";
 import Cookies from "js-cookie";
+import { useRecoilValue } from "recoil";
+import { tokenState } from "../../store/atoms/token";
+
 
 
 export default function Sidebar() {
 
     const navigate = useNavigate();
+    const tokenLeft = useRecoilValue(tokenState);
     const [openAlert, setOpenAlert] = React.useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
@@ -96,7 +101,15 @@ export default function Sidebar() {
                                         </Typography>
                                     </div>
                                 </div>
-                                <img width="32" height="32" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1" />
+                                <div className="flex justify-center items-center">
+                                    <Typography color="blue-gray" className="mx-1 font-semibold p-3 flex justify-center items-center rounded-full bg-gray-300 text-gray-900 h-4 w-4">
+                                        <span className="">
+                                        {tokenLeft}
+                                        </span>
+                                    </Typography>
+                                <img width="32" height="32" className="mx-1" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1" />
+                                </div>
+                                    {/* show token 3 */}
                             </div>
                             <Button
                                 color="#2b6030"
