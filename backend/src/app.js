@@ -1,12 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import path from "path";
 // import { RateLimiter15mins } from "./utils/RateLimiter.js";
 
 
 const app = express()
 
-app.use(express.static('public'));
+const objectStorePath = path.resolve("../objectStore");
+
+// Serve static files from the 'objectStore' directory
+app.use("/objectStore", express.static(objectStorePath));
 
 app.use(cors())
 
