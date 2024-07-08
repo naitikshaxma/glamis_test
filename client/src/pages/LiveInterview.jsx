@@ -192,12 +192,9 @@ const LiveInterview = () => {
                 });
                 console.log('Question:', response.data.data);
                 if (!didCancel) {
-                    setQuestion(response.data.data);
-                    // setQuestionAudio(response.data.audio);
-                    // setTimeout(() => {
-                    //     setIsAudioPlaying(true);
-                    // }, 5000
-                    // )
+                    setQuestion(response.data.data.question);
+                    setQuestionAudio(`http://localhost:8000/objectStore/${response.data.data.audioFileName}`);
+                    setIsAudioPlaying(true);
                 }
             } catch (error) {
                 if (!didCancel) {

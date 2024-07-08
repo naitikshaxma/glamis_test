@@ -8,12 +8,14 @@ import { generateQuestionPrompt } from "../utils/prompts/prompt.js";
 import FormData from "form-data";
 import "dotenv/config.js";
 
-const audioPath = path.resolve("./output.mp3");
+// const audioPath = path.resolve("./output.mp3");
+const objectStorePath = path.resolve("../objectStore");
 
 // Store conversation history in memory
 let conversationHistory = [];
 
 export const generateQuestion = asyncHandler(async (req, res) => {
+    console.log("hello enter")
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
@@ -44,20 +46,39 @@ export const generateQuestion = asyncHandler(async (req, res) => {
 
     const question = completion.choices[0].message.content.trim();
 
-    await textToSpeech(question);
+    // await textToSpeech(question);
 
-    // if (!fs.existsSync(audioPath)) {
-    //     return res.status(500).json({ error: 'Failed to generate audio' });
-    // }
-
+    
     // console.log(`Question: ${question}`);
     // res.setHeader('Content-Type', 'audio/mpeg');
     // res.sendFile(audioPath);
+    
+    
 
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+    
+    await textToSpeech(question, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+    }
+
+    const dataToSend = {
+        question,
+        audioFileName: audioFileName
+    }
+
+    console.log(dataToSend)
+    
     return res.status(200).json(
-        new ApiResponse(200, question, "Question generated successfully")
+        new ApiResponse(200, dataToSend, "Question generated successfully")
     )
 })
+
+const generateUniqueKey = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
 
 async function evaluateAnswerWithPrompt(answer, question) {
     const openai = new OpenAI({
@@ -106,7 +127,7 @@ async function startInterview(subject) {
     console.log('Interview complete!');
 }
 
-async function textToSpeech(input) {
+async function textToSpeech(input, audioPath) {
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
