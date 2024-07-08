@@ -8,14 +8,7 @@ import { generateQuestionPrompt } from "../utils/prompts/prompt.js";
 import FormData from "form-data";
 import "dotenv/config.js";
 
-import AWS from 'aws-sdk';
-
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
-
-const speechFile = path.resolve("./output.mp3");
+const audioPath = path.resolve("./output.mp3");
 
 // Store conversation history in memory
 let conversationHistory = [];
@@ -53,31 +46,18 @@ export const generateQuestion = asyncHandler(async (req, res) => {
 
     await textToSpeech(question);
 
-    // push audio file to s3 bucket
+    // if (!fs.existsSync(audioPath)) {
+    //     return res.status(500).json({ error: 'Failed to generate audio' });
+    // }
 
-    const fileContent = fs.readFileSync(speechFile);
+    // console.log(`Question: ${question}`);
+    // res.setHeader('Content-Type', 'audio/mpeg');
+    // res.sendFile(audioPath);
 
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: 'output.mp3',
-        Body: fileContent
-    };
-
-    let upload = "https://glamis-ai.s3.amazonaws.com/output.mp3"
-
-    s3.upload(params, function (err, data) {
-        if (err) {
-            throw err;
-        }
-        console.log(`File uploaded successfully. ${data.Location}`);
-
-        upload = data.Location;
-    })
-
-    setTimeout(() => {
-        return res.status(200).json({ question, audio: upload });
-    }, 5000);
-});
+    return res.status(200).json(
+        new ApiResponse(200, question, "Question generated successfully")
+    )
+})
 
 async function evaluateAnswerWithPrompt(answer, question) {
     const openai = new OpenAI({
@@ -137,7 +117,7 @@ async function textToSpeech(input) {
     });
 
     const buffer = Buffer.from(await mp3.arrayBuffer());
-    await fs.promises.writeFile(speechFile, buffer);
+    await fs.promises.writeFile(audioPath, buffer);
 }
 
 // const subject = readlineSync.question('Enter the subject for the interview: ');

@@ -184,18 +184,20 @@ const LiveInterview = () => {
                 "subject": "Data Structures and Algorithms",
             };
             try {
+                console.log('Fetching question from...',`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion}`);
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
                     headers: {
                         'Content-Type': 'application/json',
                     }
                 });
+                console.log('Question:', response.data.data);
                 if (!didCancel) {
-                    setQuestion(response.data.question);
-                    setQuestionAudio(response.data.audio);
-                    setTimeout(() => {
-                        setIsAudioPlaying(true);
-                    }, 5000
-                    )
+                    setQuestion(response.data.data);
+                    // setQuestionAudio(response.data.audio);
+                    // setTimeout(() => {
+                    //     setIsAudioPlaying(true);
+                    // }, 5000
+                    // )
                 }
             } catch (error) {
                 if (!didCancel) {
