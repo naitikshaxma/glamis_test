@@ -2,14 +2,13 @@ import React from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
 
-
 const EvaluationResult = ({ data }) => {
-    let { score, explanation } = data;
+    const totalScore = data.reduce((sum, result) => sum + result.score, 0) / data.length;
 
-    // score is like "20/100", so we need to extract the first part
-    score = parseInt(score.split('/')[0]);
-
-    const donutData = [{ name: 'Score', value: score }, { name: 'Remaining', value: 100 - score }];
+    const donutData = [
+        { name: 'Score', value: totalScore },
+        { name: 'Remaining', value: 100 - totalScore }
+    ];
 
     const COLORS = ['#0088FE', '#FFBB28'];
 
@@ -40,10 +39,14 @@ const EvaluationResult = ({ data }) => {
                         </PieChart>
                     </div>
                     <Typography variant="h6" color="gray" className="mt-4">
-                        {`Score: ${score}/100`}
+                        {`Average Score: ${totalScore.toFixed(2)}/100`}
                     </Typography>
                     <Typography variant="body1" color="gray" className="mt-2">
-                        {explanation}
+                        {data.map((result, index) => (
+                            <div key={index} className="mb-2">
+                                <strong>Question {index + 1}:</strong> {result.explanation}
+                            </div>
+                        ))}
                     </Typography>
                 </CardBody>
             </Card>
