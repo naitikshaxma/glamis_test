@@ -7,20 +7,18 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import avatar from '../assets/avatar.jpeg';
 
 const pieData = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 },
-  { name: 'Group D', value: 200 },
+  { name: 'Group A', value: 90 },
+  { name: 'Group B', value: 10 },
 ];
 
 const barData = [
-  { name: 'Vocabulary', score: 85 },
-  { name: 'Pronunciation', score: 78 },
+  { name: 'Vocab', score: 85 },
+  { name: 'Pronun', score: 78 },
   { name: 'Grammar', score: 90 },
   { name: 'Fluency', score: 80 },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#8884d8', 'green'];
 
 const technicalExpertiseScore = 75; // Example score
 
@@ -42,7 +40,7 @@ export default function Result() {
         </IconButton>
       </div>
       <div className="p-6">
-        <div className="flex items-center mb-4">
+        {/* <div className="flex items-center mb-4">
           <div className="mr-4">
             <div className="w-16 h-16 bg-gray-300 rounded-full">
               <img src={avatar} alt="profile" className="w-full h-full object-cover rounded-full" />
@@ -53,7 +51,7 @@ export default function Result() {
             <Typography>Uni Roll - 2115000976</Typography>
             <Typography>Subject - DBMS</Typography>
           </div>
-        </div>
+        </div> */}
         <div className="flex justify-between mb-4">
           <div className="w-1/4 flex justify-center items-center">
             <PieChart width={200} height={200}>
@@ -75,7 +73,7 @@ export default function Result() {
           </div>
           <div className="w-3/4">
             <div className="mb-4">
-              <BarChart width={420} height={150} data={barData}>
+              <BarChart width={440} height={150} data={barData}>
                 <CartesianGrid stroke="#ccc" />
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 100]} />
@@ -83,13 +81,13 @@ export default function Result() {
                 <Bar dataKey="score" fill="#8884d8" />
               </BarChart>
             </div>
-            <div className="w-98">
+            <div className='ml-10'>
               <div className="mb-2">
                 <Typography>Technical Expertise</Typography>
               </div>
               <div className="relative h-6 bg-gray-300 rounded-full">
                 <div
-                  className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
+                  className="absolute top-0 left-0 h-full bg-[#8884d8] rounded-full"
                   style={{ width: `${technicalExpertiseScore}%` }}
                 ></div>
                 <div className="absolute top-0 left-0 h-full flex items-center justify-center w-full text-white">
@@ -99,7 +97,7 @@ export default function Result() {
             </div>
           </div>
         </div>
-        <Button color="blue" fullWidth onClick={onClose}>
+        <Button className='bg-green-800 hover:bg-green-900' fullWidth onClick={onClose}>
           Detailed report
         </Button>
       </div>
