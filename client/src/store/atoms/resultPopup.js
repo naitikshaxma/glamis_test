@@ -1,6 +1,7 @@
-import {atom} from 'recoil';
+// store/atoms/resultPopup.js
+import { atom } from 'recoil';
 
 export const resultPopupState = atom({
-    key: 'resultPopupState',
-    default: false
-})
+  key: 'resultPopupState',
+  default: false,
+});
