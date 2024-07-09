@@ -1,5 +1,8 @@
 import { Card, Typography } from "@material-tailwind/react";
 import { Button } from "@material-tailwind/react";
+import React, { useState } from "react";
+import { resultPopupState } from "../../store/atoms/resultPopup";
+import { useSetRecoilState } from "recoil";
 
 export default function Table() {
   const TABLE_HEAD = ["S.No", "Interview Name", "Time", 'status', "Result"];
@@ -31,6 +34,8 @@ export default function Table() {
       status: true
     }
   ];
+  const setResultPopup = useSetRecoilState(resultPopupState);
+
 
   return (
     <Card className="h-full w-full">
@@ -73,7 +78,12 @@ export default function Table() {
                 </Typography>
               </td>
               <td className="p-4 flex justify-center">
-                <Button className={`${status ? 'bg-[#2b6030]' : 'bg-gray-400 disabled text-black'} `}>{status ? "View Result" : "Expired"}</Button>
+                <Button
+                onClick={() => {
+                  if (!status) return;
+                  setResultPopup(true);
+                }}
+                className={`${status ? 'bg-[#2b6030]' : 'bg-gray-400 disabled text-black'} `}>{status ? "View Result" : "Expired"}</Button>
               </td>
             </tr>
           ))}

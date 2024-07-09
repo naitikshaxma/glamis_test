@@ -7,10 +7,12 @@ import Profile from "./pages/Profile";
 import History from "./pages/History";
 import Interviews from "./pages/Interviews";
 import Sidebar from "./components/global_components/Sidebar";
-import Result from "./pages/Result";
 import LiveInterview from "./pages/LiveInterview";
 import EvaluationResult from "./pages/EvaluationResult";
 import CreateInterview from "./pages/CreateInterview";
+import { resultPopupState } from "./store/atoms/resultPopup";
+import { useRecoilValue } from "recoil";
+import Result from "./pages/Result";
 const response = {
     statusCode: 200,
     data: {
@@ -35,6 +37,7 @@ const MainLayout = ({ children }) => (
 );
 
 const App = () => {
+    const resultPopup = useRecoilValue(resultPopupState);
     return (
 
         <Router>
@@ -55,7 +58,12 @@ const App = () => {
                 />
                 <Route
                     path="/history"
-                    element={<MainLayout><History /></MainLayout>}
+                    element={<MainLayout><History />
+                    {
+                        resultPopup && <Result />
+                    }
+                    
+                    </MainLayout>}
                     />
                 <Route
                     path="/live"
