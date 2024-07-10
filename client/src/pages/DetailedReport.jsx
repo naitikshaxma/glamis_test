@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import logo from '../assets/logo.png'; // Add the path to your logo file
+import { Button } from '@mui/material';
 
 const verbalData = [
     { subject: 'Grammar', A: 90, fullMark: 100 },
@@ -50,6 +51,60 @@ const technicalScore = [
 
 const COLORS = ['#0088FE', '#00C49F'];
 
+const fluencyScore = [{ name: 'Fluency', value: 80 }];
+const clarityScore = [{ name: 'Clarity', value: 55 }];
+const communicationScore = [{ name: 'Communication', value: 90 }];
+const pronunciationScore = [{ name: 'Pronunciation', value: 70 }];
+
+const VerbalCard = () => {
+    return (
+        <div className="flex flex-col bg-lightBlue-500 rounded-lg p-4">
+            {/* question */}
+            <div className="flex flex-col space-y-2 text-semibold">
+               <strong>
+                Que: Explain a project where you used React.
+                
+                </strong> 
+            </div>
+            {/* answer */}
+            <div className="flex flex-col space-y-2">
+                <div className="flex flex-col space-y-2">
+                    <strong>Your Answer:</strong>
+                    React is a popular open-source JavaScript library for building user interfaces, particularly for single-page applications where you want a fast, interactive user experience. Here are some key aspects of React:
+
+                    Component-Based Architecture: React is built around components, which are reusable pieces of UI that can manage their own state. Components can be nested, managed, and handled independently, promoting modular and maintainable code.
+
+                    Declarative Syntax: React uses a declarative paradigm, which makes it easier to reason about your application and aims to be both efficient and flexible. Developers can describe how the UI should look for different states, and React will efficiently update and render just the right components when the data changes.
+                </div>
+
+                {/* a gray color table feedback */}
+                <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
+                    <div className="flex flex-col space-y-2">Feedback</div>
+                    <hr />
+                    <div className='flex w-full justify-between'>
+                        <div className="flex flex-col space-y-2 text-semibold w-1/3">Attributes</div>
+                        <div className="flex flex-col space-y-2 text-semibold w-2/3">Description </div>
+                    </div>
+                    <hr />
+                    <div className='flex w-full justify-between'>
+                        <div className="flex flex-col space-y-2 w-1/3">What went well</div>
+                        <div className="flex flex-col space-y-2 w-2/3">The answer provided a good overview of React and its key features.</div>
+                        </div>
+                    <hr />
+                    <div className='flex w-full justify-between'>
+                        <div className="flex flex-col space-y-2 w-1/3">Areas for improvement</div>
+                        <div className="flex flex-col space-y-2 w-2/3">The answer lacked depth and detail, and could have included specific examples of projects or challenges faced while using React.</div>
+                    </div> 
+                    <hr />
+                    </div>
+
+                    
+            </div>
+        </div>
+    )
+}
+
+
 const DetailedReport = () => {
     const [open, setOpen] = useState(null);
     const [activeTab, setActiveTab] = useState('verbal');
@@ -63,13 +118,13 @@ const DetailedReport = () => {
             case 'verbal':
                 return (
                     <div className="flex flex-col lg:flex-row gap-6">
-                        <Card className="w-full rounded-lg shadow-lg">
-                            <CardHeader className="bg-lightBlue-500 rounded-t-lg p-4">
+                        <div className="w-full rounded-lg">
+                            <div className="bg-lightBlue-500 rounded-t-lg p-4">
                                 <Typography variant="h3">
                                     Verbal Skills
                                 </Typography>
-                            </CardHeader>
-                            <CardBody className="flex flex-col lg:flex-row gap-6 p-4">
+                            </div>
+                            <div className="flex flex-col lg:flex-row gap-6 p-4">
                                 <div className="w-full lg:w-1/3">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <RadarChart data={verbalData}>
@@ -87,19 +142,20 @@ const DetailedReport = () => {
                                     <Typography variant="body1"><strong>Grammar:</strong> Evaluates the correctness of language use.</Typography>
                                     <Typography variant="body1"><strong>Vocabulary:</strong> Measures the range of words known and used correctly.</Typography>
                                 </div>
-                            </CardBody>
-                        </Card>
+                            </div>
+
+                        </div>
                     </div>
                 );
             case 'behavioral':
                 return (
                     <div className="flex flex-col lg:flex-row gap-6 h-full">
                         <Card className="w-full h-full rounded-lg shadow-lg">
-                            <CardHeader className="bg-lightBlue-500 rounded-t-lg p-4">
+                            <div className="bg-lightBlue-500 rounded-t-lg p-4">
                                 <Typography variant="h3">
                                     Behavioral Skills
                                 </Typography>
-                            </CardHeader>
+                            </div>
                             <CardBody className="flex flex-col lg:flex-row gap-6 p-4">
                                 <div className="w-full lg:w-1/3">
                                     <ResponsiveContainer width="100%" height="100%">
@@ -126,11 +182,11 @@ const DetailedReport = () => {
                 return (
                     <div className="flex flex-col items-center space-y-4 p-4 h-full">
                         <Card className="w-full rounded-lg shadow-lg">
-                            <CardHeader className="bg-lightBlue-500 rounded-t-lg p-4">
+                            <div className="bg-lightBlue-500 rounded-t-lg p-4">
                                 <Typography variant="h3">
                                     Technical Skills
                                 </Typography>
-                            </CardHeader>
+                            </div>
                             <CardBody className="flex flex-col items-center space-y-4 p-4">
                                 <ResponsiveContainer width="50%" height={250}>
                                     <PieChart>
@@ -142,25 +198,42 @@ const DetailedReport = () => {
                                     </PieChart>
                                 </ResponsiveContainer>
                                 <Typography variant="body1" className="my-2">Domain Knowledge: 80/100</Typography>
-                                <div className="w-full space-y-2">
-                                    {technicalQuestions.map((q, index) => (
-                                        <div key={index} className="my-2">
-                                            <Typography variant="body2"><strong>{q.question}</strong></Typography>
-                                            <Progress value={q.score} className="my-1" />
-                                            <Accordion open={open === index} onClick={() => handleOpen(index)}>
-                                                <AccordionHeader>
-                                                    View Answers
-                                                </AccordionHeader>
-                                                <AccordionBody>
-                                                    <Typography variant="body2"><strong>User Answer:</strong> {q.userAnswer}</Typography>
-                                                    <Typography variant="body2"><strong>Ideal Answer:</strong> {q.idealAnswer}</Typography>
-                                                </AccordionBody>
-                                            </Accordion>
-                                        </div>
-                                    ))}
-                                </div>
+                                
                             </CardBody>
                         </Card>
+                        <div className="flex ">
+                                <div className='w-[80%] m-auto flex justify around m-5'>
+
+
+
+                                    <div className="w-1/8 mr-3 p-4 bg-lightBlue-500 rounded-lg shadow-lg">
+                                        {/* Q1 to Q10 */}
+                                        <div className="flex flex-col space-y-4">
+                                            <div className="flex flex-col space-y-2
+                                        bg-blue-300 text-white rounded-lg p-3"> Q1 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q2 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q3 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q4 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q5 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q6 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q7 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q8 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q9 </div>
+                                            <div className="flex flex-col space-y-2 p-3"> Q10 </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg">
+                                        <VerbalCard />
+
+                                    </div>
+
+                                </div>
+
+
+
+                        </div>
                     </div>
                 );
             default:
@@ -169,7 +242,7 @@ const DetailedReport = () => {
     };
 
     return (
-        <div className="flex flex-col w-full h-screen p-6 shadow-md rounded-lg">
+        <div className="flex flex-col w-full h-screen p-6 rounded-lg">
             <div className="flex justify-between items-center p-4">
                 <img src={logo} alt="Logo" className="h-24" />
                 <IconButton variant="text" color="blue-gray" onClick={() => alert('Close button clicked')}>
