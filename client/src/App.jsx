@@ -13,6 +13,7 @@ import CreateInterview from "./pages/CreateInterview";
 import { resultPopupState } from "./store/atoms/resultPopup";
 import { useRecoilValue } from "recoil";
 import Result from "./pages/Result";
+import DetailedReport from "./pages/DetailedReport";
 const response = {
     statusCode: 200,
     data: {
@@ -47,11 +48,11 @@ const App = () => {
                 <Route
                     path="/dashboard"
                     element={<MainLayout><Dashboard /></MainLayout>}
-                    />
+                />
                 <Route
                     path="/myInterview"
                     element={<MainLayout><Interviews /></MainLayout>}
-                    />
+                />
                 <Route
                     path="/profile"
                     element={<MainLayout><Profile /></MainLayout>}
@@ -59,24 +60,30 @@ const App = () => {
                 <Route
                     path="/history"
                     element={<MainLayout><History />
-                    {
-                        resultPopup && <Result />
-                    }
-                    
+                        {
+                            resultPopup && <Result />
+                        }
+
                     </MainLayout>}
-                    />
+                />
+                <Route
+                    path="/history/detailed"
+                    element={
+                        <DetailedReport />
+                    }
+                />
                 <Route
                     path="/live"
                     element={<LiveInterview />}
-                    />
+                />
                 <Route
                     path="/evaluation"
                     element={<EvaluationResult data={response.data} />}
-                    />
+                />
                 <Route
                     path="/interview/create"
                     element={<CreateInterview />}
-                    />
+                />
             </Routes>
         </Router>
     );

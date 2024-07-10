@@ -5,6 +5,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { resultPopupState } from '../store/atoms/resultPopup';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import avatar from '../assets/avatar.jpeg';
+import DetailedReport from './DetailedReport';
 
 const pieData = [
   { name: 'Group A', value: 90 },
@@ -73,7 +74,7 @@ export default function Result() {
           </div>
           <div className="w-3/4">
             <div className="mb-4">
-              <BarChart width={440} height={150} data={barData}>
+              <BarChart width={500} height={150} data={barData}>
                 <CartesianGrid stroke="#ccc" />
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 100]} />
@@ -97,7 +98,7 @@ export default function Result() {
             </div>
           </div>
         </div>
-        <Button className='bg-green-800 hover:bg-green-900' fullWidth onClick={onClose}>
+        <Button className='bg-green-800 hover:bg-green-900' fullWidth onClick={() => window.location.href = '/history/detailed'}>
           Detailed report
         </Button>
       </div>
