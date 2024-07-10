@@ -198,7 +198,7 @@ const LiveInterview = () => {
                             questionAudio && isAudioPlaying && (
                                 <audio src={questionAudio} autoPlay className='hidden'></audio>)
                         }
-                        <div className="flex flex-col items-center h-screen w-3/4">
+                        <div className="flex flex-col items-center w-3/4">
                             <div className="timer-tab w-full flex justify-between p-4 items-center">
                                 <div className="logo mr-4">
                                     <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
