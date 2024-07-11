@@ -7,13 +7,14 @@ import {
 } from 'recharts';
 import { Link, Element, scroller } from 'react-scroll';
 
-const COLORS = ['#0088FE', '#00C49F'];
+
+const COLORS = ['#00C49F', "#ee4e4e" ];
 const technicalScore = [
     { name: 'Score', value: 80 },
     { name: 'Remaining', value: 20 },
 ];
 
-const questions = [
+export const questions = [
     {
         question: "Explain a project where you used React.",
         answer: "React is a popular open-source JavaScript library for building user interfaces, particularly for single-page applications where you want a fast, interactive user experience. Here are some key aspects of React: \n\n Component-Based Architecture: React is built around components, which are reusable pieces of UI that can manage their own state. Components can be nested, managed, and handled independently, promoting modular and maintainable code. \n\n Declarative Syntax: React uses a declarative paradigm, which makes it easier to reason about your application and aims to be both efficient and flexible. Developers can describe how the UI should look for different states, and React will efficiently update and render just the right components when the data changes.",
@@ -48,9 +49,9 @@ const questions = [
     },
 ];
 
-const TechnicalCard = ({ question, answer, feedback }) => {
+export const TechnicalCard = ({ question, answer, feedback }) => {
     return (
-        <div className="flex flex-col bg-lightBlue-500 rounded-lg p-4">
+        <div className="flex  flex-col bg-lightBlue-500 rounded-lg p-4">
             <div className="flex flex-col space-y-2 font-semibold mb-4">
                 Question: {question}
             </div>
@@ -99,21 +100,9 @@ const TechnicalCard = ({ question, answer, feedback }) => {
 }
 
 const Technical = () => {
-    const [selectedQuestion, setSelectedQuestion] = useState(0);
-    const scrollContainerRef = useRef(null);
-
-    const handleQuestionClick = (index) => {
-        setSelectedQuestion(index);
-        scroller.scrollTo(`question-${index}`, {
-            duration: 500,
-            delay: 0,
-            smooth: true,
-            containerId: 'scroll-container'
-        });
-    };
 
     return (
-        <div className="flex flex-col items-center space-y-4 p-4 h-full">
+        <div className="flex w-1/3 flex-col items-center m-3">
             <Card className="w-full rounded-lg shadow-lg">
                 <div className="bg-lightBlue-500 rounded-t-lg p-4">
                     <Typography variant="h3">Technical Skills</Typography>
@@ -128,48 +117,9 @@ const Technical = () => {
                             </Pie>
                         </PieChart>
                     </ResponsiveContainer>
-                    <Typography variant="body1" className="my-2">Domain Knowledge: 80/100</Typography>
+                    <Typography variant="body1" className="my-2 text-green-900 font-semibold">Domain Knowledge: 80/100</Typography>
                 </CardBody>
             </Card>
-            <div className="flex">
-                <div className='w-[80%] m-auto flex justify-around mb-5'>
-                    <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                        <div className="flex flex-col space-y-4">
-                            {questions.map((_, index) => (
-                                <Link
-                                    key={index}
-                                    to={`question-${index}`}
-                                    smooth={true}
-                                    duration={500}
-                                    className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-blue-300 text-white' : ''}`}
-                                    onClick={() => handleQuestionClick(index)}
-                                >
-                                    Q{index + 1}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                    <div
-                        className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[60vh] overflow-y-scroll"
-                        id="scroll-container"
-                        ref={scrollContainerRef}
-                    >
-                        {questions.map((question, index) => (
-                            <Element
-                                key={index}
-                                name={`question-${index}`}
-                                id={`question-${index}`}
-                            >
-                                <TechnicalCard
-                                    question={question.question}
-                                    answer={question.answer}
-                                    feedback={question.feedback}
-                                />
-                            </Element>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

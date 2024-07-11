@@ -4,47 +4,41 @@ import {
     Accordion, AccordionHeader, AccordionBody, Progress, IconButton
 } from '@material-tailwind/react';
 import {
-    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, PieChart, Pie, Cell
+    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, PieChart, Pie
 } from 'recharts';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Button } from '@mui/material';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 
-const verbalData = [
-    { subject: 'Grammar', A: 90, fullMark: 100 },
-    { subject: 'Clarity', A: 55, fullMark: 100 },
-    { subject: 'Vocabulary', A: 12, fullMark: 100 },
-];
+const data = [
+    {
+        name : 'Grammar', score: 80
+    },
+    {
+        name : 'Vocabulary', score: 70
+    },
+]
 const Verbal = () => {
     return (
-        <div className="flex flex-col lg:flex-row gap-6">
-            <div className="w-full rounded-lg">
+        <div className="flex w-1/3 flex-col lg:flex-row gap-4 my-3">
+            <Card className="w-full rounded-lg shadow-lg">
                 <div className="bg-lightBlue-500 rounded-t-lg p-4">
-                    <Typography variant="h3">
-                        Verbal Skills
-                    </Typography>
+                    <Typography variant="h3">Verbal Skills</Typography>
                 </div>
-                <div className="flex flex-col lg:flex-row gap-6 p-4">
-                    <div className="w-full lg:w-1/3">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart data={verbalData}>
-                                <PolarGrid />
-                                <PolarAngleAxis dataKey="subject" />
-                                <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                                <Radar name="Verbal Skills" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                            </RadarChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="w-full lg:w-2/3 space-y-2">
-                        <Typography variant="body1"><strong>Communication:</strong> Measures the ability to convey information effectively.</Typography>
-                        <Typography variant="body1"><strong>Listening:</strong> Evaluates how well the individual comprehends spoken information.</Typography>
-                        <Typography variant="body1"><strong>Clarity:</strong> Assesses the lucidity of the spoken or written message.</Typography>
-                        <Typography variant="body1"><strong>Grammar:</strong> Evaluates the correctness of language use.</Typography>
-                        <Typography variant="body1"><strong>Vocabulary:</strong> Measures the range of words known and used correctly.</Typography>
-                    </div>
-                </div>
-
-            </div>
+                <CardBody className="flex flex-col items-center space-y-4 p-4">
+                    <ResponsiveContainer width="100%" height={200}>
+                    <BarChart width={730} height={250} data={data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="score" fill="#8884d8" />
+                    </BarChart>
+                    </ResponsiveContainer>
+                </CardBody>
+            </Card>
         </div>
     );
 }
