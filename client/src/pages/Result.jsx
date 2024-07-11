@@ -41,18 +41,6 @@ export default function Result() {
         </IconButton>
       </div>
       <div className="p-6">
-        {/* <div className="flex items-center mb-4">
-          <div className="mr-4">
-            <div className="w-16 h-16 bg-gray-300 rounded-full">
-              <img src={avatar} alt="profile" className="w-full h-full object-cover rounded-full" />
-            </div>
-          </div>
-          <div>
-            <Typography>Name - Shubh Chaturvedi</Typography>
-            <Typography>Uni Roll - 2115000976</Typography>
-            <Typography>Subject - DBMS</Typography>
-          </div>
-        </div> */}
         <div className="flex justify-between mb-4">
           <div className="w-1/4 flex justify-center items-center">
             <PieChart width={200} height={200}>

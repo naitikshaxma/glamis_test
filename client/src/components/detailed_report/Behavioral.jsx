@@ -9,13 +9,13 @@ import {
 
 const data = [
   {
-    name : "Intonation", score: 80
+    name: "Intonation", score: 80
   },
   {
-    name : "Clarity", score: 70
+    name: "Clarity", score: 70
   },
   {
-    name : "Fluency", score: 35
+    name: "Fluency", score: 35
   }
 ]
 
@@ -29,17 +29,17 @@ const Behavioral = () => {
           </Typography>
         </div>
         <CardBody className="flex flex-col items-center space-y-4 p-4">
-                    <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={280}>
 
-          <BarChart width={730} height={250} data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="score" fill="#8884d8" />
-          </BarChart>
-                    </ResponsiveContainer>
+            <BarChart width={730} height={250} data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="score" fill="#2b6030" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardBody>
       </Card>
     </div>

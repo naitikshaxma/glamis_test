@@ -69,7 +69,7 @@ const DetailedReport = () => {
             </div>
             <div className="analysis flex flex-col h-full">
                 <div className="border-t-0">
-                    <div className="bg-green-800 text-white text-lg flex justify-center p-1 font-semibold">
+                    <div className="bg-[#2b6030] text-white text-lg flex justify-center p-1 font-semibold">
                         <span>Analysis</span>
                     </div>
                     <div className='flex w-full'>
@@ -79,22 +79,22 @@ const DetailedReport = () => {
                     </div>
                 </div>
                 <div className="report mt-4">
-                <div className="bg-green-800 text-white text-lg flex justify-center p-1 font-semibold">
+                    <div className="bg-[#2b6030] text-white text-lg flex justify-center p-1 font-semibold">
                     <span>Detailed Report</span>
                 </div>
                 <div className="w-full shadow">
                 <div className="flex border-b mb-6">
-                    <button className={`py-2 px-4 ${activeTab === 'technical' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`} onClick={() => setActiveTab('technical')} >
+                            <button className={`py-2 px-4 ${activeTab === 'technical' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('technical')} >
                         Technical Skills
                     </button>
                     <button
-                        className={`py-2 px-4 ${activeTab === 'verbal' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+                                className={`py-2 px-4 ${activeTab === 'verbal' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`}
                         onClick={() => setActiveTab('verbal')}
                     >
                         Verbal Skills
                     </button>
                     <button
-                        className={`py-2 px-4 ${activeTab === 'behavioral' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`} onClick={() => setActiveTab('behavioral')} > Behavioral Skills
+                                className={`py-2 px-4 ${activeTab === 'behavioral' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('behavioral')} > Behavioral Skills
                     </button>
                 </div>
                 <div className="flex">
@@ -107,7 +107,7 @@ const DetailedReport = () => {
                                         to={`question-${index}`}
                                         smooth={true}
                                         duration={500}
-                                        className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-blue-300 text-white' : ''}`}
+                                        className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
                                         onClick={() => handleQuestionClick(index)}
                                     >
                                         Q{index + 1}

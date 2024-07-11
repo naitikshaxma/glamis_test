@@ -1,22 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-    Card, CardHeader, CardBody, Typography,
-    Accordion, AccordionHeader, AccordionBody, Progress, IconButton
+    Card, CardBody, Typography
 } from '@material-tailwind/react';
-import {
-    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, PieChart, Pie
-} from 'recharts';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { Button } from '@mui/material';
+import { ResponsiveContainer } from 'recharts';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 
 const data = [
     {
-        name : 'Grammar', score: 80
+        name: 'Grammar', score: 80
     },
     {
-        name : 'Vocabulary', score: 70
+        name: 'Vocabulary', score: 70
     },
 ]
 const Verbal = () => {
@@ -27,15 +22,15 @@ const Verbal = () => {
                     <Typography variant="h3">Verbal Skills</Typography>
                 </div>
                 <CardBody className="flex flex-col items-center space-y-4 p-4">
-                    <ResponsiveContainer width="100%" height={200}>
-                    <BarChart width={730} height={250} data={data}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="score" fill="#8884d8" />
-                    </BarChart>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart width={730} height={250} data={data}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="score" fill="#2b6030" />
+                        </BarChart>
                     </ResponsiveContainer>
                 </CardBody>
             </Card>
