@@ -29,7 +29,7 @@ const Verbal = () => {
                             <YAxis />
                             <Tooltip />
                             <Legend />
-                            <Bar dataKey="score" fill="#2b6030" />
+                            <Bar dataKey="score" fill="#529e5a" />
                         </BarChart>
                     </ResponsiveContainer>
                 </CardBody>

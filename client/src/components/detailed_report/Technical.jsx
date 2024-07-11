@@ -8,7 +8,7 @@ import {
 import { Link, Element, scroller } from 'react-scroll';
 
 
-const COLORS = ['#2b6030', "red"];
+const COLORS = ['#529e5a', "#d63a3a"];
 const technicalScore = [
     { name: 'Score', value: 80 },
     { name: 'Remaining', value: 20 },
