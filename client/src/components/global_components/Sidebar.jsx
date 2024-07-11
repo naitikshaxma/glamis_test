@@ -46,7 +46,7 @@ export default function Sidebar() {
         </svg>,
         href: '/history'
     }
-]
+    ]
 
     return (
         <div className="flex">
@@ -94,7 +94,7 @@ export default function Sidebar() {
                         <div className="my-3">
                             <div className="flex justify-between items-center gap-2 px-2">
                                 <div className="flex items-center gap-2 my-3">
-                                    <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border border-green-600 border-2" />
+                                    <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2" />
                                     <div>
                                         <Typography color="blue-gray" className="font-semibold ml-2">
                                             Gourav Bathla
@@ -104,12 +104,12 @@ export default function Sidebar() {
                                 <div className="flex justify-center items-center">
                                     <Typography color="blue-gray" className="mx-1 font-semibold p-3 flex justify-center items-center rounded-full bg-gray-300 text-gray-900 h-4 w-4">
                                         <span className="">
-                                        {tokenLeft}
+                                            {tokenLeft}
                                         </span>
                                     </Typography>
-                                <img width="32" height="32" className="mx-1" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1" />
+                                    <img width="32" height="32" className="mx-1" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1" />
                                 </div>
-                                    {/* show token 3 */}
+                                {/* show token 3 */}
                             </div>
                             <Button
                                 color="#2b6030"
@@ -117,7 +117,7 @@ export default function Sidebar() {
                                 variant="outlined"
                                 block={true}
                                 ripple="light"
-                                onClick={()=>{
+                                onClick={() => {
                                     Cookies.remove("accessToken");
                                     navigate("/login");
                                 }}
