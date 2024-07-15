@@ -3,7 +3,13 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
 
 const EvaluationResult = ({ data }) => {
-    const totalScore = data.reduce((sum, result) => sum + result.score, 0) / data.length;
+    const calculateAverage = (key) => {
+        return data.reduce((sum, result) => sum + parseInt(result[key], 10), 0) / data.length;
+    };
+
+    const totalScore = calculateAverage('overallScore');
+    const grammarScore = calculateAverage('grammarScore');
+    const vocabularyScore = calculateAverage('vocabularyScore');
 
     const donutData = [
         { name: 'Score', value: totalScore },
@@ -39,22 +45,41 @@ const EvaluationResult = ({ data }) => {
                         </PieChart>
                     </div>
                     <Typography variant="h6" color="gray" className="mt-4">
-                        {`Average Score: ${totalScore.toFixed(2)}/100`}
+                        {`Average Overall Score: ${totalScore.toFixed(2)}/100`}
                     </Typography>
-                    <Typography variant="body1" color="gray" className="mt-2">
+                    <Typography variant="h6" color="gray" className="mt-2">
+                        {`Average Grammar Score: ${grammarScore.toFixed(2)}/100`}
+                    </Typography>
+                    <Typography variant="h6" color="gray" className="mt-2">
+                        {`Average Vocabulary Score: ${vocabularyScore.toFixed(2)}/100`}
+                    </Typography>
+                    <div className="mt-4">
                         {data.map((result, index) => (
-                            <div key={index} className="mb-2">
-                                <strong>Question {index + 1}:</strong> {result.explanation}
-                                <strong>Vocablary score</strong>{result.vocabularyScore}
-                                <strong>Grammar score</strong>{result.grammarScore}
-                                <strong>Overall score</strong>{result.overallScore}
-                                <strong>Explanation</strong>{result.explanation}
-                                <strong>Question</strong>{result.question}
-                                <strong>Answer</strong>{result.userAnswer}
-                                )
+                            <div key={index} className="mb-4">
+                                <Typography variant="h6" color="blue-gray" className="mb-2">
+                                    {`Question ${index + 1}`}
+                                </Typography>
+                                <Typography variant="body1" color="gray">
+                                    <strong>Question:</strong> {result.question}
+                                </Typography>
+                                <Typography variant="body1" color="gray">
+                                    <strong>User Answer:</strong> {result.userAnswer}
+                                </Typography>
+                                <Typography variant="body1" color="gray">
+                                    <strong>Overall Score:</strong> {result.overallScore}/100
+                                </Typography>
+                                <Typography variant="body1" color="gray">
+                                    <strong>Grammar Score:</strong> {result.grammarScore}/100
+                                </Typography>
+                                <Typography variant="body1" color="gray">
+                                    <strong>Vocabulary Score:</strong> {result.vocabularyScore}/100
+                                </Typography>
+                                <Typography variant="body1" color="gray">
+                                    <strong>Explanation:</strong> {result.explanation}
+                                </Typography>
                             </div>
                         ))}
-                    </Typography>
+                    </div>
                 </CardBody>
             </Card>
         </div>
