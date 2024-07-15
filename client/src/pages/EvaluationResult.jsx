@@ -45,6 +45,13 @@ const EvaluationResult = ({ data }) => {
                         {data.map((result, index) => (
                             <div key={index} className="mb-2">
                                 <strong>Question {index + 1}:</strong> {result.explanation}
+                                <strong>Vocablary score</strong>{result.vocabularyScore}
+                                <strong>Grammar score</strong>{result.grammarScore}
+                                <strong>Overall score</strong>{result.overallScore}
+                                <strong>Explanation</strong>{result.explanation}
+                                <strong>Question</strong>{result.question}
+                                <strong>Answer</strong>{result.userAnswer}
+                                )
                             </div>
                         ))}
                     </Typography>

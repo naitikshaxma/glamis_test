@@ -78,23 +78,29 @@ async function evaluateAnswerWithPrompt(answer, question) {
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const prompt = `
-        You are an interviewer. I will provide you with a question and its answer.
-        I want you to evaluate the answer on a scale of 0 to 100 and give constructive feedback.
+        You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
 
         Here is the question: "${question}"
         Here is the answer: "${answer}"
 
-        Your feedback should include a score out of 100 and comments on the strengths and weaknesses of the answer.
+        Please evaluate the answer based on the following criteria:
+        1. Overall Score: A score out of 100 for the overall quality of the answer.
+        2. Grammar: A score out of 100 for the grammatical correctness of the answer.
+        3. Vocabulary: A score out of 100 for the vocabulary used in the answer.
+        4. Explanation: Constructive feedback highlighting the strengths and weaknesses of the answer.
 
         The response should be in JSON format and must follow this structure:
         {
-        "score": 90,
-        "explanation": "The answer provided is a repetition of the question rather than a standalone response"
+            "question": "The question text",
+            "userAnswer": "The user's answer text",
+            "overallScore": "number out of 100",
+            "grammarScore": "number out of 100",
+            "vocabularyScore": "number out of 100",
+            "explanation": "Detailed feedback on the strengths and weaknesses of the answer"
         }
 
-        The keys must be "score" and "explanation".
-        - The "score" should be a string representing a number out of 100.
-        - The "explanation" should be a string describing the evaluation.
+        Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", and "explanation".
+
     `;
 
     const completion = await openai.chat.completions.create({
