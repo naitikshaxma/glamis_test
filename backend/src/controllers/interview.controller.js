@@ -84,22 +84,22 @@ async function evaluateAnswerWithPrompt(answer, question) {
         Here is the answer: "${answer}"
 
         Please evaluate the answer based on the following criteria:
-        1. Overall Score: A score out of 100 for the overall quality of the answer.
-        2. Grammar: A score out of 100 for the grammatical correctness of the answer.
-        3. Vocabulary: A score out of 100 for the vocabulary used in the answer.
+        1. Overall Score: An integer score out of 100 for the overall quality of the answer.
+        2. Grammar: An integer score out of 100 for the grammatical correctness of the answer.
+        3. Vocabulary: An integer score out of 100 for the vocabulary used in the answer.
         4. Explanation: Constructive feedback highlighting the strengths and weaknesses of the answer.
 
         The response should be in JSON format and must follow this structure:
         {
             "question": "The question text",
             "userAnswer": "The user's answer text",
-            "overallScore": "number out of 100",
-            "grammarScore": "number out of 100",
-            "vocabularyScore": "number out of 100",
+            "overallScore": 90,
+            "grammarScore": 85,
+            "vocabularyScore": 88,
             "explanation": "Detailed feedback on the strengths and weaknesses of the answer"
         }
 
-        Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", and "explanation".
+        Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", and "explanation". All scores should be integers.
 
     `;
 
