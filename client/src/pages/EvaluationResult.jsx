@@ -66,7 +66,7 @@ const EvaluationResult = ({ data }) => {
                                     <strong>User Answer:</strong> {result.userAnswer}
                                 </Typography>
                                 <Typography variant="body1" color="gray">
-                                    <strong>Overall Score:</strong> {result.overallScore}/100
+                                    <strong>Technical Score:</strong> {result.overallScore}/100
                                 </Typography>
                                 <Typography variant="body1" color="gray">
                                     <strong>Grammar Score:</strong> {result.grammarScore}/100
@@ -75,7 +75,13 @@ const EvaluationResult = ({ data }) => {
                                     <strong>Vocabulary Score:</strong> {result.vocabularyScore}/100
                                 </Typography>
                                 <Typography variant="body1" color="gray">
-                                    <strong>Explanation:</strong> {result.explanation}
+                                    <strong>1. Technical: {result.technicalExplanation}</strong>
+                                </Typography>
+                                <Typography>
+                                    <strong>2. Vocabulary: {result.vocabularyExplanation}</strong>
+                                </Typography>
+                                <Typography>
+                                    <strong>3. Grammar: {result.grammarExplanation}</strong>
                                 </Typography>
                             </div>
                         ))}

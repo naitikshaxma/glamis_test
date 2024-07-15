@@ -45,7 +45,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
             { role: "user", content: prompt }
         ],
         model: "gpt-3.5-turbo",
-        max_tokens: 256,
+        max_tokens: 1000,
     });
 
     const question = completion.choices[0].message.content.trim();
@@ -87,7 +87,9 @@ async function evaluateAnswerWithPrompt(answer, question) {
         1. Overall Score: An integer score out of 100 for the overall quality of the answer.
         2. Grammar: An integer score out of 100 for the grammatical correctness of the answer.
         3. Vocabulary: An integer score out of 100 for the vocabulary used in the answer.
-        4. Explanation: Constructive feedback highlighting the strengths and weaknesses of the answer.
+        4. technicalExplanation: Feedback on the technical aspects of the answer.
+        5. vocabularyExplanation: Feedback on the vocabulary used in the answer.
+        6. grammarExplanation: Feedback on the grammatical correctness of the answer.
 
         The response should be in JSON format and must follow this structure:
         {
@@ -96,10 +98,12 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "overallScore": 90,
             "grammarScore": 85,
             "vocabularyScore": 88,
-            "explanation": "Detailed feedback on the strengths and weaknesses of the answer"
+            "technicalExplanation": "Feedback on the technical aspects of the answer",
+            "vocabularyExplanation": "Feedback on the vocabulary used in the answer",
+            "grammarExplanation": "Feedback on the grammatical correctness of the answer"
         }
 
-        Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", and "explanation". All scores should be integers.
+        Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", "technicalExplanation", "vocabularyExplanation" and "grammarExplanation". All scores should be integers.
 
     `;
 
@@ -109,9 +113,9 @@ async function evaluateAnswerWithPrompt(answer, question) {
             { role: "user", content: prompt }
         ],
         model: "gpt-3.5-turbo",
-        max_tokens: 256,
+        max_tokens: 1000,
     });
-
+    console.log(completion.choices[0].message.content);
     return completion.choices[0].message.content;
 }
 
