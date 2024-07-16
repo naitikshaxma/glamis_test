@@ -122,7 +122,7 @@ export default function CreateInterview() {
     const CreateInterview = async () => {
         // create interview
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-            subject : "Data Structure and Algorithm"
+            subject : "Machine Learning"
         },
         {
             headers: {

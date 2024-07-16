@@ -138,7 +138,7 @@ const LiveInterview = () => {
     const fetchQuestion = async () => {
         setLoading(true);
         const data = {
-            subject: "Computer Networks",
+            subject: "Machine Learning",
         };
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {

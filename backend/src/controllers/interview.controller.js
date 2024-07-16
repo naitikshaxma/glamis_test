@@ -142,7 +142,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "overallScore": 90,
             "grammarScore": 85,
             "vocabularyScore": 88,
-            "technicalExplanation": "Feedback on the technical aspects of the answer",
+            "technicalExplanation": "Feedback on the technical aspects of the answer"
             "vocabularyExplanation": "Feedback on the vocabulary used in the answer",
             "grammarExplanation": "Feedback on the grammatical correctness of the answer"
         }

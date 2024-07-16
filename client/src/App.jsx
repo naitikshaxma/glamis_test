@@ -73,6 +73,12 @@ const App = () => {
                     }
                 />
                 <Route
+                    path="/history/detailed/:id"
+                    element={
+                        <DetailedReport />
+                    }
+                />
+                <Route
                     path="/live"
                     element={<LiveInterview />}
                 />
