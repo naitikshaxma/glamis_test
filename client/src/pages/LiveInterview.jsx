@@ -133,7 +133,7 @@ const LiveInterview = () => {
     const [timer, setTimer] = useState(true);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 3;
+    const totalQuestions = 7;
 
     const fetchQuestion = async () => {
         setLoading(true);

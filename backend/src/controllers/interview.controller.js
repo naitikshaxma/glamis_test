@@ -72,7 +72,14 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    const prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for the subject: "${subject}"`;
+    if(index<3){
+        const prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} question for the subject: "${subject}"`;
+    }
+    else{
+        const prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for the subject: "${subject}"`;
+    }
+
+    
 
     const completion = await openai.chat.completions.create({
         messages: [
@@ -150,6 +157,9 @@ async function evaluateAnswerWithPrompt(answer, question) {
         model: "gpt-3.5-turbo",
         max_tokens: 1000,
     });
+
+    // 
+
     console.log(completion.choices[0].message.content);
     return completion.choices[0].message.content;
 }
