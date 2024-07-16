@@ -112,6 +112,6 @@ userSchema.methods.generateRefreshToken = function () {
 }
 
 const User = mongoose.model("User", userSchema)
-const Profile = mongoose.model("Profile", studentProfileSchema)
+const Student = mongoose.model("Student", studentProfileSchema)
 
-export { User, Profile };
+export { User, Student };

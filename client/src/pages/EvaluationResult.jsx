@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 const EvaluationResult = ({ data }) => {
     const calculateAverage = (key) => {
@@ -18,9 +20,25 @@ const EvaluationResult = ({ data }) => {
 
     const COLORS = ['#0088FE', '#FFBB28'];
 
+    useEffect(()=>{
+        const saveResultToDB = async () => {
+            console.log(data)
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/saveResultToDb`, {data, interviewId : Cookies.get('interviewId')}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${Cookies.get('accessToken')}`
+                }
+            });
+            console.log(response.data);
+        }
+
+        saveResultToDB()
+    })
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            <Card className="w-full max-w-md mx-auto mb-4 shadow-lg">
+            Your Result will be Available at History Page
+            {/* <Card className="w-full max-w-md mx-auto mb-4 shadow-lg">
                 <CardBody>
                     <Typography variant="h5" color="blue-gray" className="mb-4">
                         Evaluation Result
@@ -87,7 +105,7 @@ const EvaluationResult = ({ data }) => {
                         ))}
                     </div>
                 </CardBody>
-            </Card>
+            </Card> */}
         </div>
     );
 };

@@ -3,12 +3,47 @@ import OpenAI from "openai";
 import path from "path";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import  { Interview, InterviewQuestion, InterviewResult } from "../models/interview.models.js"
+import { Student } from "../models/users.models.js"
 import "dotenv/config.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const objectStorePath = path.resolve("../objectStore");
 
 // Store conversation history in memory
 let conversationHistory = [];
+
+export const createInterview = asyncHandler(async (req, res) => {
+    try{
+        console.log("enter ####");
+        const { subject } = req.body;
+        console.log("subject ####", subject);
+        const interview = await Interview.create({
+            start_time : new Date(),
+            is_active : true,
+            title : subject,
+            description : subject
+        })
+
+        console.log("Interview created ####", interview);
+    
+        const currentUser = req.user;
+        console.log("currentUser ####", currentUser);
+        const student = await Student.findOne({user : currentUser._id});
+        console.log("student ####", student);
+        student.interview_taken.push(interview._id);
+        await student.save();
+    
+        return res.status(200).json(
+            new ApiResponse(200, interview, "Interview created successfully")
+        );
+    }
+    catch(err){
+        return res.status(500).json(
+            ApiError(500, err.message || "Internal Server Error")
+        );
+    }
+})
 
 export const generateQuestion = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
@@ -134,12 +169,71 @@ async function textToSpeech(input, audioPath) {
 }
 
 export const evaluateAnswer = asyncHandler(async (req, res) => {
-    const { question } = req.body;
-    const answer = req.extractedAnswer;
-
-    const feedback = await evaluateAnswerWithPrompt(answer, question);
-
-    return res.status(200).json(
-        new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully")
-    );
+    try{
+        const { question } = req.body;
+        const answer = req.extractedAnswer;
+    
+        const feedback = await evaluateAnswerWithPrompt(answer, question);
+    
+        return res.status(200).json(
+            new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully")
+        );
+    }
+    catch(err){
+        return res.status(500).json(
+            ApiError(500, err.message || "Internal Server Error")
+        );
+    }
 });
+
+export const saveResultToDb = asyncHandler(async (req, res) => {
+    try{
+        const { data, interviewId } = req.body
+        console .log("data ####", data);
+    
+        const interview = await Interview.findById(interviewId);
+        console.log("interview ####", interview);
+        interview.is_active = false;
+        interview.end_time = new Date();
+        await interview.save();
+    
+        const currentUser = req.user;
+        const student = await Student.findOne({user : currentUser._id});
+        console.log("student ####", student);
+    
+        for (let i = 0; i < data.length; i++) {
+            const question = data[i];
+            const interviewQuestion = await InterviewQuestion.create({
+                question: question.question,
+                answer: question.userAnswer,
+                interview: interviewId,
+                student: student._id,
+            });
+
+            console.log("interviewQuestion ####", interviewQuestion);
+
+            const interviewResult = await InterviewResult.create({
+                overallPerformance: question.overallScore,
+                grammar: question.grammarScore,
+                vocabulary: question.vocabularyScore,
+                technicalExplanation: question.technicalExplanation,
+                vocabularyExplanation: question.vocabularyExplanation,
+                grammarExplanation: question.grammarExplanation,
+                student: student._id,
+                interview: interviewId,
+            });
+
+            console.log("interviewResult ####", interviewResult);
+        }
+    
+        return res.status(200).json(
+            new ApiResponse(200, {}, "Result saved successfully")
+        );
+    }
+    catch(err){
+        console.log(err.message)
+        return res.status(500).json(
+            ApiError(500, err.message)
+        );
+    }
+})

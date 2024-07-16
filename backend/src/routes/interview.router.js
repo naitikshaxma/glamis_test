@@ -1,8 +1,9 @@
 import { Router } from "express";
 import {
-    generateQuestion, evaluateAnswer
+    generateQuestion, evaluateAnswer, createInterview, saveResultToDb
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
+import isAuthenticated from "../middlewares/auth.middleware.js";
 // import { isAuthenticated } from '../middlewares/auth.middleware.js';
 
 const router = Router()
@@ -11,6 +12,8 @@ const router = Router()
 router.route('/generateQuestion').post(generateQuestion); // removed isAuthenticated middleware for testing purposes
 // router.route('/evaluateQuestion').post(isAuthenticated, evaluateQuestion);
 router.route('/evaluateQuestion').post(extractAnswerAudio, handleAudioUpload, evaluateAnswer); // removed isAuthenticated middleware for testing purposes
+router.route('/createInterview').post(isAuthenticated, createInterview);
+router.route("/saveResultToDb").post(isAuthenticated, saveResultToDb);
 
 export default router;
 

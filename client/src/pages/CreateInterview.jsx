@@ -13,6 +13,8 @@ import JDpic from '../assets/jd.png';
 import Resume from '../assets/sample.pdf';
 import { useNavigate } from 'react-router-dom';
 import isOnline from 'is-online';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const steps = [
     'Select type of interview',
@@ -116,6 +118,26 @@ export default function CreateInterview() {
 
     }
     const [interviewType, setInterviewType] = React.useState('');
+
+    const CreateInterview = async () => {
+        // create interview
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
+            subject : "Data Structure and Algorithm"
+        },
+        {
+            headers: {
+                "Content-Type" : "application/json",
+                "Authorization" : `Bearer ${Cookies.get('accessToken')}`
+            }
+        }
+        )
+        console.log(response.data);
+        if(response.data.statusCode === 200){
+            Cookies.set('interviewId', response.data.data._id);
+            navigate('/live');
+        }
+    }
+
     return (
         <div className="flex w-full h-screen items-center justify-center">
             <div className="flex flex-col w-1/3 h-screen p-6 bg-[#2b6030] text-white items-center justify-center">
@@ -338,7 +360,7 @@ export default function CreateInterview() {
                             activeStep === 2 &&
                             <Button variant="contained" color="success"
                             onClick={() => {
-                                navigate('/live')
+                                CreateInterview();
                             }}>
                             Start Interview
                         </Button>

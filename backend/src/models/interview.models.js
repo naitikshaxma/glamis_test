@@ -6,8 +6,7 @@ const interviewSchema = new mongoose.Schema({
         required: true
     },
     end_time: {
-        type: Date,
-        required: true
+        type: Date
     },
     start_time: {
         type: Date,
@@ -39,7 +38,7 @@ const interviewQuestionSchema = new mongoose.Schema({
     },
     student: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Profile'
+        ref: 'Student'
     },
 }, { timestamps: true })
 
@@ -85,11 +84,10 @@ const interviewByCoreSubjects = new mongoose.Schema({
 
 const InterviewByCoreSubjects = mongoose.model('InterviewByCoreSubjects', interviewByCoreSubjects);
 
-
-const InterviewResult = new mongoose.Schema({
+const interviewResult = new mongoose.Schema({
     student: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Profile'
+        ref: 'Student'
     },
     interview: {
         type: mongoose.Schema.Types.ObjectId,
@@ -112,7 +110,18 @@ const InterviewResult = new mongoose.Schema({
     },
     technicalSkills: {
         type: Number
+    },
+    technicalExplanation: {
+        type: String
+    },
+    vocabularyExplanation: {
+        type: String
+    },
+    grammarExplanation: {
+        type: String
     }
 }, { timestamps: true })
+
+const InterviewResult = mongoose.model('InterviewResult', interviewResult);
 
 export { Interview, InterviewQuestion, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, InterviewResult };
