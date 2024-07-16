@@ -72,7 +72,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    if(index<3){
+    if(conversationHistory.length<3){
         const prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} question for the subject: "${subject}"`;
     }
     else{
