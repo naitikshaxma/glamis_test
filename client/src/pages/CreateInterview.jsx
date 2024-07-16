@@ -255,7 +255,7 @@ export default function CreateInterview() {
                                             <option value={title}>{title}</option>
                                         ))}
                                     </select>
-                                    <select className="p-3 border border-gray-300 rounded-lg w-1/2 p-2">
+                                    <select className="p-3 border border-gray-300 rounded-lg w-1/2">
                                         <option value="">Select Experience Level</option>
                                         <option value="Fresher">Fresher</option>
                                         <option value="1-3 years">1-3 years</option>
