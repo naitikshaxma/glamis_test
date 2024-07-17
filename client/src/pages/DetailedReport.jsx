@@ -35,8 +35,8 @@ const DetailedReport = () => {
     };
 
     const fetchResultData = async () => {
-        const resultId = window.location.pathname.split('/').pop();
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/result/interviewresult`, { resultId },
+        const interviewId = window.location.pathname.split('/').pop();
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/result/interviewresult`, { interviewId },
 
             {
                 headers: {

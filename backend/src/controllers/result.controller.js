@@ -1,12 +1,12 @@
-import { InterviewResult } from "../models/interview.models.js"
+import { InterviewResult } from "../models/interview.models.js";
 
-const getResult = async (req, res) => {
+const getResultsByInterviewId = async (req, res) => {
     try {
-        const interviewResult = await InterviewResult.findById(req.body.resultId);
-        res.json(interviewResult);
+        const interviewResults = await InterviewResult.find({ interview: req.body.interviewId });
+        res.json(interviewResults);
     } catch (error) {
         res.status(500).send('Server error');
     }
 };
 
-export default getResult ;
+export default getResultsByInterviewId;
