@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 
 
 const DetailedReport = () => {
-    const [result, setResult] = useState(null);
+    const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
     const [activeTab, setActiveTab] = useState('technical');
 
@@ -34,6 +34,8 @@ const DetailedReport = () => {
         });
     };
 
+
+
     const fetchResultData = async () => {
         const interviewId = window.location.pathname.split('/').pop();
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/result/interviewresult`, { interviewId },
@@ -47,7 +49,38 @@ const DetailedReport = () => {
             }
         );
         console.log(response.data);
+        // it is a array with data sample
+        // 0
+
+        // _id: "6697919ccc7762fcd7669a37"
+
+        // answer: "Overfitting occurs when the model cannot generalize and fit too closely to the training dataset. Instead, overfitting happens due to several reasons such as the training dataset is too small and does not contain enough data sample to accurately represent all the possible input data values."
+
+        // createdAt: "2024-07-17T09:40:44.308Z"
+
+        // grammar: 75
+
+        // grammarExplanation: "The answer suffers from some grammatical issues, such as missing articles ('the model,' 'the training dataset'), incorrect tense ('fit too closely,' 'does not contain'), and word choice ('data sample'). Improving grammar would enhance the clarity of the response."
+
+        // interview: "66978ee3cc7762fcd7669a2f"
+
+        // overallPerformance: 80
+
+        // question: "Q2: Can you explain the concept of overfitting in machine learning and provide some techniques to prevent it?"
+
+        // student: "66956ed2bd30353348d2f4e5"
+
+        // technicalExplanation: "The answer provides a basic understanding of overfitting in machine learning by mentioning that it occurs when the model fits too closely to the training dataset and lacks generalization abilities. However, it could benefit from elaborating more on techniques to prevent overfitting."
+
+        // updatedAt: "2024-07-17T09:40:44.308Z"
+
+        // vocabulary: 85
+
+        // vocabularyExplanation: "The vocabulary used in the answer is suitable for explaining the concept of overfitting, but it lacks depth and could be enriched with more technical terms related to machine learning."
+        setResult(response.data);
     }
+
+
 
     useEffect(() => {
         fetchResultData();
@@ -61,38 +94,43 @@ const DetailedReport = () => {
                     <div className='w-full flex justify-around mb-5'>
                         <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
                             <div className="flex flex-col space-y-4">
-                                {questions.map((_, index) => (
-                                    <Link
-                                        key={index}
-                                        to={`question-${index}`}
-                                        smooth={true}
-                                        duration={500}
-                                        className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
-                                        onClick={() => handleQuestionClick(index)}
-                                    >
-                                        Q{index + 1}
-                                    </Link>
-                                ))}
+
+                                {
+                                    result.map((item, index) => (
+                                        <Link
+                                            key={index}
+                                            to={`question-${index}`}
+                                            smooth={true}
+                                            duration={500}
+                                            className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            onClick={() => handleQuestionClick(index)}
+                                        >
+                                            Q{index + 1}
+                                        </Link>
+                                    ))
+                                }
                             </div>
                         </div>
                         <div
-                            className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[60vh] overflow-y-scroll"
+                            className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
                             id="scroll-container"
                             ref={scrollContainerRef}
                         >
-                            {questions.map((question, index) => (
-                                <Element
-                                    key={index}
-                                    name={`question-${index}`}
-                                    id={`question-${index}`}
-                                >
+                            {
+                                result.map((item, index) => (
                                     <TechnicalCard
-                                        question={question.question}
-                                        answer={question.answer}
-                                        feedback={question.feedback}
+                                        key={index}
+                                        qno={index}
+                                        question={item.question}
+                                        answer={item.answer}
+                                        feedback={{
+                                            good: [item.technicalExplanation],
+                                            improvement: [item.grammarExplanation, item.vocabularyExplanation]
+                                        }}
+                                        score={item.overallPerformance}
                                     />
-                                </Element>
-                            ))}
+                                ))
+                            }
                         </div>
                     </div>
                 )
@@ -112,10 +150,14 @@ const DetailedReport = () => {
                                 <div className="flex flex-col space-y-2 w-2/3">
                                     <ul className="list-disc">
                                         <li>
-                                            You have a good vocabulary and have used it effectively in the conversation.
+                                            {
+                                                result[0].vocabularyExplanation
+                                            }
                                         </li>
                                         <li>
-                                            You are able to express your thoughts clearly and concisely.
+                                            {
+                                                result[1].vocabularyExplanation
+                                            }
                                         </li>
 
                                     </ul>
@@ -127,10 +169,14 @@ const DetailedReport = () => {
                                 <div className="flex flex-col space-y-2 w-2/3">
                                     <ul className="list-disc">
                                         <li>
-                                            You can improve your grammar and sentence formation.
+                                            {
+                                                result[0].grammarExplanation
+                                            }
                                         </li>
                                         <li>
-                                            You can improve your fluency and pronunciation.
+                                            {
+                                                result[1].grammarExplanation
+                                            }
                                         </li>
                                     </ul>
                                 </div>
@@ -205,7 +251,7 @@ const DetailedReport = () => {
                     <div className="flex flex-col mr-4">
                         <div className="font-semibold text-lg text-right">Shubh Chaturvedi</div>
                         <div className="font-semibold text-sm text-right">2115000976</div>
-                        <div className="font-semibold text-sm text-right">Data Structures and Algorithm</div>
+                        <div className="font-semibold text-sm text-right">Machine Learning</div>
                     </div>
                     <div className="avatar w-20 border-2 border-green-900">
                         <img src={avatar} alt="" />
@@ -218,8 +264,16 @@ const DetailedReport = () => {
                         <span>Analysis</span>
                     </div>
                     <div className='flex w-full'>
-                        <Technical />
-                        <Verbal />
+                        <Technical technicalScore={[
+                            { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
+                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
+                        ]} />
+                        <Verbal data={
+                            [
+                                { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
+                                { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                            ]
+                        } />
                         <Behavioral />
                     </div>
                 </div>

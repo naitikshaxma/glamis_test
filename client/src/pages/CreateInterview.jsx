@@ -8,7 +8,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import SidePic from '../assets/SidePic.png'; 
+import SidePic from '../assets/SidePic.png';
 import JDpic from '../assets/jd.png';
 import Resume from '../assets/sample.pdf';
 import { useNavigate } from 'react-router-dom';
@@ -122,17 +122,17 @@ export default function CreateInterview() {
     const CreateInterview = async () => {
         // create interview
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-            subject : "Machine Learning"
+            subject: "Machine Learning"
         },
-        {
-            headers: {
-                "Content-Type" : "application/json",
-                "Authorization" : `Bearer ${Cookies.get('accessToken')}`
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
+                }
             }
-        }
         )
         console.log(response.data);
-        if(response.data.statusCode === 200){
+        if (response.data.statusCode === 200) {
             Cookies.set('interviewId', response.data.data._id);
             navigate('/live');
         }
@@ -171,73 +171,73 @@ export default function CreateInterview() {
 
 
                     {
-                        activeStep===0 &&
+                        activeStep === 0 &&
                         <div className="flex justify-between gap-5 my-5">
-                        <CardContent className={` w-1/3 p-6
+                            <CardContent className={` w-1/3 p-6
                         ${interviewType === 'JD' ? 'bg-gray-100' : ''}
                         rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform transform duration-300`}
-                        onClick={() => {
-                            setInterviewType('JD');
-                            
-                            }}>
-                        
-                            <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
-                                Interview by JD
-                            </Typography>
-                            <div className="flex w-24 h-24 m-5 items-center justify-center">
+                                onClick={() => {
+                                    setInterviewType('JD');
 
-                            <img src={JDpic} className='w-full' />
-                            </div>
-                            <Typography variant="body2" className="text-center">
-                                provide the job description and the system will generate the interview questions
-                            </Typography>
-                        </CardContent>
+                                }}>
 
-                        <CardContent className={
-                            `w-1/3 p-6
+                                <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
+                                    Interview by JD
+                                </Typography>
+                                <div className="flex w-24 h-24 m-5 items-center justify-center">
+
+                                    <img src={JDpic} className='w-full' />
+                                </div>
+                                <Typography variant="body2" className="text-center">
+                                    provide the job description and the system will generate the interview questions
+                                </Typography>
+                            </CardContent>
+
+                            <CardContent className={
+                                `w-1/3 p-6
                             ${interviewType === 'Resume' ? 'bg-gray-100' : ''}
                             rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform transform duration-300`}
-                            onClick={() => {
-                                setInterviewType('Resume');
-                            }}>
-    
-                            <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
-                                Interview by Resume
-                            </Typography>
-                            <div className="flex w-24 h-24 m-5 items-center justify-center">
+                                onClick={() => {
+                                    setInterviewType('Resume');
+                                }}>
 
-                            <img src={JDpic} className='w-full' />
-                            </div>
-                            <Typography variant="body2">
-                                provide the resume and the system will generate the interview questions
-                            </Typography>
+                                <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
+                                    Interview by Resume
+                                </Typography>
+                                <div className="flex w-24 h-24 m-5 items-center justify-center">
 
-
-                        </CardContent>
+                                    <img src={JDpic} className='w-full' />
+                                </div>
+                                <Typography variant="body2">
+                                    provide the resume and the system will generate the interview questions
+                                </Typography>
 
 
-                        <CardContent className={
-                            `w-1/3 p-6
+                            </CardContent>
+
+
+                            <CardContent className={
+                                `w-1/3 p-6
                             ${interviewType === 'Core Subjects' ? 'bg-gray-100' : ''}
                             rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform
                             transform
                             duration-300`}
-                            onClick={() => {
-                                setInterviewType('Core Subjects');
-                            }}>
-                            <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
-                                Interview by Core Subjects
-                            </Typography>
-                            <div className="flex w-24 h-24 m-5 items-center justify-center">
+                                onClick={() => {
+                                    setInterviewType('Core Subjects');
+                                }}>
+                                <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
+                                    Interview by Core Subjects
+                                </Typography>
+                                <div className="flex w-24 h-24 m-5 items-center justify-center">
 
-                            <img src={JDpic} className='w-full' />
-                            </div>
-                            <Typography variant="body2">
-                                provide the core subjects and the system will generate the interview questions
-                            </Typography>
-                        </CardContent>
+                                    <img src={JDpic} className='w-full' />
+                                </div>
+                                <Typography variant="body2">
+                                    provide the core subjects and the system will generate the interview questions
+                                </Typography>
+                            </CardContent>
 
-                    </div>}
+                        </div>}
 
 
                     {/* for jd take a job title expreience level hardness and jd */}
@@ -264,9 +264,9 @@ export default function CreateInterview() {
                                         <option value="8-12 years">8-12 years</option>
                                         <option value="12+ years">12+ years</option>
                                     </select>
-                                    </div>
+                                </div>
 
-                                    <textarea placeholder="Job Description" className="p-3 border border-gray-900 rounded-lg h-48"></textarea>
+                                <textarea placeholder="Job Description" className="p-3 border border-gray-900 rounded-lg h-48"></textarea>
 
 
 
@@ -279,8 +279,8 @@ export default function CreateInterview() {
                                 <div className="flex gap-5 w-1/2">
                                     <input type="file" className="p-2 border border-gray-300 rounded-lg w-1/2" />
                                     <Button variant="contained"
-                                    size='small'
-                                    color="primary">Load Resume</Button>
+                                        size='small'
+                                        color="primary">Load Resume</Button>
                                 </div>
 
                                 {/* show privious resume as preview */}
@@ -330,11 +330,11 @@ export default function CreateInterview() {
                                 <div className="flex gap-5">
                                     <p className="w-1/2">Internet Connection</p>
                                     <Button variant="contained" color="success"
-                                    onClick={internetCheck}
+                                        onClick={internetCheck}
                                     >{
-                                        internetConnection ? 'Connected' : 'Check'
-                                    
-                                    }</Button>
+                                            internetConnection ? 'Connected' : 'Check'
+
+                                        }</Button>
                                 </div>
                             </div>
                         </div>
@@ -352,25 +352,24 @@ export default function CreateInterview() {
                         {
                             activeStep !== 2 &&
                             <Button variant="contained" color="success"
-                        onClick={handleNext}>
-                            Next
-                        </Button>}
+                                onClick={handleNext}>
+                                Next
+                            </Button>}
 
                         {
                             activeStep === 2 &&
                             <Button variant="contained" color="success"
-                            onClick={() => {
-                                CreateInterview();
-                            }}>
-                            Start Interview
-                        </Button>
+                                onClick={() => {
+                                    CreateInterview();
+                                }}>
+                                Start Interview
+                            </Button>
                         }
                     </div>
-
-
 
                 </div>
             </div>
         </div>
     )
 }
+/*hi*/

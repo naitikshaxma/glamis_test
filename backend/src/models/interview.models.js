@@ -40,6 +40,37 @@ const interviewQuestionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Student'
     },
+    interview: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Interview'
+    },
+    fluency: {
+        type: Number
+    },
+    grammar: {
+        type: Number
+    },
+    overallPerformance: {
+        type: Number
+    },
+    pronounciation: {
+        type: Number
+    },
+    vocabulary: {
+        type: Number
+    },
+    technicalSkills: {
+        type: Number
+    },
+    technicalExplanation: {
+        type: String
+    },
+    vocabularyExplanation: {
+        type: String
+    },
+    grammarExplanation: {
+        type: String
+    },
 }, { timestamps: true })
 
 const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);
@@ -84,44 +115,5 @@ const interviewByCoreSubjects = new mongoose.Schema({
 
 const InterviewByCoreSubjects = mongoose.model('InterviewByCoreSubjects', interviewByCoreSubjects);
 
-const interviewResult = new mongoose.Schema({
-    student: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Student'
-    },
-    interview: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Interview'
-    },
-    fluency: {
-        type: Number
-    },
-    grammar: {
-        type: Number
-    },
-    overallPerformance: {
-        type: Number
-    },
-    pronounciation: {
-        type: Number
-    },
-    vocabulary: {
-        type: Number
-    },
-    technicalSkills: {
-        type: Number
-    },
-    technicalExplanation: {
-        type: String
-    },
-    vocabularyExplanation: {
-        type: String
-    },
-    grammarExplanation: {
-        type: String
-    }
-}, { timestamps: true })
 
-const InterviewResult = mongoose.model('InterviewResult', interviewResult);
-
-export { Interview, InterviewQuestion, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, InterviewResult };
+export { Interview, InterviewQuestion, InterviewByJD, InterviewByResume, InterviewByCoreSubjects };

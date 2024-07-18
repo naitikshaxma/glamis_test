@@ -5,16 +5,7 @@ import {
 import { ResponsiveContainer } from 'recharts';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-
-const data = [
-    {
-        name: 'Grammar', score: 80
-    },
-    {
-        name: 'Vocabulary', score: 70
-    },
-]
-const Verbal = () => {
+const Verbal = ({ data }) => {
     return (
         <div className="flex w-1/3 flex-col lg:flex-row gap-4 my-3">
             <Card className="w-full rounded-lg shadow-lg">

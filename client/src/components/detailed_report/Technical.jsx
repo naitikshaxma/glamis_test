@@ -9,10 +9,7 @@ import { Link, Element, scroller } from 'react-scroll';
 
 
 const COLORS = ['#529e5a', "#d63a3a"];
-const technicalScore = [
-    { name: 'Score', value: 80 },
-    { name: 'Remaining', value: 20 },
-];
+
 
 export const questions = [
     {
@@ -49,12 +46,13 @@ export const questions = [
     },
 ];
 
-export const TechnicalCard = ({ question, answer, feedback }) => {
+export const TechnicalCard = ({ question, answer, feedback, score, qno }) => {
     return (
         <div className="flex  flex-col bg-lightBlue-500 rounded-lg p-4">
             <div className="flex flex-col space-y-2 font-semibold mb-4">
-                Question: {question}
+                Question {qno + 1} : {question}
             </div>
+            <p className="font-semibold my-2">Score : {score}/100</p>
             <div className="flex flex-col space-y-2">
                 <div className="flex flex-col space-y-2">
                     <strong>Your Answer:</strong>
@@ -99,7 +97,7 @@ export const TechnicalCard = ({ question, answer, feedback }) => {
     );
 }
 
-const Technical = () => {
+const Technical = (props) => {
 
     return (
         <div className="flex w-1/3 flex-col items-center m-3">
@@ -110,14 +108,18 @@ const Technical = () => {
                 <CardBody className="flex flex-col items-center space-y-4 p-4">
                     <ResponsiveContainer width="50%" height={250}>
                         <PieChart>
-                            <Pie data={technicalScore} cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5} dataKey="value">
-                                {technicalScore.map((entry, index) => (
+                            <Pie data={props.technicalScore} cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5} dataKey="value">
+                                {props.technicalScore.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
                         </PieChart>
                     </ResponsiveContainer>
-                    <Typography variant="body1" className="my-2 text-green-900 font-semibold">Domain Knowledge: 80/100</Typography>
+                    <Typography variant="body1" className="my-2 text-green-900 font-semibold">Domain Knowledge: &nbsp;
+                        {
+                            Math.round(props.technicalScore[0].value)
+                        } / 100
+                    </Typography>
                 </CardBody>
             </Card>
         </div>
