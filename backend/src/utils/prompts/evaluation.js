@@ -91,3 +91,34 @@ const cnPrompt = `
     Ensure the keys are exactly "question", "userAnswer", "overallScore", "accuracyScore", "clarityScore", "completenessScore", "accuracyExplanation", "clarityExplanation", and "completenessExplanation". All scores should be integers.
     `;
 
+const osPrompt = `
+        You are an interviewer for an Operating Systems exam. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
+
+        Here is the question: "${question}"
+        Here is the answer: "${answer}"
+
+        Please evaluate the answer based on the following criteria:
+        1. Overall Score: An integer score out of 100 for the overall quality of the answer.
+        2. Knowledge: An integer score out of 100 for the knowledge demonstrated in the answer.
+        3. Clarity: An integer score out of 100 for the clarity of the answer.
+        4. Depth: An integer score out of 100 for the depth of the answer.
+        5. knowledgeExplanation: Feedback on the knowledge demonstrated in the answer.
+        6. clarityExplanation: Feedback on the clarity of the answer.
+        7. depthExplanation: Feedback on the depth of the answer.
+
+        The response should be in JSON format and must follow this structure:
+        {
+            "question": "The question text",
+            "userAnswer": "The user's answer text",
+            "overallScore": 90,
+            "knowledgeScore": 85,
+            "clarityScore": 88,
+            "depthScore": 92,
+            "knowledgeExplanation": "Feedback on the knowledge demonstrated in the answer",
+            "clarityExplanation": "Feedback on the clarity of the answer",
+            "depthExplanation": "Feedback on the depth of the answer"
+        }
+
+        Ensure the keys are exactly "question", "userAnswer", "overallScore", "knowledgeScore", "clarityScore", "depthScore", "knowledgeExplanation", "clarityExplanation", and "depthExplanation". All scores should be integers.
+        `;
+
