@@ -6,6 +6,8 @@ import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
 import { Skeleton } from '@mui/material';
 import EvaluationResult from './EvaluationResult';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 const Timer = () => {
     return (
@@ -133,12 +135,12 @@ const LiveInterview = () => {
     const [timer, setTimer] = useState(true);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 7;
+    const totalQuestions = 10;
 
     const fetchQuestion = async () => {
         setLoading(true);
         const data = {
-            subject: "Machine Learning",
+            subject: "Data Structures and Algorithms",
         };
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
@@ -187,7 +189,40 @@ const LiveInterview = () => {
         setOpen(false);
     };
 
-    // custom hook for access and reset timer
+    const renderQuestion = () => {
+        if (question.includes('```')) {
+            const parts = question.split('```');
+            return (
+                <div className="question bg-gray-200 rounded-lg text-justify">
+                    {parts.map((part, index) => {
+                        if (index % 2 === 1) {
+                            // Code snippet part
+                            return (
+                                <SyntaxHighlighter key={index} language="javascript" style={docco}>
+                                    {part}
+                                </SyntaxHighlighter>
+                            );
+                        } else {
+                            // Text part
+                            return (
+                                <p key={index} className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                                    {part}
+                                </p>
+                            );
+                        }
+                    })}
+                </div>
+            );
+        } else {
+            return (
+                <div className="question bg-gray-200 rounded-lg text-justify">
+                    <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                        {question}
+                    </p>
+                </div>
+            );
+        }
+    };
 
     return (
         <>
@@ -217,11 +252,7 @@ const LiveInterview = () => {
                                     {loading ? (
                                         <Skeleton animation="wave" className='p-8 h-fit min-h-[20vh] rounded-lg max-h-[40vh]' />
                                     ) : (
-                                        <div className="question bg-gray-200 rounded-lg text-justify">
-                                            <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
-                                                {question}
-                                            </p>
-                                        </div>
+                                        renderQuestion()
                                     )}
                                     <div className="audio-visualizer mt-4 flex justify-center">
                                         <canvas ref={canvasRef} width="640" height="200" />

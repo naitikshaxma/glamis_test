@@ -74,11 +74,12 @@ export const generateQuestion = asyncHandler(async (req, res) => {
 
     let prompt = null;
 
-    if (conversationHistory.length <= 5) {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} question for the subject: "${subject}"`;
-    }
-    else {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for the subject: "${subject}"`;
+    if (conversationHistory.length < 3) {
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
+    } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. Ask the user to explain the code and predict the output:\n\n\`\`\`java\n# Your java code snippet here\n\`\`\``;
+    } else {
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
     }
 
 
@@ -142,9 +143,18 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "overallScore": 90,
             "grammarScore": 85,
             "vocabularyScore": 88,
-            "technicalExplanation": "Feedback on the technical aspects of the answer"
-            "vocabularyExplanation": "Feedback on the vocabulary used in the answer",
-            "grammarExplanation": "Feedback on the grammatical correctness of the answer"
+            "technicalExplanation": {
+                "Pros": "Explain the strong points of the answer",
+                "Cons": "Explain the weak points of the answer
+            },
+            "vocabularyExplanation": {
+                "Pros": "Explain the strong points of the vocabulary used",
+                "Cons": "Explain the weak points of the vocabulary used"
+            },
+            "grammarExplanation": {
+                "Pros": "Explain the strong points of the grammar used",
+                "Cons": "Explain the weak points of the grammar used"
+            }
         }
 
         Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", "technicalExplanation", "vocabularyExplanation" and "grammarExplanation". All scores should be integers.
