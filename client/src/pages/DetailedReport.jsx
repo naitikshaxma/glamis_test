@@ -224,9 +224,9 @@ const DetailedReport = () => {
                 </div>
                 <div className="flex items-center">
                     <div className="flex flex-col mr-4">
-                        <div className="font-semibold text-lg text-right">Shubh Chaturvedi</div>
-                        <div className="font-semibold text-sm text-right">2115000976</div>
-                        <div className="font-semibold text-sm text-right">Machine Learning</div>
+                        <div className="font-semibold text-lg text-right">Demo User</div>
+                        <div className="font-semibold text-sm text-right">2115000000</div>
+                        <div className="font-semibold text-sm text-right">Data Structures and Algorithms</div>
                     </div>
                     <div className="avatar w-20 border-2 border-green-900">
                         <img src={avatar} alt="" />

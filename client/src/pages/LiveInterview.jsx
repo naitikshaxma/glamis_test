@@ -193,7 +193,7 @@ const LiveInterview = () => {
         if (question.includes('```')) {
             const parts = question.split('```');
             return (
-                <div className="question bg-gray-200 rounded-lg text-justify">
+                <div className="question bg-gray-200 rounded-lg text-justify h-[5rem] overflow-hidden overflow-y-scroll">
                     {parts.map((part, index) => {
                         if (index % 2 === 1) {
                             // Code snippet part
@@ -240,7 +240,7 @@ const LiveInterview = () => {
                                 </div>
                                 <div className="title-and-name ml-4">
                                     <p className="text-2xl font-semibold">Full Stack Interview</p>
-                                    <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
+                                    <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
                                     {timer && <Timer />}
