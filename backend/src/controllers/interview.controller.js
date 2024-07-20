@@ -77,7 +77,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     if (conversationHistory.length < 3) {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
     } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. Ask the user to explain the code and predict the output:\n\n\`\`\`java\n# Your java code snippet here\n\`\`\``;
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. The code should be 8-10 lines only. Ask the user to explain the code and predict the output:\n\n\`\`\`Your java code snippet here\n\`\`\``;
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
     }

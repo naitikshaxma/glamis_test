@@ -193,7 +193,7 @@ const LiveInterview = () => {
         if (question.includes('```')) {
             const parts = question.split('```');
             return (
-                <div className="question bg-gray-200 rounded-lg text-justify">
+                <div className="question bg-gray-200 rounded-lg text-justify h-[5rem] overflow-hidden overflow-y-scroll">
                     {parts.map((part, index) => {
                         if (index % 2 === 1) {
                             // Code snippet part
