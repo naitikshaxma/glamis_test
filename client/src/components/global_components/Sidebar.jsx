@@ -97,7 +97,7 @@ export default function Sidebar() {
                                     <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2" />
                                     <div>
                                         <Typography color="blue-gray" className="font-semibold ml-2">
-                                            Gourav Bathla
+                                            Demo User
                                         </Typography>
                                     </div>
                                 </div>

@@ -240,7 +240,7 @@ const LiveInterview = () => {
                                 </div>
                                 <div className="title-and-name ml-4">
                                     <p className="text-2xl font-semibold">Full Stack Interview</p>
-                                    <p className="text-lg text-gray-600 font-semibold">Shubh Chaturvedi | 2115000976</p>
+                                    <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
                                     {timer && <Timer />}
