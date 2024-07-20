@@ -63,14 +63,14 @@ const interviewQuestionSchema = new mongoose.Schema({
         type: Number
     },
     technicalExplanation: {
-        type: String
+        type: [String]
     },
     vocabularyExplanation: {
-        type: String
+        type: [String]
     },
     grammarExplanation: {
-        type: String
-    },
+        type: [String]
+    }
 }, { timestamps: true })
 
 const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);

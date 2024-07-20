@@ -3,8 +3,10 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const EvaluationResult = ({ data }) => {
+    const navigate = useNavigate();
     const calculateAverage = (key) => {
         return data.reduce((sum, result) => sum + parseInt(result[key], 10), 0) / data.length;
     };
@@ -30,6 +32,14 @@ const EvaluationResult = ({ data }) => {
                 }
             });
             console.log(response.data);
+
+            setTimeout(() => {
+
+
+                navigate(`/history/details/${Cookies.get('interviewId')}`);
+
+            } , 3000)
+
         }
 
         saveResultToDB()

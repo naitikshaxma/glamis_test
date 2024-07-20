@@ -49,34 +49,7 @@ const DetailedReport = () => {
             }
         );
         console.log(response.data);
-        // it is a array with data sample
-        // 0
 
-        // _id: "6697919ccc7762fcd7669a37"
-
-        // answer: "Overfitting occurs when the model cannot generalize and fit too closely to the training dataset. Instead, overfitting happens due to several reasons such as the training dataset is too small and does not contain enough data sample to accurately represent all the possible input data values."
-
-        // createdAt: "2024-07-17T09:40:44.308Z"
-
-        // grammar: 75
-
-        // grammarExplanation: "The answer suffers from some grammatical issues, such as missing articles ('the model,' 'the training dataset'), incorrect tense ('fit too closely,' 'does not contain'), and word choice ('data sample'). Improving grammar would enhance the clarity of the response."
-
-        // interview: "66978ee3cc7762fcd7669a2f"
-
-        // overallPerformance: 80
-
-        // question: "Q2: Can you explain the concept of overfitting in machine learning and provide some techniques to prevent it?"
-
-        // student: "66956ed2bd30353348d2f4e5"
-
-        // technicalExplanation: "The answer provides a basic understanding of overfitting in machine learning by mentioning that it occurs when the model fits too closely to the training dataset and lacks generalization abilities. However, it could benefit from elaborating more on techniques to prevent overfitting."
-
-        // updatedAt: "2024-07-17T09:40:44.308Z"
-
-        // vocabulary: 85
-
-        // vocabularyExplanation: "The vocabulary used in the answer is suitable for explaining the concept of overfitting, but it lacks depth and could be enriched with more technical terms related to machine learning."
         setResult(response.data);
     }
 
@@ -124,8 +97,8 @@ const DetailedReport = () => {
                                         question={item.question}
                                         answer={item.answer}
                                         feedback={{
-                                            good: [item.technicalExplanation],
-                                            improvement: [item.grammarExplanation, item.vocabularyExplanation]
+                                            good: [item.technicalExplanation[0]],
+                                            improvement: [item.technicalExplanation[1]] 
                                         }}
                                         score={item.overallPerformance}
                                     />
@@ -138,6 +111,8 @@ const DetailedReport = () => {
                 return (
                     <div className='w-full flex mb-5'>
                         <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
+                            <p className='font-semibold my-2'>Grammar score: {result.reduce((acc, item) => acc + item.grammar, 0) / result.length}</p>
+                            <p className='font-semibold mb-2'>Vocabulary score: {result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length}</p>
                             <div className="flex flex-col space-y-2 font-semibold">Feedback</div>
                             <hr />
                             <div className='flex w-full justify-between font-semibold'>
@@ -151,12 +126,12 @@ const DetailedReport = () => {
                                     <ul className="list-disc">
                                         <li>
                                             {
-                                                result[0].vocabularyExplanation
+                                                result[0].vocabularyExplanation[0]
                                             }
                                         </li>
                                         <li>
                                             {
-                                                result[1].vocabularyExplanation
+                                                result[1].vocabularyExplanation[0]
                                             }
                                         </li>
 
@@ -170,12 +145,12 @@ const DetailedReport = () => {
                                     <ul className="list-disc">
                                         <li>
                                             {
-                                                result[0].grammarExplanation
+                                                result[0].grammarExplanation[1]
                                             }
                                         </li>
                                         <li>
                                             {
-                                                result[1].grammarExplanation
+                                                result[1].grammarExplanation[1]
                                             }
                                         </li>
                                     </ul>

@@ -233,9 +233,9 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
                 overallPerformance: question.overallScore,
                 grammar: question.grammarScore,
                 vocabulary: question.vocabularyScore,
-                technicalExplanation: question.technicalExplanation,
-                vocabularyExplanation: question.vocabularyExplanation,
-                grammarExplanation: question.grammarExplanation,
+                technicalExplanation: [question.technicalExplanation.Pros, question.technicalExplanation.Cons],
+                vocabularyExplanation: [question.vocabularyExplanation.Pros, question.vocabularyExplanation.Cons],
+                grammarExplanation: [question.grammarExplanation.Pros, question.grammarExplanation.Cons]
             });
 
         }

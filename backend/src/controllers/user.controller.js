@@ -8,6 +8,7 @@ import OTPTemplate from "../utils/emailTemplates/OTP.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { Student } from "../models/users.models.js"
 
 const generateAccessAndRefreshTokens = async (userId)=>{
     try {
@@ -269,11 +270,41 @@ const resendOTP = asyncHandler(async (req, res)=>{
     return res.status(200).json(new ApiResponse(200, {}, "OTP Sent Successfully"))
 })
 
+
+const addStudent = asyncHandler(async (req, res)=>{
+    const { user_id } = req.body;
+
+    const user = await User.findById(user_id)
+
+    if(!user){
+        return res.status(404).json(new ApiError(404, "Student Doesn't Exists"))
+    }
+
+    const student = await Student.create({
+        user : user_id,
+        token : 4,
+        avatar : "path/to/avatar.png",
+        interview_taken : [],
+        course : "B.Tech",
+        branch : "Computer Science",
+        semester : 6,
+        section : "A",
+        address : "GLA University, Mathura",
+        idCard : "path/to/idCard.png",
+        resume : "path/to/resume.pdf"
+    })
+
+    return res.status(201).json(new ApiResponse(200, student, "Student Added Successfully"))
+})
+
+
+
 export {
     signup,
     login,
     logout,
     refreshAccessToken,
     verifyEmail,
-    resendOTP
+    resendOTP,
+    addStudent
 }
