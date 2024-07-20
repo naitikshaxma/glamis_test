@@ -1,16 +1,16 @@
 let prompt = null;
 let subjectType = ""; // This should be set based on the subject passed in req.body or otherwise identified
 
-// Determine subject type and set prompt accordingly
 if (subjectType === "DSA") {
     if (conversationHistory.length < 3) {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
     } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} output-based question for DSA`;
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. Ask the user to explain the code and predict the output:\n\n\`\`\`java\n# Your java code snippet here\n\`\`\``;
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
     }
-} else if (subjectType === "Computer Networks") {
+}
+ else if (subjectType === "Computer Networks") {
     if (conversationHistory.length < 3) {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} basic conceptual question for Computer Networks`;
     } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
