@@ -23,10 +23,12 @@ app.use(cookieParser())
 import userRouter from './routes/user.router.js';
 import interviewRouter from './routes/interview.router.js';
 import resultRouter from './routes/result.router.js';
+import objectRouter from './routes/object.router.js';
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/interview", interviewRouter)
 app.use("/api/v1/result", resultRouter)
+app.use("/api/v1/objectStore", objectRouter)
 
 
 // health check route
