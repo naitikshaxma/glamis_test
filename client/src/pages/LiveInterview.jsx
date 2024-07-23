@@ -8,6 +8,7 @@ import { Skeleton } from '@mui/material';
 import EvaluationResult from './EvaluationResult';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import Cookies from 'js-cookie';
 
 const Timer = () => {
     return (
@@ -73,6 +74,11 @@ const LiveInterview = () => {
         }
     };
 
+    const [ansMetaData, setAnsMetaData] = useState({
+        answer : "",
+        score : 0
+    })
+
     const handleSaveRecording = async (audioBlob) => {
         setLoading(true);
         const formData = new FormData();
@@ -86,6 +92,10 @@ const LiveInterview = () => {
             });
             console.log('Response:', response.data);
             setResults((prevResults) => [...prevResults, response.data.data]);
+            setAnsMetaData({
+                answer : response.data.data.userAnswer,
+                score : response.data.data.overallScore
+            })
             setCurrentQuestion((prev) => prev + 1);
         } catch (error) {
             console.error('Error uploading audio:', error);
@@ -141,6 +151,9 @@ const LiveInterview = () => {
         setLoading(true);
         const data = {
             subject: "Data Structures and Algorithms",
+            interviewId : Cookies.get('interviewId'),
+            answer: ansMetaData.answer,
+            score : ansMetaData.score
         };
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {

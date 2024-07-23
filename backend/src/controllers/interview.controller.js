@@ -7,11 +7,23 @@ import { Interview, InterviewQuestion } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
 import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
+import connectRedis from "../db/redis.connect.js"
 
 const objectStorePath = path.resolve("../objectStore");
 
+// let redisClient;
+// const connectToRedisCall = async () => {
+//     try {
+//         redisClient = await connectRedis()
+//     } catch (error) {
+//         console.log("Error while connecting to Redis", error)
+//     }
+// }
+
+// connectToRedisCall();
+
 // Store conversation history in memory
-let conversationHistory = [];
+// let conversationHistory = [];
 
 export const createInterview = asyncHandler(async (req, res) => {
     try {
@@ -33,6 +45,16 @@ export const createInterview = asyncHandler(async (req, res) => {
         console.log("student ####", student);
         student.interview_taken.push(interview._id);
         await student.save();
+        try{
+            let redisClient = await connectRedis()
+            await redisClient.set(String(interview._id), JSON.stringify([]));
+            // redisClient.expire(email_id, 600);
+        }catch(error){
+            console.log("Error while connecting to Redis", error)
+            return res.status(500).json(
+                ApiError(500, error.message || "Internal Server Error")
+            );
+        }   
 
         return res.status(200).json(
             new ApiResponse(200, interview, "Interview created successfully")
@@ -49,16 +71,25 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
-    const { subject, answer, score } = req.body;
+    const { subject, answer, score, interviewId } = req.body;
+
+    let redisClient = await connectRedis()
 
     // Add the current question and answer to the conversation history
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    console.log(typeof conversationHistory, ",", conversationHistory, ",", conversationHistory.length)
     if (conversationHistory.length > 0) {
+        console.log("conversationHistory ####", conversationHistory);
         const lastInteraction = conversationHistory[conversationHistory.length - 1];
         lastInteraction.answer = answer;
         lastInteraction.score = score;
+        console.log("lastInteraction ####", lastInteraction);
     }
-    conversationHistory.push({ subject });
-
+    else{
+        conversationHistory.push({ subject });
+    }
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+    
     // Adjust difficulty based on score
     let difficulty = "medium";
     if (score >= 70) {
@@ -81,8 +112,6 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
     }
-
-
 
     const completion = await openai.chat.completions.create({
         messages: [
@@ -113,6 +142,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         new ApiResponse(200, dataToSend, "Question generated successfully")
     );
 });
+
 
 const generateUniqueKey = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -170,7 +200,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
         max_tokens: 1000,
     });
 
-    // 
+    //  
 
     console.log(completion.choices[0].message.content);
     return completion.choices[0].message.content;
