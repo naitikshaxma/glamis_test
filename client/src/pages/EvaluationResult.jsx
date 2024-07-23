@@ -22,10 +22,10 @@ const EvaluationResult = ({ data }) => {
 
     const COLORS = ['#0088FE', '#FFBB28'];
 
-    useEffect(()=>{
+    useEffect(() => {
         const saveResultToDB = async () => {
             console.log(data)
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/saveResultToDb`, {data, interviewId : Cookies.get('interviewId')}, {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/saveResultToDb`, { data, interviewId: Cookies.get('interviewId') }, {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${Cookies.get('accessToken')}`
@@ -36,9 +36,9 @@ const EvaluationResult = ({ data }) => {
             setTimeout(() => {
 
 
-                navigate(`/history/details/${Cookies.get('interviewId')}`);
+                navigate(`/history/detailed/${Cookies.get('interviewId')}`);
 
-            } , 3000)
+            }, 3000)
 
         }
 
