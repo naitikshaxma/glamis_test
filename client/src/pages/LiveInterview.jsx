@@ -162,7 +162,7 @@ const LiveInterview = () => {
                 },
             });
             setQuestion(response.data.data.question);
-            setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/objectStore/${response.data.data.audioFileName}`);
+            setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
             setIsAudioPlaying(true);
             setTimer(true);
 

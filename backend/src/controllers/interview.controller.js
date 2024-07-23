@@ -127,6 +127,8 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     const audioFileName = `question-${generateUniqueKey()}.mp3`;
     const audioFilePath = path.join(objectStorePath, audioFileName);
 
+    console.log(audioFilePath,"########")
+
     await textToSpeech(question, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {

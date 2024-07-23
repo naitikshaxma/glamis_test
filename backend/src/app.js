@@ -10,7 +10,7 @@ const app = express()
 const objectStorePath = path.resolve("../objectStore");
 
 // Serve static files from the 'objectStore' directory
-app.use("/objectStore", express.static(objectStorePath));
+app.use("/api/v1/objectStore", express.static(objectStorePath));
 
 app.use(cors())
 
