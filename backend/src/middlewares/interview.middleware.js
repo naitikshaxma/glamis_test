@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer( { storage });
+const upload = multer({ storage });
 
 const extractAnswerAudio = upload.single('answerAudio');
 
@@ -29,7 +29,7 @@ const handleAudioUpload = asyncHandler(async (req, res, next) => {
         req.extractedAnswer = text;
         next();
     } catch (error) {
-        return res.status(500).json(ApiError(500, error.message ||   "Internal Server Error in extractAnswerAudio"));
+        return res.status(500).json(ApiError(500, error.message || "Internal Server Error in extractAnswerAudio"));
     }
 });
 

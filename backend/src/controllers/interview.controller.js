@@ -45,16 +45,16 @@ export const createInterview = asyncHandler(async (req, res) => {
         console.log("student ####", student);
         student.interview_taken.push(interview._id);
         await student.save();
-        try{
+        try {
             let redisClient = await connectRedis()
             await redisClient.set(String(interview._id), JSON.stringify([]));
             // redisClient.expire(email_id, 600);
-        }catch(error){
+        } catch (error) {
             console.log("Error while connecting to Redis", error)
             return res.status(500).json(
                 ApiError(500, error.message || "Internal Server Error")
             );
-        }   
+        }
 
         return res.status(200).json(
             new ApiResponse(200, interview, "Interview created successfully")
@@ -80,16 +80,24 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     console.log(typeof conversationHistory, ",", conversationHistory, ",", conversationHistory.length)
     if (conversationHistory.length > 0) {
         console.log("conversationHistory ####", conversationHistory);
-        const lastInteraction = conversationHistory[conversationHistory.length - 1];
-        lastInteraction.answer = answer;
-        lastInteraction.score = score;
-        console.log("lastInteraction ####", lastInteraction);
+        // const lastInteraction = conversationHistory[conversationHistory.length - 1];
+        // lastInteraction.answer = answer;
+        // lastInteraction.score = score;
+        // console.log("lastInteraction ####", lastInteraction);
+        // add conversation hhistory
+
+        conversationHistory.push({
+            answer: answer,
+            score: score
+        })
+        console.log("###########", conversationHistory);
     }
-    else{
+    else {
         conversationHistory.push({ subject });
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
-    
+    console.log(conversationHistory + "????")
+
     // Adjust difficulty based on score
     let difficulty = "medium";
     if (score >= 70) {
@@ -127,7 +135,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     const audioFileName = `question-${generateUniqueKey()}.mp3`;
     const audioFilePath = path.join(objectStorePath, audioFileName);
 
-    console.log(audioFilePath,"########")
+    console.log(audioFilePath, "########")
 
     await textToSpeech(question, audioFilePath);
 

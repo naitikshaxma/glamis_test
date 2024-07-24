@@ -75,15 +75,15 @@ const LiveInterview = () => {
     };
 
     const [ansMetaData, setAnsMetaData] = useState({
-        answer : "",
-        score : 0
+        answer: "",
+        score: 0
     })
 
     const handleSaveRecording = async (audioBlob) => {
         setLoading(true);
         const formData = new FormData();
         formData.append('question', question);
-        formData.append('answerAudio', audioBlob, `answer${currentQuestion + 1}.webm`);
+        formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                 headers: {
@@ -93,8 +93,8 @@ const LiveInterview = () => {
             console.log('Response:', response.data);
             setResults((prevResults) => [...prevResults, response.data.data]);
             setAnsMetaData({
-                answer : response.data.data.userAnswer,
-                score : response.data.data.overallScore
+                answer: response.data.data.userAnswer,
+                score: response.data.data.overallScore
             })
             setCurrentQuestion((prev) => prev + 1);
         } catch (error) {
@@ -151,9 +151,9 @@ const LiveInterview = () => {
         setLoading(true);
         const data = {
             subject: "Data Structures and Algorithms",
-            interviewId : Cookies.get('interviewId'),
+            interviewId: Cookies.get('interviewId'),
             answer: ansMetaData.answer,
-            score : ansMetaData.score
+            score: ansMetaData.score
         };
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
@@ -163,6 +163,8 @@ const LiveInterview = () => {
             });
             setQuestion(response.data.data.question);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
+            // check the audio duration
+
             setIsAudioPlaying(true);
             setTimer(true);
 
@@ -201,6 +203,10 @@ const LiveInterview = () => {
     const handleClose = () => {
         setOpen(false);
     };
+
+    const generateUniqueKey = () => {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
 
     const renderQuestion = () => {
         if (question.includes('```')) {
