@@ -53,7 +53,7 @@ async function generateQuestion(subject) {
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: prompt }
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         max_tokens: 50,
     });
 
@@ -84,7 +84,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
             { role: "system", content: "You are a strict but constructive interviewer." },
             { role: "user", content: prompt }
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         max_tokens: 150,
     });
 

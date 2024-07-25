@@ -10,7 +10,7 @@ if (subjectType === "DSA") {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
     }
 }
- else if (subjectType === "Computer Networks") {
+else if (subjectType === "Computer Networks") {
     if (conversationHistory.length < 3) {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} basic conceptual question for Computer Networks`;
     } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -55,7 +55,7 @@ const completion = await openai.chat.completions.create({
         { role: "system", content: "You are a helpful assistant." },
         { role: "user", content: prompt }
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     max_tokens: 1000,
 });
 

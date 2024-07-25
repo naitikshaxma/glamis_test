@@ -114,19 +114,21 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     let prompt = null;
 
     if (conversationHistory.length < 3) {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA.`;
     } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. The code should be 8-10 lines only. Ask the user to explain the code and predict the output:\n\n\`\`\`Your java code snippet here\n\`\`\``;
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
     }
 
+    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
+
     const completion = await openai.chat.completions.create({
         messages: [
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: prompt }
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         max_tokens: 1000,
     });
 
@@ -176,7 +178,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
         5. vocabularyExplanation: Feedback on the vocabulary used in the answer.
         6. grammarExplanation: Feedback on the grammatical correctness of the answer.
 
-        The response should be in JSON format and must follow this structure:
+        The response should be in JSON format and must follow this structure. Do not add any additional informational and ensure the keys are exactly as shown below, also ensure there are no symbols like tilde are added so that i can parse it as JSON:
         {
             "question": "The question text",
             "userAnswer": "The user's answer text",
@@ -206,7 +208,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
             { role: "system", content: "You are a strict but constructive interviewer." },
             { role: "user", content: prompt }
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         max_tokens: 1000,
     });
 
@@ -222,7 +224,7 @@ async function textToSpeech(input, audioPath) {
     });
     const mp3 = await openai.audio.speech.create({
         model: "tts-1",
-        voice: "nova",
+        voice: "onyx",
         input: input,
     });
 
