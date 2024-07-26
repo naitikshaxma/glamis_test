@@ -16,6 +16,7 @@ import SidePic from '../assets/SidePic.png';
 import { InputAdornment } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import axios from 'axios';
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -29,14 +30,28 @@ export default function Signup() {
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
+        setIsLoading(true);
+        console.log(signupData);
+        const rersponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/signup`, signupData, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
+        console.log(rersponse.data);
+        setIsLoading(false);
     };
+
+    const [signupData, setSignupData] = React.useState({
+        name: '',
+        email_id: '',
+        phone: '',
+        password: '',
+        confirm_password: ''
+    });
+
+    const [isLoading, setIsLoading] = React.useState(false);
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -92,6 +107,7 @@ export default function Signup() {
                                         color: '#2b6030',
                                     },
                                 }}
+                                onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                             />
 
                             {/* email */}
@@ -101,9 +117,9 @@ export default function Signup() {
                                 margin="normal"
                                 required
                                 fullWidth
-                                id="email"
+                                id="email_id"
                                 label="Email Address"
-                                name="email"
+                                name="email_id"
                                 autoComplete="email"
                                 sx={{
                                     '& .MuiInput-underline:after': {
@@ -116,6 +132,7 @@ export default function Signup() {
                                         color: '#2b6030',
                                     },
                                 }}
+                                onChange={(e) => setSignupData({ ...signupData, email_id: e.target.value })}
                             />
                             {/* phone */}
                             <TextField
@@ -137,6 +154,7 @@ export default function Signup() {
                                         color: '#2b6030',
                                     },
                                 }}
+                                onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
                             />
                             {/* password */}
                             <div className="flex">
@@ -166,6 +184,7 @@ export default function Signup() {
                                         },
                                         marginRight: '0.5rem'
                                     }}
+                                    onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                                 />
                                 {/* confirm password */}
                                 <TextField
@@ -194,6 +213,7 @@ export default function Signup() {
                                         },
                                         marginRight: '0.5rem'
                                     }}
+                                    onChange={(e) => setSignupData({ ...signupData, confirm_password: e.target.value })}
                                 />
                             </div>
                             <Button
@@ -201,8 +221,10 @@ export default function Signup() {
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030", '&:hover': { backgroundColor: "#1c3d1f" } }}
+                                disabled={isLoading}
+                                className={isLoading ? 'loader' : ''}
                             >
-                                Sign Up
+                                {!isLoading ? "Sign Up" : ""}
                             </Button>
                             <div className="flex justify-center">
                                 <span>Already have an account?&nbsp;</span>

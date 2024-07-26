@@ -10,7 +10,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { Student } from "../models/users.models.js"
 
-const generateAccessAndRefreshTokens = async (userId)=>{
+const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId);
         const accessToken = user.generateAccessToken()
@@ -20,7 +20,7 @@ const generateAccessAndRefreshTokens = async (userId)=>{
         user.save()
 
         return {
-            accessToken, 
+            accessToken,
             refreshToken
         }
     } catch (error) {
@@ -28,20 +28,21 @@ const generateAccessAndRefreshTokens = async (userId)=>{
     }
 }
 
-const signup = asyncHandler(async (req, res)=>{
-    const {name, email_id ,phone ,password ,confirm_password} = req.body;
+const signup = asyncHandler(async (req, res) => {
+    console.log(req.body)
+    const { name, email_id, phone, password, confirm_password } = req.body;
 
-    if(isEmpty(name) || isEmpty(email_id) || isEmpty(phone) || isEmpty(password) || isEmpty(confirm_password)){
+    if (isEmpty(name) || isEmpty(email_id) || isEmpty(phone) || isEmpty(password) || isEmpty(confirm_password)) {
         return res.status(401).json(ApiError(401, "All fields are required"))
     }
 
-    if(password !== confirm_password){
+    if (password !== confirm_password) {
         return res.status(401).json(ApiError(401, "Password do not match"))
     }
 
-    const user = await User.findOne({$or : [{email_id}, {phone}]})
+    const user = await User.findOne({ $or: [{ email_id }, { phone }] })
 
-    if(user){
+    if (user) {
         return res.status(400).json(ApiError(400, "User already exists"))
     }
 
@@ -49,17 +50,17 @@ const signup = asyncHandler(async (req, res)=>{
 
     sendMail(email_id, "OTP Verification", OTPTemplate(otp))
 
-    
+
 
     // push otp to redis cache
     let redisClient;
-    try{
+    try {
         redisClient = await connectRedis()
         redisClient.set(email_id, otp);
         redisClient.expire(email_id, 600);
-    }catch(error){
+    } catch (error) {
         console.log("Error while connecting to Redis", error)
-    }   
+    }
 
     const userCreating = await User.create({
         name,
@@ -72,7 +73,7 @@ const signup = asyncHandler(async (req, res)=>{
         "-password -refreshToken"
     )
 
-    if(!createdUser){
+    if (!createdUser) {
         return res.status(500).json(ApiError(500, "Something might be up with the server"))
     }
 
@@ -81,7 +82,7 @@ const signup = asyncHandler(async (req, res)=>{
     )
 })
 
-const login = asyncHandler(async (req, res)=>{
+const login = asyncHandler(async (req, res) => {
     // todos : 
 
     /*
@@ -94,24 +95,24 @@ const login = asyncHandler(async (req, res)=>{
      */
 
     const { email, password } = req.body;
-    if(isEmpty(email) || isEmpty(password)){
+    if (isEmpty(email) || isEmpty(password)) {
         return res.status(401).json(ApiError(401, "Please Fill All the fields"))
     }
 
-    const isUser = await User.findOne({email_id : email})
+    const isUser = await User.findOne({ email_id: email })
 
     console.log(isUser)
 
-    if(isUser === null){
+    if (isUser === null) {
         return res.status(404).json(ApiError(404, "User Doesn't Exists"))
     }
 
     let isPasswordCorrectResponse = await isUser.isPasswordCorrect(password)
-    if(!isPasswordCorrectResponse){
+    if (!isPasswordCorrectResponse) {
         return res.status(401).json(ApiError(401, "Password do not match"))
     }
 
-    if(!isUser.is_email_verified){
+    if (!isUser.is_email_verified) {
         return res.status(401).json(ApiError(401, "Please Verify Your Email"))
     }
 
@@ -120,141 +121,141 @@ const login = asyncHandler(async (req, res)=>{
     const loggedInUser = await User.findById(isUser._id).select("-password -refreshToken")
 
     const options = {
-        httpOnly : true, // can only be modified by server not by client-side
-        secure : true
+        httpOnly: true, // can only be modified by server not by client-side
+        secure: true
     }
 
     return res
-    .status(201)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-        new ApiResponse(200, {
-            userData : loggedInUser,
-            refreshToken,
-            accessToken
-        }, "LoggedIn Successfully")
-    )
+        .status(201)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(200, {
+                userData: loggedInUser,
+                refreshToken,
+                accessToken
+            }, "LoggedIn Successfully")
+        )
 })
 
 
-const logout = asyncHandler(async (req, res)=>{
+const logout = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
-        $set : {
-            refreshToken : undefined
+        $set: {
+            refreshToken: undefined
         }
     },
-    {
-        new : true
-    })
+        {
+            new: true
+        })
 
     const options = {
-        httpOnly : true, // can only be modified by server not by client-side
-        secure : true
+        httpOnly: true, // can only be modified by server not by client-side
+        secure: true
     }
 
     return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json(
-        new ApiResponse(200, {}, "loggedOut Successfully")
-    )
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(
+            new ApiResponse(200, {}, "loggedOut Successfully")
+        )
 })
 
-const refreshAccessToken = asyncHandler(async (req, res)=>{
-    const { incomingRefreshToken } = req.cookies.refreshToken || req.header("Authorization")?.replace("Bearer ","")
-    if(isEmpty(incomingRefreshToken)){
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const { incomingRefreshToken } = req.cookies.refreshToken || req.header("Authorization")?.replace("Bearer ", "")
+    if (isEmpty(incomingRefreshToken)) {
         return res.status(404).json(ApiError(404, "Unauthorized Request"))
     }
 
     try {
         const decodedRefreshToken = await jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
-        
+
         const user = await User.findById(decodedRefreshToken._id)
-    
-        if(!user){
+
+        if (!user) {
             return res.status(404).json(ApiError(404, "Please send Valid Refresh Token"))
         }
-    
-        if(incomingRefreshToken !== user?.refreshToken){
+
+        if (incomingRefreshToken !== user?.refreshToken) {
             return res.status(404).json(ApiError(404, "Token May be Expired"))
         }
-    
+
         const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id)
-    
+
         const options = {
-            httpOnly : true,
-            secure : true
+            httpOnly: true,
+            secure: true
         }
-    
+
         return res
-        .status(201)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
-        .json(
-            new ApiResponse(200, {
-                accessToken,
-                refreshToken : newRefreshToken
-            }, "Token Refreshed Successfully!")
-        )
+            .status(201)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(
+                new ApiResponse(200, {
+                    accessToken,
+                    refreshToken: newRefreshToken
+                }, "Token Refreshed Successfully!")
+            )
     } catch (error) {
         return res.status(500).json(ApiError(500, "Internal Server Error while Refreshing Access Token"))
     }
 })
 
 
-const verifyEmail = asyncHandler(async (req, res)=>{
+const verifyEmail = asyncHandler(async (req, res) => {
     const { email, otp } = req.body;
 
-    if(isEmpty(email) || isEmpty(otp)){
+    if (isEmpty(email) || isEmpty(otp)) {
         return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
     }
 
-    const user = await User.findOne({email_id : email})
+    const user = await User.findOne({ email_id: email })
 
-    if(!user){
+    if (!user) {
         return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
     }
 
     const redisClient = await connectRedis()
 
     const expectedOTP = await redisClient.get(email)
-    if(user.is_email_verified){
+    if (user.is_email_verified) {
         return res.status(200).json(new ApiResponse(200, {}, "Email Verified Successfully"))
     }
-    if(expectedOTP !== otp){
+    if (expectedOTP !== otp) {
         return res.status(401).json(new ApiError(401, "Invalid OTP"))
     }
-    if(expectedOTP === otp){
+    if (expectedOTP === otp) {
         await User.findByIdAndUpdate(user._id, {
-            $set : {
-                is_email_verified : true
+            $set: {
+                is_email_verified: true
             }
         },
-        {
-            new : true
-        })
+            {
+                new: true
+            })
 
         return res.status(200).json(new ApiResponse(200, {}, "Email Verified Successfully"))
     }
-    if(expectedOTP === null){
+    if (expectedOTP === null) {
         return res.status(401).json(new ApiError(401, "OTP Expired"))
     }
-    
+
 })
 
-const resendOTP = asyncHandler(async (req, res)=>{
+const resendOTP = asyncHandler(async (req, res) => {
     const { email } = req.body;
     console.log(email)
 
-    if(isEmpty(email)){
+    if (isEmpty(email)) {
         return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
     }
 
-    const user = await User.findOne({email_id : email})
+    const user = await User.findOne({ email_id: email })
 
-    if(!user){
+    if (!user) {
         return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
     }
 
@@ -271,27 +272,27 @@ const resendOTP = asyncHandler(async (req, res)=>{
 })
 
 
-const addStudent = asyncHandler(async (req, res)=>{
+const addStudent = asyncHandler(async (req, res) => {
     const { user_id } = req.body;
 
     const user = await User.findById(user_id)
 
-    if(!user){
+    if (!user) {
         return res.status(404).json(new ApiError(404, "Student Doesn't Exists"))
     }
 
     const student = await Student.create({
-        user : user_id,
-        token : 4,
-        avatar : "path/to/avatar.png",
-        interview_taken : [],
-        course : "B.Tech",
-        branch : "Computer Science",
-        semester : 6,
-        section : "A",
-        address : "GLA University, Mathura",
-        idCard : "path/to/idCard.png",
-        resume : "path/to/resume.pdf"
+        user: user_id,
+        token: 4,
+        avatar: "path/to/avatar.png",
+        interview_taken: [],
+        course: "B.Tech",
+        branch: "Computer Science",
+        semester: 6,
+        section: "A",
+        address: "GLA University, Mathura",
+        idCard: "path/to/idCard.png",
+        resume: "path/to/resume.pdf"
     })
 
     return res.status(201).json(new ApiResponse(200, student, "Student Added Successfully"))

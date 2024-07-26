@@ -25,7 +25,7 @@ const handleAudioUpload = asyncHandler(async (req, res, next) => {
         console.log(req.file);
 
         const text = await speechToText(req.file.path);
-        console.log(text);
+        console.log(text, "###text");
         req.extractedAnswer = text;
         next();
     } catch (error) {
