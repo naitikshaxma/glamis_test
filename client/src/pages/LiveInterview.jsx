@@ -9,6 +9,8 @@ import EvaluationResult from './EvaluationResult';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import Cookies from 'js-cookie';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 const Timer = () => {
     return (
@@ -234,11 +236,23 @@ const LiveInterview = () => {
             );
         } else {
             return (
-                <div className="question bg-gray-200 rounded-lg text-justify">
-                    <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
-                        {question}
-                    </p>
-                </div>
+                <>
+                    <div className="question bg-gray-200 rounded-lg text-justify">
+                        <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                            {question}
+                        </p>
+                    </div>
+                    {questionAudio && (
+                        <>
+                            <div className="flex justify-end">
+                                <Button className='w-fit bg-gray-200 text-black shadow-none' onClick={() => { setIsAudioPlaying(!isAudioPlaying)}}>
+                                    {isAudioPlaying ? <VolumeUpIcon /> : <VolumeOffIcon />}
+                                </Button>
+                            </div>
+                        </>
+                    )
+                    }
+                </>
             );
         }
     };
@@ -250,7 +264,10 @@ const LiveInterview = () => {
                     <div className="flex w-full">
                         {
                             questionAudio && isAudioPlaying && (
-                                <audio src={questionAudio} autoPlay className='hidden'></audio>)
+                                <>
+                                    <audio src={questionAudio} autoPlay className='hidden'></audio>
+                                </>
+                            )
                         }
                         <div className="flex flex-col items-center w-3/4">
                             <div className="timer-tab w-full flex justify-between p-4 items-center">
