@@ -1,0 +1,11 @@
+{
+  "name": "glamis",
+  "version": "1.0.0",
+  "description": "Welcome to the AI Interviewer project for GLA University! This project aims to provide students with a realistic interview practice platform, emulating real-world interview scenarios using state-of-the-art AI technologies.",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -186,8 +186,8 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "grammarScore": 85,
             "vocabularyScore": 88,
             "technicalExplanation": {
-                "Pros": "Explain the strong points of the answer",
-                "Cons": "Explain the weak points of the answer
+                "Pros": "In the context of a standard answer to this question, explain the strong points of the answer and suggest in points how it can be improved",
+                "Cons": "In the context of a standard answer to this question, explain the weak points of the answer and suggest in points how it can be improved"
             },
             "vocabularyExplanation": {
                 "Pros": "Explain the strong points of the vocabulary used",
