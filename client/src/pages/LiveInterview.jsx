@@ -198,7 +198,6 @@ const LiveInterview = () => {
             setIsAudioPlaying(false);
             setTimer(false);
             setCurrentQuestion((prev) => prev + 1);
-
         }
     };
 
@@ -245,7 +244,7 @@ const LiveInterview = () => {
                     {questionAudio && (
                         <>
                             <div className="flex justify-end">
-                                <Button className='w-fit bg-gray-200 text-black shadow-none' onClick={() => { setIsAudioPlaying(!isAudioPlaying)}}>
+                                <Button className='w-fit bg-gray-200 text-black shadow-none' onClick={() => { setIsAudioPlaying(!isAudioPlaying) }}>
                                     {isAudioPlaying ? <VolumeUpIcon /> : <VolumeOffIcon />}
                                 </Button>
                             </div>
