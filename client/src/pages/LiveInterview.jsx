@@ -152,7 +152,7 @@ const LiveInterview = () => {
     const fetchQuestion = async () => {
         setLoading(true);
         const data = {
-            subject: "Data Structures and Algorithms",
+            subject: Cookies.get('subject'),
             interviewId: Cookies.get('interviewId'),
             answer: ansMetaData.answer,
             score: ansMetaData.score
