@@ -98,7 +98,6 @@ const LiveInterview = () => {
                 answer: response.data.data.userAnswer,
                 score: response.data.data.overallScore
             })
-            setCurrentQuestion((prev) => prev + 1);
         } catch (error) {
             console.error('Error uploading audio:', error);
         }
@@ -197,7 +196,8 @@ const LiveInterview = () => {
         if (isRecording) {
             stopRecording();
             setIsAudioPlaying(false);
-            setTimer(false)
+            setTimer(false);
+            setCurrentQuestion((prev) => prev + 1);
 
         }
     };
