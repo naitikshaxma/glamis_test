@@ -139,7 +139,8 @@ export const generateQuestion = asyncHandler(async (req, res) => {
 
     console.log(audioFilePath, "########")
 
-    await textToSpeech(question, audioFilePath);
+    const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+    await textToSpeech(cleanedQuestion, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({ error: 'Failed to generate audio' });

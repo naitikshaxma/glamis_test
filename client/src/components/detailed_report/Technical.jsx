@@ -6,6 +6,8 @@ import {
     ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 import { Link, Element, scroller } from 'react-scroll';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 
 const COLORS = ['#529e5a', "#d63a3a"];
@@ -47,10 +49,44 @@ export const questions = [
 ];
 
 export const TechnicalCard = ({ question, answer, feedback, score, qno }) => {
+    const renderQuestion = () => {
+        if (question.includes('```')) {
+            const parts = question.split('```');
+            return (
+                <div className="question text-justify">
+                    {parts.map((part, index) => {
+                        if (index % 2 === 1) {
+                            return (
+                                <SyntaxHighlighter key={index} language="java" style={docco}>
+                                    {part}
+                                </SyntaxHighlighter>
+                            );
+                        } else {
+                            return (
+                                <p key={index}>
+                                    {part.replace(/Q\d*\s*:\s*/g, '')}
+                                </p>
+                            );
+                        }
+                    })}
+                </div>
+            );
+        } else {
+            return (
+                <>
+                    <div className="question text-justify">
+                        <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                            {question.replace(/Q\d*\s*:\s*/g, '')}
+                        </p>
+                    </div>
+                </>
+            );
+        }
+    };
     return (
         <div className="flex  flex-col bg-lightBlue-500 rounded-lg p-4">
             <div className="flex flex-col space-y-2 font-semibold mb-4">
-                Question {qno + 1} : {question}
+                Question {qno + 1} : {renderQuestion()}
             </div>
             <p className="font-semibold my-2">Score : {score}/100</p>
             <div className="flex flex-col space-y-2">
