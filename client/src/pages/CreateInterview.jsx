@@ -27,33 +27,14 @@ const coreSubjects = [
     "Operating Systems",
     "Computer Networks",
     "Database Management Systems",
-    "Software Engineering",
-    "Computer Organization and Architecture",
-    "Theory of Computation",
-    "Compiler Design",
-    "Computer Graphics",
-    "Artificial Intelligence",
     "Machine Learning",
-    "Deep Learning",
-    "Natural Language Processing",
-    "Computer Vision",
-    "Robotics",
     "Cyber Security",
     "Cloud Computing",
-    "Internet of Things",
-    "Blockchain",
-    "Big Data",
-    "Data Science",
-    "Data Analytics",
-    "Data Mining",
     "Web Development",
-    "Mobile Development",
-    "Game Development",
-    "UI/UX Design",
-    "Frontend Development",
-    "Backend Development",
-    "Full Stack Development",
-    "DevOps"
+    "Java",
+    "Python",
+    "JavaScript",
+    "C/C++",
 ]
 
 const jobTitles = [
@@ -118,11 +99,12 @@ export default function CreateInterview() {
 
     }
     const [interviewType, setInterviewType] = React.useState('');
+    const [subject, setSubject] = React.useState('');
 
     const CreateInterview = async () => {
         // create interview
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-            subject: "Machine Learning"
+            subject: subject,
         },
             {
                 headers: {
@@ -134,6 +116,9 @@ export default function CreateInterview() {
         console.log(response.data);
         if (response.data.statusCode === 200) {
             Cookies.set('interviewId', response.data.data._id);
+            if(interviewType === 'Core Subjects'){
+                Cookies.set('subject', subject);
+            }
             navigate('/live');
         }
     }
@@ -296,11 +281,20 @@ export default function CreateInterview() {
                             <h1 className='text-2xl font-semibold'>Provide Interview Details</h1>
                             <div className="flex flex-col gap-5 my-5">
                                 <div className="flex gap-5 w-1/2">
-                                    <select className="p-3 border border-gray-300 rounded-lg w-1/2">
-                                        <option value="">Select Core Subjects</option>
-                                        {coreSubjects.map((subject) => (
-                                            <option value={subject}>{subject}</option>
-                                        ))}
+                                <select
+                                    className="p-3 border border-gray-300 rounded-lg w-1/2"
+                                    onChange={(e) => {
+                                        const selectedSubject = e.target.value;
+                                        console.log(selectedSubject);
+                                        setSubject(selectedSubject);
+                                    }}
+                                    >
+                                    <option value="">Select Core Subjects</option>
+                                    {coreSubjects.map((subject) => (
+                                        <option key={subject} value={subject}>
+                                        {subject}
+                                        </option>
+                                    ))}
                                     </select>
                                 </div>
                             </div>

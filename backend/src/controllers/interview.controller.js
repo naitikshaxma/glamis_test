@@ -8,6 +8,7 @@ import { Student } from "../models/users.models.js"
 import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
+import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 
 const objectStorePath = path.resolve("../objectStore");
 
@@ -80,11 +81,6 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     console.log(typeof conversationHistory, ",", conversationHistory, ",", conversationHistory.length)
     if (conversationHistory.length > 0) {
         console.log("conversationHistory ####", conversationHistory);
-        // const lastInteraction = conversationHistory[conversationHistory.length - 1];
-        // lastInteraction.answer = answer;
-        // lastInteraction.score = score;
-        // console.log("lastInteraction ####", lastInteraction);
-        // add conversation hhistory
 
         conversationHistory.push({
             answer: answer,
@@ -111,15 +107,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    let prompt = null;
-
-    if (conversationHistory.length < 3) {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA.`;
-    } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. The code should be 8-10 lines only. Ask the user to explain the code and predict the output:\n\n\`\`\`Your java code snippet here\n\`\`\``;
-    } else {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
-    }
+    let prompt = generateQuestionsPrompt(subject, difficulty, conversationHistory);
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
 
