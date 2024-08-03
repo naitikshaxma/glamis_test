@@ -61,6 +61,13 @@ const DetailedReport = () => {
 
 
     const actionBar = () => {
+        const uniqueResults = result.reduce((acc, item) => {
+            // Check if the item with the same question already exists in the accumulator
+            if (!acc.some(existingItem => existingItem.question === item.question)) {
+                acc.push(item);
+            }
+            return acc;
+        }, []);
         switch (activeTab) {
             case 'technical':
                 return (
@@ -69,7 +76,7 @@ const DetailedReport = () => {
                             <div className="flex flex-col space-y-4">
 
                                 {
-                                    result.map((item, index) => (
+                                    uniqueResults.map((item, index) => (
                                         <Link
                                             key={index}
                                             to={`question-${index}`}
@@ -90,7 +97,7 @@ const DetailedReport = () => {
                             ref={scrollContainerRef}
                         >
                             {
-                                result.map((item, index) => (
+                                uniqueResults.map((item, index) => (
                                     <TechnicalCard
                                         key={index}
                                         qno={index}

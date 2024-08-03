@@ -61,17 +61,17 @@ const LiveInterview = () => {
         mediaRecorderRef.current.start();
     };
 
-    const stopRecording = () => {
+    const stopRecording = async () => {
         setIsRecording(false);
         if (audioCtxRef.current) {
             audioCtxRef.current.close();
         }
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
-            mediaRecorderRef.current.onstop = () => {
+            mediaRecorderRef.current.onstop = async () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
                 audioChunksRef.current = [];
-                handleSaveRecording(audioBlob);
+                await handleSaveRecording(audioBlob);
             };
         }
     };
@@ -192,12 +192,13 @@ const LiveInterview = () => {
             });
     }, []);
 
-    const handleNextQuestion = () => {
+    const handleNextQuestion = async () => {
         if (isRecording) {
-            stopRecording();
+            await stopRecording();
             setIsAudioPlaying(false);
             setTimer(false);
             setCurrentQuestion((prev) => prev + 1);
+
         }
     };
 
