@@ -107,7 +107,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    let prompt = generateQuestionsPrompt(subject, difficulty, conversationHistory);
+    let prompt = generateQuestionsPrompt(subject, conversationHistory, historyPrompt, difficulty);
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
 
