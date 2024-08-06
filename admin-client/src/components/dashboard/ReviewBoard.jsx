@@ -88,7 +88,7 @@ const TABLE_ROWS2 = [
 export default function ReviewBoard() {
   return (
     <div>
-        <div className="flex flex-col p-6 bg-white rounded-lg" style={{height: '100vh' , marginLeft : '20rem'}}>
+        <div className="flex flex-col p-6 bg-white rounded-lg">
       <div className="flex  justify-between w-full border-b pb-2">
       <h1 className="text-2xl font-semibold mb-4">Review Board</h1>
       </div>

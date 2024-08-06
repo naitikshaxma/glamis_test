@@ -24,8 +24,8 @@ export default function ScheduleInterview() {
     const [studentRecord, setStudentRecord] = React.useState(null);
 
     return (
-        <div className="flex flex-col justify-center h-[95vh]">
-            <Card className="ml-[18vw] mt-4 mr-8">
+        <div className="p-8 flex flex-col justify-center h-[95vh]">
+            <Card className="mt-4 mr-8">
                 <CardHeader
                     color=""
                     floated={false}
