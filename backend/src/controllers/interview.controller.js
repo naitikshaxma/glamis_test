@@ -172,8 +172,8 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "question": "The question text",
             "userAnswer": "The user's answer text",
             "overallScore": 90,
-            "grammarScore": 85,
             "vocabularyScore": 88,
+            "grammarScore": 85,
             "technicalExplanation": {
                 "Pros": "In the context of a standard answer to this question, explain the strong points of the answer and suggest in points how it can be improved",
                 "Cons": "In the context of a standard answer to this question, explain the weak points of the answer and suggest in points how it can be improved"
@@ -184,7 +184,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
             },
             "grammarExplanation": {
                 "Pros": "Explain the strong points of the grammar used",
-                "Cons": "Explain the weak points of the grammar used"
+                "Cons": "Explain the weak points of the grammar used and also suggest the corrections that can be made"
             }
         }
 
