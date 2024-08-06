@@ -134,7 +134,9 @@ export default function Sidebar() {
                                 GLAMIS - Notify
                             </Typography>
                             <Typography variant="small" className="font-normal opacity-80">
-                                🚀 You have 3 tokens left! Conduct 3 interviews this month on your own! 🌟💼
+                                🚀 Dear admin, You can now schedule an Interview in just 5 mins
+                                
+                                 🌟💼
                             </Typography>
                             <div className="mt-4 flex gap-3">
                                 <Typography
