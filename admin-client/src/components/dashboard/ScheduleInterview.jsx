@@ -1,5 +1,4 @@
 import React from "react";
-import { useCountries } from "use-react-countries";
 import {
     Card,
     CardHeader,
@@ -12,8 +11,21 @@ import {
     Textarea
 } from "@material-tailwind/react";
 
+// Define a list of positions in the software industry
+const softwarePositions = [
+    "Software Developer",
+    "Product Engineer",
+    "Data Scientist",
+    "Front-End Developer",
+    "Back-End Developer",
+    "Full-Stack Developer",
+    "DevOps Engineer",
+    "QA Engineer",
+    "UX/UI Designer",
+    "Systems Analyst"
+];
+
 export default function ScheduleInterview() {
-    const { countries } = useCountries();
     const [interviewName, setInterviewName] = React.useState("");
     const [companyName, setCompanyName] = React.useState("");
     const [date, setDate] = React.useState("");
@@ -24,7 +36,10 @@ export default function ScheduleInterview() {
     const [studentRecord, setStudentRecord] = React.useState(null);
 
     return (
-        <div className="p-8 flex flex-col justify-center h-[95vh]">
+        <div className="p-8 flex flex-col h-[95vh]">
+            <div className="flex justify-between w-full border-b pb-2 mb-[8vh]">
+                <h1 className="text-2xl font-semibold mb-4">Interview Creation</h1>
+            </div>
             <Card className="mt-4 mr-8">
                 <CardHeader
                     color=""
@@ -150,9 +165,9 @@ export default function ScheduleInterview() {
                                     className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                                     placeholder="Select Position"
                                 >
-                                    {countries.map(({ name }) => (
-                                        <Option key={name} value={name}>
-                                            {name}
+                                    {softwarePositions.map((pos) => (
+                                        <Option key={pos} value={pos}>
+                                            {pos}
                                         </Option>
                                     ))}
                                 </Select>
