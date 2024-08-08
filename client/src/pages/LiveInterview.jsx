@@ -148,6 +148,24 @@ const LiveInterview = () => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = 10;
 
+    // if this someone copy the url and paste it in another tab, then this will show 404 page
+    // force the user for full screen mode
+    useEffect(() => {
+        if (!document.fullscreenElement) {
+            console.log('Requesting fullscreen...');
+            document.documentElement.requestFullscreen();
+
+            document.addEventListener('fullscreenchange', (event) => {
+                if (!document.fullscreenElement) {
+                    console.log('Exiting fullscreen...');
+                    window.location.href = '/404';
+                }
+            });
+        }
+    }, []);
+
+
+
     const fetchQuestion = async () => {
         setLoading(true);
         const data = {
