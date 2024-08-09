@@ -76,7 +76,7 @@ const DetailedReport = () => {
                             <div className="flex flex-col space-y-4">
 
                                 {
-                                    uniqueResults.map((item, index) => (
+                                    result.map((item, index) => (
                                         <Link
                                             key={index}
                                             to={`question-${index}`}
@@ -97,7 +97,7 @@ const DetailedReport = () => {
                             ref={scrollContainerRef}
                         >
                             {
-                                uniqueResults.map((item, index) => (
+                                result.map((item, index) => (
                                     <TechnicalCard
                                         key={index}
                                         qno={index}
