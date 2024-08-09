@@ -105,7 +105,7 @@ const DetailedReport = () => {
                                         answer={item.answer}
                                         feedback={{
                                             good: [item.technicalExplanation[0]],
-                                            improvement: [item.technicalExplanation[1]] 
+                                            improvement: [item.technicalExplanation[1]]
                                         }}
                                         score={item.overallPerformance}
                                     />
@@ -118,7 +118,7 @@ const DetailedReport = () => {
                 return (
                     <div className='w-full flex mb-5'>
                         <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
-                            <p className='font-semibold my-2'>Grammar score: {result.reduce((acc, item) => acc + item.grammar, 0) / result.length}</p>
+                            <p className='font-semibold my-2'>Grammar score: {(result.reduce((acc, item) => acc + item.grammar, 0) / result.length) <= 20 ? 0 : result.reduce((acc, item) => acc + item.grammar, 0) / result.length}</p>
                             <p className='font-semibold mb-2'>Vocabulary score: {result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length}</p>
                             <div className="flex flex-col space-y-2 font-semibold">Feedback</div>
                             <hr />

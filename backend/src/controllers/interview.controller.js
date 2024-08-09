@@ -175,16 +175,40 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "vocabularyScore": 88,
             "grammarScore": 85,
             "technicalExplanation": {
-                "Pros": "In the context of a standard answer to this question, explain the strong points of the answer and suggest in points how it can be improved",
-                "Cons": "In the context of a standard answer to this question, explain the weak points of the answer and suggest in points how it can be improved"
+                "Pros": "In the context of a standard answer to this question, explain the strong points of the answer and suggest in points how it can be improved
+                        1. First Point
+                        2. Second Point
+                        3. and so on...
+                        Each point should have a max word limit of 10",
+                "Cons": "In the context of a standard answer to this question, explain the weak points of the answer and suggest in points how it can be improved
+                        1. First Point
+                        2. Second Point
+                        3. and so on...
+                        Each point should have a max word limit of 10"
             },
             "vocabularyExplanation": {
-                "Pros": "Explain the strong points of the vocabulary used",
-                "Cons": "Explain the weak points of the vocabulary used"
+                "Pros": "Explain the strong points of the vocabulary used
+                        1. First Point
+                        2. Second Point
+                        3. and so on...
+                        Each point should have a max word limit of 10",
+                "Cons": "Explain the weak points of the vocabulary used
+                        1. First Point
+                        2. Second Point
+                        3. and so on...
+                        Each point should have a max word limit of 10"
             },
             "grammarExplanation": {
-                "Pros": "Explain the strong points of the grammar used",
-                "Cons": "Explain the weak points of the grammar used and also suggest the corrections that can be made"
+                "Pros": "Explain the strong points of the grammar used
+                        1. First Point
+                        2. Second Point
+                        3. and so on...
+                        Each point should have a max word limit of 10",
+                "Cons": "Explain the weak points of the grammar used and also suggest the corrections that can be made
+                        1. First Point
+                        2. Second Point
+                        3. and so on...
+                        Each point should have a max word limit of 10"
             }
         }
 

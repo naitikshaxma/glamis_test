@@ -146,7 +146,7 @@ const LiveInterview = () => {
     const [timer, setTimer] = useState(true);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 10;
+    const totalQuestions = 3;
 
     // if this someone copy the url and paste it in another tab, then this will show 404 page
     // force the user for full screen mode
@@ -158,7 +158,9 @@ const LiveInterview = () => {
             document.addEventListener('fullscreenchange', (event) => {
                 if (!document.fullscreenElement) {
                     console.log('Exiting fullscreen...');
-                    window.location.href = '/404';
+                    Cookies.remove('subject');
+                    Cookies.remove('interviewId');
+                    window.location.href = '/dashboard';
                 }
             });
         }
