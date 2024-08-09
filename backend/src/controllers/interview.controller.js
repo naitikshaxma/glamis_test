@@ -208,7 +208,12 @@ async function evaluateAnswerWithPrompt(answer, question) {
                         2. Second Point
                         3. and so on...
                         Each point should have a max word limit of 10"
-            }
+            },
+            "expectedAnswer": "The expected answer to the question. Only mention the points that must be included.
+                                1. First Point
+                                2. Second Point
+                                3. and so on...
+                                Each point should have a max word limit of 20"
         }
 
         Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", "technicalExplanation", "vocabularyExplanation" and "grammarExplanation". All scores should be integers.
