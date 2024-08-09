@@ -146,7 +146,7 @@ const LiveInterview = () => {
     const [timer, setTimer] = useState(true);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 3;
+    const totalQuestions = 4;
 
     // if this someone copy the url and paste it in another tab, then this will show 404 page
     // force the user for full screen mode

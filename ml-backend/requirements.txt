@@ -1,2 +1,2 @@
 ultralytics == 8.2.32
-opencv-python == 
+opencv-python
