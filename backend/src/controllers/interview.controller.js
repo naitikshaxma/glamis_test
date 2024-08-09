@@ -28,7 +28,6 @@ const objectStorePath = path.resolve("../objectStore");
 
 export const createInterview = asyncHandler(async (req, res) => {
     try {
-        console.log("enter ####");
         const { subject } = req.body;
         console.log("subject ####", subject);
         const interview = await Interview.create({
