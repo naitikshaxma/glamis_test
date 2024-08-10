@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Technical from '../components/detailed_report/Technical';
 import { Verbal, VerbalCard } from '../components/detailed_report/Verbal';
 import Behavioral from '../components/detailed_report/Behavioral';
@@ -75,7 +75,7 @@ const DetailedReport = () => {
                             <div className="flex flex-col space-y-4">
 
                                 {
-                                    uniqueResults.map((item, index) => (
+                                    result.map((item, index) => (
                                         <Link
                                             key={index}
                                             to={`question-${index}`}
@@ -96,7 +96,7 @@ const DetailedReport = () => {
                             ref={scrollContainerRef}
                         >
                             {
-                                uniqueResults.map((item, index) => (
+                                result.map((item, index) => (
                                     <TechnicalCard
                                         key={index}
                                         qno={index}
@@ -120,7 +120,7 @@ const DetailedReport = () => {
                             <div className="flex flex-col space-y-4">
 
                                 {
-                                    uniqueResults.map((item, index) => (
+                                    result.map((item, index) => (
                                         <Link
                                             key={index}
                                             to={`question-${index}`}
@@ -141,7 +141,7 @@ const DetailedReport = () => {
                             ref={scrollContainerRef}
                         >
                             {
-                                uniqueResults.map((item, index) => (
+                                result.map((item, index) => (
                                     <TechnicalCard
                                         key={index}
                                         qno={index}

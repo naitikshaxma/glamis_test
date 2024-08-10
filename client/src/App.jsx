@@ -14,6 +14,8 @@ import { resultPopupState } from "./store/atoms/resultPopup";
 import { useRecoilValue } from "recoil";
 import Result from "./pages/Result";
 import DetailedReport from "./pages/DetailedReport";
+import Otp from "./pages/Otp";
+import { useEffect } from "react";
 const response = {
     statusCode: 200,
     data: {
@@ -38,6 +40,34 @@ const MainLayout = ({ children }) => (
 );
 
 const App = () => {
+    // a function for disable the inspect panel
+    document.onkeydown = function (e) {
+        if (e.ctrlKey && (e.keyCode === 73 || e.keyCode === 85)) {
+            return false;
+        }
+        // disable F12 key
+        if (e.keyCode === 123) {
+            return false;
+        }
+        //disable right click
+        if (e.button == 2) {
+            return false;
+        }
+    }
+    useEffect(() => {
+        // Function to disable right-click
+        const handleContextMenu = (e) => {
+          e.preventDefault(); // Prevents the context menu from appearing
+        };
+    
+        // Attach the event listener to the document
+        document.addEventListener('contextmenu', handleContextMenu);
+    
+        // Clean up the event listener on component unmount
+        return () => {
+          document.removeEventListener('contextmenu', handleContextMenu);
+        };
+      }, []);
     const resultPopup = useRecoilValue(resultPopupState);
     return (
 
@@ -45,6 +75,7 @@ const App = () => {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/" element={<Signup />} />
+                <Route path="/account/verification" element={<Otp />} />
                 <Route
                     path="/dashboard"
                     element={<MainLayout><Dashboard /></MainLayout>}

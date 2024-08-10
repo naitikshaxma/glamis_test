@@ -86,18 +86,21 @@ const LiveInterview = () => {
         const formData = new FormData();
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
+        formData.append('interviewId', await Cookies.get('interviewId'));
+        console.log('Form data:', formData);
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${Cookies.get('accessToken')}`,
                 },
             });
-            console.log('Response:', response.data);
             setResults((prevResults) => [...prevResults, response.data.data]);
             setAnsMetaData({
                 answer: response.data.data.userAnswer,
                 score: response.data.data.overallScore
             })
+            
         } catch (error) {
             console.error('Error uploading audio:', error);
         }
@@ -144,6 +147,7 @@ const LiveInterview = () => {
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
     const [timer, setTimer] = useState(true);
+    const [skipMessage, setSkipMessage] = useState("")
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = 4;
@@ -151,6 +155,9 @@ const LiveInterview = () => {
     // if this someone copy the url and paste it in another tab, then this will show 404 page
     // force the user for full screen mode
     useEffect(() => {
+        if(!Cookies.get('subject') || !Cookies.get('interviewId')) {
+            window.location.href = '/dashboard';
+        }
         if (!document.fullscreenElement) {
             console.log('Requesting fullscreen...');
             document.documentElement.requestFullscreen();
@@ -180,6 +187,7 @@ const LiveInterview = () => {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
                 },
             });
             setQuestion(response.data.data.question);
@@ -369,7 +377,8 @@ const LiveInterview = () => {
                                     variant='filled'
                                     color='red'
                                     size='lg'
-                                    onClick={handleClose}
+                                    disabled={currentQuestion < totalQuestions-1}
+                                    onClick={handleNextQuestion}
                                     className='w-full mx-3'
                                 >
                                     End Interview

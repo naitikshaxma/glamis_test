@@ -4,16 +4,14 @@ import {
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
-// import { isAuthenticated } from '../middlewares/auth.middleware.js';
+import {  RateLimiter1min } from "../utils/RateLimiter.js";
 
 const router = Router()
 
-// router.route('/generateQuestion').post(isAuthenticated, generateQuestion);
-router.route('/generateQuestion').post(generateQuestion); // removed isAuthenticated middleware for testing purposes
-// router.route('/evaluateQuestion').post(isAuthenticated, evaluateQuestion);
-router.route('/evaluateQuestion').post(extractAnswerAudio, handleAudioUpload, evaluateAnswer); // removed isAuthenticated middleware for testing purposes
-router.route('/createInterview').post(isAuthenticated, createInterview);
-router.route("/saveResultToDb").post(isAuthenticated, saveResultToDb);
+router.route('/generateQuestion').post(RateLimiter1min, isAuthenticated, generateQuestion);
+router.route('/evaluateQuestion').post(RateLimiter1min, isAuthenticated, extractAnswerAudio, handleAudioUpload, evaluateAnswer); // removed isAuthenticated middleware for testing purposes
+router.route('/createInterview').post(RateLimiter1min, isAuthenticated, createInterview);
+router.route("/saveResultToDb").post(RateLimiter1min, isAuthenticated, saveResultToDb);
 
 export default router;
 
