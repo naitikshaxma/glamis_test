@@ -246,6 +246,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
         audioFileName: audioFileName
     };
 
+    console.log("Conversation History: ", conversationHistory)
     return res.status(200).json(
         new ApiResponse(200, dataToSend, "Question generated successfully")
     );

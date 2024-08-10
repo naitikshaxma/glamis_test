@@ -152,7 +152,8 @@ const DetailedReport = () => {
                                             good: [item.grammarExplanation[0]],
                                             improvement: [item.grammarExplanation[1]]
                                         }}
-                                        score={item.grammar <= 40 ? 0 : item.grammar}
+                                        grammarScore={item.grammar}
+                                        vocabularyScore={item.vocabulary}
                                     />
                                 ))
                             }

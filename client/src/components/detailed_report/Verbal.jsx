@@ -29,7 +29,7 @@ const Verbal = ({ data }) => {
     );
 }
 
-const VerbalCard = ({ question, answer, feedback, score, qno, expectedAnswer }) => {
+const VerbalCard = ({ question, answer, feedback, grammarScore, vocabularyScore, qno, expectedAnswer }) => {
     const renderQuestion = () => {
         if (question.includes('```')) {
             const parts = question.split('```');
@@ -69,7 +69,8 @@ const VerbalCard = ({ question, answer, feedback, score, qno, expectedAnswer }) 
             <div className="flex flex-col space-y-2 font-semibold mb-4">
                 Question {qno + 1} : {renderQuestion()}
             </div>
-            <p className="font-semibold my-2">Score : {score}/100</p>
+            <p className="font-semibold my-2">Grammar Score : {grammarScore}/100</p>
+            <p className="font-semibold my-2">Vocabulary Score : {vocabularyScore}/100</p>
             <div className="flex flex-col space-y-2">
                 <div className="flex flex-col space-y-2">
                     <strong>Your Answer:</strong>

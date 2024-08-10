@@ -1,12 +1,11 @@
 const generateQuestionsPromptForJD = (selectedCompany, jobTitle, historyPrompt, conversationHistory) => {
     let prompt = null;
-    console.log(selectedCompany);
-    console.log(jobTitle);
+    console.log(conversationHistory);
 
     if (selectedCompany == "Accenture") {
         if(jobTitle == "Software Engineer")
         if (conversationHistory.length < 3) {
-            prompt = `${historyPrompt}\nGenerate introductory behavioral questions. Eg- Tell me something about yourself, Tell me about your background.`;
+            prompt = `${historyPrompt}\nGenerate introductory questions. Eg- Tell me something about yourself, Tell me about your background.`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 5) {
             prompt = `${historyPrompt}\nGenerate Data Structures questions. Eg- May be output based DSA question, May be pseudocode question`;
         } else {
