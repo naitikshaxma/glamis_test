@@ -143,7 +143,7 @@ const DetailedReport = () => {
                         >
                             {
                                 uniqueResults.map((item, index) => (
-                                    <TechnicalCard
+                                    <VerbalCard
                                         key={index}
                                         qno={index}
                                         question={item.question}

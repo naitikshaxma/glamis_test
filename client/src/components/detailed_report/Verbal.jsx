@@ -29,7 +29,7 @@ const Verbal = ({ data }) => {
     );
 }
 
-const VerbalCard = ({ question, answer, feedback, score, qno }) => {
+const VerbalCard = ({ question, answer, feedback, score, qno, expectedAnswer }) => {
     const renderQuestion = () => {
         if (question.includes('```')) {
             const parts = question.split('```');
@@ -64,9 +64,8 @@ const VerbalCard = ({ question, answer, feedback, score, qno }) => {
             );
         }
     };
-
     return (
-        <div className="flex flex-col bg-lightBlue-500 rounded-lg p-4">
+        <div className="flex  flex-col bg-lightBlue-500 rounded-lg p-4">
             <div className="flex flex-col space-y-2 font-semibold mb-4">
                 Question {qno + 1} : {renderQuestion()}
             </div>
@@ -84,31 +83,36 @@ const VerbalCard = ({ question, answer, feedback, score, qno }) => {
                         <div className="flex flex-col space-y-2 font-semibold w-2/3">Description</div>
                     </div>
                     <hr />
-                    <div className='flex w-full justify-between'>
+                    <div className="flex w-full justify-between">
                         <div className="flex flex-col space-y-2 w-1/3">What went well</div>
                         <div className="flex flex-col space-y-2 w-2/3">
-                            <ul className="list-disc">
-                                {feedback.good.map((item, index) => (
-                                    <li key={index}>{item}</li>
+                            <ul className='list-disc'>
+                                {Object.values(feedback.good).map((item, index) => (
+                                    item.split('\n').map((line, i) => (
+                                        <li key={`${index}-${i}`}>
+                                            {line}
+                                        </li>
+                                    ))
                                 ))}
                             </ul>
                         </div>
                     </div>
                     <hr />
-                    <div className='flex w-full justify-between'>
+                    <div className="flex w-full justify-between">
                         <div className="flex flex-col space-y-2 w-1/3">Areas for improvement</div>
                         <div className="flex flex-col space-y-2 w-2/3">
-                            <ul className="list-disc">
-                                {feedback.improvement.map((item, index) => (
-                                    <li key={index}>{item}</li>
+                            <ul className='list-disc'>
+                                {Object.values(feedback.improvement).map((item, index) => (
+                                    item.split('\n').map((line, i) => (
+                                        <li key={`${index}-${i}`}>
+                                            {line}
+                                        </li>
+                                    ))
                                 ))}
                             </ul>
                         </div>
                     </div>
                     <hr />
-                </div>
-                <div className="px-2">
-                    <button className="bg-black text-white rounded-lg p-2 shadow-lg px-4 font-semibold">Expected Answer</button>
                 </div>
             </div>
         </div>
