@@ -107,6 +107,7 @@ const DetailedReport = () => {
                                             improvement: [item.technicalExplanation[1]]
                                         }}
                                         score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
+                                        expectedAnswer={ item.expectedAnswer }
                                     />
                                 ))
                             }

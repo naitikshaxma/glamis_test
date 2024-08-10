@@ -11,7 +11,8 @@ import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 const COLORS = ['#529e5a', "#d63a3a"];
 
-export const TechnicalCard = ({ question, answer, feedback, score, qno }) => {
+export const TechnicalCard = ({ question, answer, feedback, score, qno, expectedAnswer }) => {
+    const [showAnswer, setShowAnswer] = useState(false);
     const renderQuestion = () => {
         if (question.includes('```')) {
             const parts = question.split('```');
@@ -96,7 +97,20 @@ export const TechnicalCard = ({ question, answer, feedback, score, qno }) => {
                     </div>
                     <hr />
                     <div className="px-2">
-                        <button className="bg-black text-white rounded-lg p-2 shadow-lg px-4 font-semibold">Expected Answer</button>
+                        <button
+                            className="bg-black text-white rounded-lg p-2 shadow-lg px-4 font-semibold"
+                            onClick={() => setShowAnswer(!showAnswer)}
+                        >
+                            Expected Answer
+                        </button>
+
+                        {showAnswer && (
+                            <ul className="mt-2 list-disc">
+                                {expectedAnswer.split('\n').map((point, index) => (
+                                    <li key={index}>{point}</li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
             </div>

@@ -175,44 +175,44 @@ async function evaluateAnswerWithPrompt(answer, question) {
             "grammarScore": 85,
             "technicalExplanation": {
                 "Pros": "In the context of a standard answer to this question, explain the strong points of the answer and suggest in points how it can be improved
-                        1. First Point
-                        2. Second Point
-                        3. and so on...
+                        First Point\n
+                        Second Point\n
+                        and so on...\n
                         Each point should have a max word limit of 10",
                 "Cons": "In the context of a standard answer to this question, explain the weak points of the answer and suggest in points how it can be improved
-                        1. First Point
-                        2. Second Point
-                        3. and so on...
+                        First Point\n
+                        Second Point\n
+                        and so on...\n
                         Each point should have a max word limit of 10"
             },
             "vocabularyExplanation": {
                 "Pros": "Explain the strong points of the vocabulary used
-                        1. First Point
-                        2. Second Point
-                        3. and so on...
+                        First Point\n
+                        Second Point\n
+                        and so on...\n
                         Each point should have a max word limit of 10",
                 "Cons": "Explain the weak points of the vocabulary used
-                        1. First Point
-                        2. Second Point
-                        3. and so on...
+                        First Point\n
+                        Second Point\n
+                        and so on...\n
                         Each point should have a max word limit of 10"
             },
             "grammarExplanation": {
                 "Pros": "Explain the strong points of the grammar used
-                        1. First Point
-                        2. Second Point
-                        3. and so on...
+                        First Point\n
+                        Second Point\n
+                        and so on...\n
                         Each point should have a max word limit of 10",
                 "Cons": "Explain the weak points of the grammar used and also suggest the corrections that can be made
-                        1. First Point
-                        2. Second Point
-                        3. and so on...
+                        First Point\n
+                        Second Point\n
+                        and so on...\n
                         Each point should have a max word limit of 10"
             },
             "expectedAnswer": "The expected answer to the question. Only mention the points that must be included.
-                                1. First Point
-                                2. Second Point
-                                3. and so on...
+                                First Point\n
+                                Second Point\n
+                                and so on...\n
                                 Each point should have a max word limit of 20"
         }
 
@@ -287,6 +287,7 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
             const interviewQuestion = await InterviewQuestion.create({
                 question: question.question,
                 answer: question.userAnswer,
+                expectedAnswer: question.expectedAnswer,
                 interview: interviewId,
                 student: student._id,
                 overallPerformance: question.overallScore,

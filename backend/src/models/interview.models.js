@@ -36,6 +36,9 @@ const interviewQuestionSchema = new mongoose.Schema({
     answer: {
         type: String
     },
+    expectedAnswer: {
+        type: String
+    },
     student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Student'
