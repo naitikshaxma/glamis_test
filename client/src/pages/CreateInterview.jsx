@@ -62,6 +62,13 @@ const jobTitles = [
     "MLops Engineer",
 ]
 
+const companies = [
+    "Accenture",
+    "KPIT",
+    "Gemini Solutions",
+    "Capgemini"
+]
+
 export default function CreateInterview() {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = React.useState(0);
@@ -101,25 +108,49 @@ export default function CreateInterview() {
     const [interviewType, setInterviewType] = React.useState('');
     const [subject, setSubject] = React.useState('');
 
+    const [selectedCompany, setSelectedCompany] = React.useState('');
+    const [selectedJobTitle, setSelectedJobTitle] = React.useState('');
+
+
     const CreateInterview = async () => {
-        // create interview
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-            subject: subject,
-        },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
+        if (interviewType === 'JD') {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByJD`, {
+                company: selectedCompany,
+                jobTitle: selectedJobTitle,
+            },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${Cookies.get('accessToken')}`
+                    }
+                });
+            console.log(response.data);
+            if (response.data.statusCode === 200) {
+                Cookies.set('interviewId', response.data.data._id);
+                Cookies.set('selectedCompany', selectedCompany);
+                Cookies.set('jobTitle', selectedJobTitle);
+                navigate('/live');
+                console.log(company);
+                console.log(jobTitle)
+            }
+        } else if (interviewType === 'Core Subjects') {
+            // create interview
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
+                subject: subject,
+            },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${Cookies.get('accessToken')}`
+                    }
                 }
-            }
-        )
-        console.log(response.data);
-        if (response.data.statusCode === 200) {
-            Cookies.set('interviewId', response.data.data._id);
-            if(interviewType === 'Core Subjects'){
+            )
+            console.log(response.data);
+            if (response.data.statusCode === 200) {
+                Cookies.set('interviewId', response.data.data._id);
                 Cookies.set('subject', subject);
+                navigate('/live');
             }
-            navigate('/live');
         }
     }
 
@@ -233,28 +264,26 @@ export default function CreateInterview() {
                             <div className="flex flex-col gap-5 my-5">
 
                                 <div className="flex gap-5">
-
-                                    <select className="p-3 border border-gray-300 rounded-lg w-1/2">
-                                        <option value="">Select Job Title</option>
-                                        {jobTitles.map((title) => (
-                                            <option value={title}>{title}</option>
+                                    <select
+                                        className="p-3 border border-gray-300 rounded-lg w-1/2"
+                                        onChange={(e) => setSelectedCompany(e.target.value)}
+                                    >
+                                        <option value="">Select Company</option>
+                                        {companies.map((title) => (
+                                            <option key={title} value={title}>{title}</option>
                                         ))}
                                     </select>
-                                    <select className="p-3 border border-gray-300 rounded-lg w-1/2">
-                                        <option value="">Select Experience Level</option>
-                                        <option value="Fresher">Fresher</option>
-                                        <option value="1-3 years">1-3 years</option>
-                                        <option value="3-5 years">3-5 years</option>
-                                        <option value="5-8 years">5-8 years</option>
-                                        <option value="8-12 years">8-12 years</option>
-                                        <option value="12+ years">12+ years</option>
+
+                                    <select
+                                        className="p-3 border border-gray-300 rounded-lg w-1/2"
+                                        onChange={(e) => setSelectedJobTitle(e.target.value)}
+                                    >
+                                        <option value="">Select Job Title</option>
+                                        {jobTitles.map((title) => (
+                                            <option key={title} value={title}>{title}</option>
+                                        ))}
                                     </select>
                                 </div>
-
-                                <textarea placeholder="Job Description" className="p-3 border border-gray-900 rounded-lg h-48"></textarea>
-
-
-
                             </div>
                         </div>}
                         {activeStep === 1 && interviewType === 'Resume' && <div>

@@ -9,6 +9,7 @@ import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
 import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
+import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 
 const objectStorePath = path.resolve("../objectStore");
 
@@ -65,7 +66,46 @@ export const createInterview = asyncHandler(async (req, res) => {
             ApiError(500, err.message || "Internal Server Error")
         );
     }
-})
+});
+
+export const createInterviewByJD = asyncHandler(async (req, res) => {
+    try {
+        const { selectedCompany, jobTitle } = req.body;
+        const interview = await Interview.create({
+            start_time: new Date(),
+            is_active: true,
+            title: jobTitle,
+            description: selectedCompany + " " + jobTitle,
+        });
+
+        console.log("Interview created ####", interview);
+
+        const currentUser = req.user;
+        console.log("currentUser ####", currentUser);
+        const student = await Student.findOne({ user: currentUser._id });
+        console.log("student ####", student);
+        student.interview_taken.push(interview._id);
+        await student.save();
+
+        try {
+            let redisClient = await connectRedis();
+            await redisClient.set(String(interview._id), JSON.stringify([]));
+        } catch (error) {
+            console.log("Error while connecting to Redis", error);
+            return res.status(500).json(
+                ApiError(500, error.message || "Internal Server Error")
+            );
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200, interview, "Interview created successfully")
+        );
+    } catch (err) {
+        return res.status(500).json(
+            ApiError(500, err.message || "Internal Server Error")
+        );
+    }
+});
 
 export const generateQuestion = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
@@ -143,6 +183,73 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     );
 });
 
+export const generateQuestionForJD = asyncHandler(async (req, res) => {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+    const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId } = req.body;
+
+    let redisClient = await connectRedis();
+
+    // Add the current question and answer to the conversation history
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    if (conversationHistory.length > 0) {
+        conversationHistory.push({
+            answer: answer,
+            score: score
+        });
+    } else {
+        conversationHistory.push({ selectedCompany, jobTitle, jdDetails });
+    }
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+    // Adjust difficulty based on score
+    let difficulty = "medium";
+    if (score >= 70) {
+        difficulty = "hard";
+    } else if (score < 40) {
+        difficulty = "easy";
+    }
+
+    // Create a prompt with conversation history
+    const historyPrompt = conversationHistory.map((interaction, index) => {
+        return `Q${index + 1}: ${interaction.jobTitle} - \nA${index + 1}: ${interaction.answer || ''}`;
+    }).join("\n");
+
+    let prompt = generateQuestionsPromptForJD(selectedCompany, jobTitle, conversationHistory, historyPrompt);
+
+    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: prompt }
+        ],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+    await textToSpeech(cleanedQuestion, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+    }
+
+    const dataToSend = {
+        question,
+        audioFileName: audioFileName
+    };
+
+    return res.status(200).json(
+        new ApiResponse(200, dataToSend, "Question generated successfully")
+    );
+});
 
 const generateUniqueKey = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

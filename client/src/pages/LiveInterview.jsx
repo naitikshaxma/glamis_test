@@ -170,30 +170,56 @@ const LiveInterview = () => {
 
     const fetchQuestion = async () => {
         setLoading(true);
-        const data = {
-            subject: Cookies.get('subject'),
-            interviewId: Cookies.get('interviewId'),
-            answer: ansMetaData.answer,
-            score: ansMetaData.score
-        };
+
+        const subject = Cookies.get('subject');
+        const jobTitle = Cookies.get('jobTitle');
+        const selectedCompany = Cookies.get('selectedCompany');
+
+        let url;
+        let data;
+
+        if (subject) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`;
+            data = {
+                subject: subject,
+                interviewId: Cookies.get('interviewId'),
+                answer: ansMetaData.answer,
+                score: ansMetaData.score
+            };
+        } else if (jobTitle && selectedCompany) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;
+            data = {
+                jobTitle: jobTitle,
+                selectedCompany: selectedCompany,
+                interviewId: Cookies.get('interviewId'),
+                answer: ansMetaData.answer,
+                score: ansMetaData.score
+            };
+        } else {
+            console.error('Required cookies are missing.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
+            const response = await axios.post(url, data, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
+
             setQuestion(response.data.data.question);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
-            // check the audio duration
-
             setIsAudioPlaying(true);
             setTimer(true);
 
         } catch (error) {
             console.error('Error fetching question:', error);
         }
+
         setLoading(false);
     };
+
 
     useEffect(() => {
         if (currentQuestion < totalQuestions) {
