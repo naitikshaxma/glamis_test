@@ -5,11 +5,13 @@ import { RateLimiter15mins } from "../utils/RateLimiter.js";
 
 const router = Router()
 
-router.route("/signup").post(signup)
-router.route("/login").post(login)
-router.route("/verify-email").post(verifyEmail)
+
+
+router.route("/signup").post(RateLimiter15mins,signup)
+router.route("/login").post(RateLimiter15mins,login)
+router.route("/verify-email").post(RateLimiter15mins,verifyEmail)
 router.route("/resend-otp").post(RateLimiter15mins, resendOTP)
-router.route("/add-student").post(addStudent)
+router.route("/add-student").post(RateLimiter15mins,addStudent)
 
 // Authenticated Routes:
 

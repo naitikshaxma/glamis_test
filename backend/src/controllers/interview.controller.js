@@ -359,10 +359,49 @@ async function textToSpeech(input, audioPath) {
 
 export const evaluateAnswer = asyncHandler(async (req, res) => {
     try {
-        const { question } = req.body;
+        const { question, interviewId } = req.body;
         const answer = req.extractedAnswer;
 
-        const feedback = await evaluateAnswerWithPrompt(answer, question);
+        console.log("answer ####", answer);
+        console.log("question ####", question);
+        console.log("interviewId ####", interviewId);
+
+        let feedback = await evaluateAnswerWithPrompt(answer, question);
+
+        feedback = JSON.parse(feedback);
+
+        console.log("feedback ####", feedback);
+
+        console.log(typeof feedback)
+        // const interviewQuestion = await InterviewQuestion.create({
+            //         question: question.question,
+            //         answer: question.userAnswer,
+            //         interview: interviewId,
+            //         student: student._id,
+            //         overallPerformance: question.overallScore,
+            //         grammar: question.grammarScore,
+            //         vocabulary: question.vocabularyScore,
+            //         technicalExplanation: [question.technicalExplanation.Pros, question.technicalExplanation.Cons],
+            //         vocabularyExplanation: [question.vocabularyExplanation.Pros, question.vocabularyExplanation.Cons],
+            //         grammarExplanation: [question.grammarExplanation.Pros, question.grammarExplanation.Cons],
+            //         expectedAnswer: question.expectedAnswer
+            //     });
+
+        const interviewQuestion =   await InterviewQuestion.create({
+            question: question,
+            answer: feedback.userAnswer,
+            expectedAnswer: feedback.expectedAnswer,
+            interview: interviewId,
+            student: req.user._id,
+            overallPerformance: feedback.overallScore,
+            grammar: feedback.grammarScore,
+            vocabulary: feedback.vocabularyScore,
+            technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
+            vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
+            grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+        });
+
+        console.log("answer added successfully ####");
 
         return res.status(200).json(
             new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully")
@@ -390,23 +429,6 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
         const student = await Student.findOne({ user: currentUser._id });
         console.log("student ####", student);
 
-        for (let i = 0; i < data.length; i++) {
-            const question = data[i];
-            const interviewQuestion = await InterviewQuestion.create({
-                question: question.question,
-                answer: question.userAnswer,
-                expectedAnswer: question.expectedAnswer,
-                interview: interviewId,
-                student: student._id,
-                overallPerformance: question.overallScore,
-                grammar: question.grammarScore,
-                vocabulary: question.vocabularyScore,
-                technicalExplanation: [question.technicalExplanation.Pros, question.technicalExplanation.Cons],
-                vocabularyExplanation: [question.vocabularyExplanation.Pros, question.vocabularyExplanation.Cons],
-                grammarExplanation: [question.grammarExplanation.Pros, question.grammarExplanation.Cons]
-            });
-
-        }
 
         return res.status(200).json(
             new ApiResponse(200, {}, "Result saved successfully")
