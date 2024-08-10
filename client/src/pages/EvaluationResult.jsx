@@ -38,7 +38,7 @@ const EvaluationResult = ({ data }) => {
 
                 navigate(`/history/detailed/${Cookies.get('interviewId')}`);
 
-            }, 3000)
+            }, 7000)
 
         }
 

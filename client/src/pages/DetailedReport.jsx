@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Technical from '../components/detailed_report/Technical';
-import Verbal from '../components/detailed_report/Verbal';
+import { Verbal, VerbalCard } from '../components/detailed_report/Verbal';
 import Behavioral from '../components/detailed_report/Behavioral';
 import { Link, Element, scroller } from 'react-scroll';
 import { TechnicalCard } from '../components/detailed_report/Technical';
-import { questions } from '../components/detailed_report/Technical';
 import { useRef } from 'react';
 import avatar from "../assets/avatar.jpeg"
 import axios from "axios";
@@ -76,7 +75,7 @@ const DetailedReport = () => {
                             <div className="flex flex-col space-y-4">
 
                                 {
-                                    uniqueResults.map((item, index) => (
+                                    result.map((item, index) => (
                                         <Link
                                             key={index}
                                             to={`question-${index}`}
@@ -97,7 +96,7 @@ const DetailedReport = () => {
                             ref={scrollContainerRef}
                         >
                             {
-                                uniqueResults.map((item, index) => (
+                                result.map((item, index) => (
                                     <TechnicalCard
                                         key={index}
                                         qno={index}
@@ -105,65 +104,59 @@ const DetailedReport = () => {
                                         answer={item.answer}
                                         feedback={{
                                             good: [item.technicalExplanation[0]],
-                                            improvement: [item.technicalExplanation[1]] 
+                                            improvement: [item.technicalExplanation[1]]
                                         }}
-                                        score={item.overallPerformance}
+                                        score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
+                                        expectedAnswer={ item.expectedAnswer }
                                     />
                                 ))
                             }
                         </div>
                     </div>
                 )
-            case 'verbal':
+            case 'verbal': 
                 return (
-                    <div className='w-full flex mb-5'>
-                        <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
-                            <p className='font-semibold my-2'>Grammar score: {result.reduce((acc, item) => acc + item.grammar, 0) / result.length}</p>
-                            <p className='font-semibold mb-2'>Vocabulary score: {result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length}</p>
-                            <div className="flex flex-col space-y-2 font-semibold">Feedback</div>
-                            <hr />
-                            <div className='flex w-full justify-between font-semibold'>
-                                <div className="flex flex-col space-y-2 font-semibold w-1/3">Attributes</div>
-                                <div className="flex flex-col space-y-2 font-semibold w-2/3">Description</div>
-                            </div>
-                            <hr />
-                            <div className='flex w-full justify-between'>
-                                <div className="flex flex-col space-y-2 w-1/3">What went well</div>
-                                <div className="flex flex-col space-y-2 w-2/3">
-                                    <ul className="list-disc">
-                                        <li>
-                                            {
-                                                result[0].vocabularyExplanation[0]
-                                            }
-                                        </li>
-                                        <li>
-                                            {
-                                                result[1].vocabularyExplanation[0]
-                                            }
-                                        </li>
+                    <div className='w-full flex justify-around mb-5'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                            <div className="flex flex-col space-y-4">
 
-                                    </ul>
-                                </div>
+                                {
+                                    result.map((item, index) => (
+                                        <Link
+                                            key={index}
+                                            to={`question-${index}`}
+                                            smooth={true}
+                                            duration={500}
+                                            className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            onClick={() => handleQuestionClick(index)}
+                                        >
+                                            Q{index + 1}
+                                        </Link>
+                                    ))
+                                }
                             </div>
-                            <hr />
-                            <div className='flex w-full justify-between'>
-                                <div className="flex flex-col space-y-2 w-1/3">Areas for improvement</div>
-                                <div className="flex flex-col space-y-2 w-2/3">
-                                    <ul className="list-disc">
-                                        <li>
-                                            {
-                                                result[0].grammarExplanation[1]
-                                            }
-                                        </li>
-                                        <li>
-                                            {
-                                                result[1].grammarExplanation[1]
-                                            }
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <hr />
+                        </div>
+                        <div
+                            className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            id="scroll-container"
+                            ref={scrollContainerRef}
+                        >
+                            {
+                                result.map((item, index) => (
+                                    <VerbalCard
+                                        key={index}
+                                        qno={index}
+                                        question={item.question}
+                                        answer={item.answer}
+                                        feedback={{
+                                            good: [item.grammarExplanation[0]],
+                                            improvement: [item.grammarExplanation[1]]
+                                        }}
+                                        grammarScore={item.grammar}
+                                        vocabularyScore={item.vocabulary}
+                                    />
+                                ))
+                            }
                         </div>
                     </div>
                 )
@@ -256,7 +249,6 @@ const DetailedReport = () => {
                                 { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
                             ]
                         } />
-                        <Behavioral />
                     </div>
                 </div>
                 <div className="report mt-4">
@@ -273,9 +265,6 @@ const DetailedReport = () => {
                                 onClick={() => setActiveTab('verbal')}
                             >
                                 Verbal Skills
-                            </button>
-                            <button
-                                className={`py-2 px-4 ${activeTab === 'behavioral' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('behavioral')} > Behavioral Skills
                             </button>
                         </div>
                         <div className="flex">

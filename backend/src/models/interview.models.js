@@ -36,6 +36,9 @@ const interviewQuestionSchema = new mongoose.Schema({
     answer: {
         type: String
     },
+    expectedAnswer: {
+        type: String
+    },
     student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Student'
@@ -70,7 +73,10 @@ const interviewQuestionSchema = new mongoose.Schema({
     },
     grammarExplanation: {
         type: [String]
-    }
+    },
+    expectedAnswer: {
+        type: String
+    },
 }, { timestamps: true })
 
 const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);

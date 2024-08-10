@@ -86,18 +86,21 @@ const LiveInterview = () => {
         const formData = new FormData();
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
+        formData.append('interviewId', await Cookies.get('interviewId'));
+        console.log('Form data:', formData);
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${Cookies.get('accessToken')}`,
                 },
             });
-            console.log('Response:', response.data);
             setResults((prevResults) => [...prevResults, response.data.data]);
             setAnsMetaData({
                 answer: response.data.data.userAnswer,
                 score: response.data.data.overallScore
             })
+            
         } catch (error) {
             console.error('Error uploading audio:', error);
         }
@@ -144,36 +147,87 @@ const LiveInterview = () => {
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
     const [timer, setTimer] = useState(true);
+    const [skipMessage, setSkipMessage] = useState("")
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 10;
+    const totalQuestions = 4;
+
+    // if this someone copy the url and paste it in another tab, then this will show 404 page
+    // force the user for full screen mode
+    useEffect(() => {
+        if(!Cookies.get('interviewId')) {
+            window.location.href = '/dashboard';
+        }
+        if (!document.fullscreenElement) {
+            console.log('Requesting fullscreen...');
+            document.documentElement.requestFullscreen();
+
+            document.addEventListener('fullscreenchange', (event) => {
+                if (!document.fullscreenElement) {
+                    console.log('Exiting fullscreen...');
+                    Cookies.remove('subject');
+                    Cookies.remove('interviewId');
+                    window.location.href = '/dashboard';
+                }
+            });
+        }
+    }, []);
+
+
 
     const fetchQuestion = async () => {
         setLoading(true);
-        const data = {
-            subject: Cookies.get('subject'),
-            interviewId: Cookies.get('interviewId'),
-            answer: ansMetaData.answer,
-            score: ansMetaData.score
-        };
+
+        const subject = Cookies.get('subject');
+        const jobTitle = Cookies.get('jobTitle');
+        const selectedCompany = Cookies.get('selectedCompany');
+
+        let url;
+        let data;
+
+        if (subject) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`;
+            data = {
+                subject: subject,
+                interviewId: Cookies.get('interviewId'),
+                answer: ansMetaData.answer,
+                score: ansMetaData.score
+            };
+        } else if (jobTitle && selectedCompany) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;
+            data = {
+                jobTitle: jobTitle,
+                selectedCompany: selectedCompany,
+                interviewId: Cookies.get('interviewId'),
+                answer: ansMetaData.answer,
+                score: ansMetaData.score
+            };
+        } else {
+            console.error('Required cookies are missing.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`, data, {
+            const response = await axios.post(url, data, {
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
                 },
             });
+
             setQuestion(response.data.data.question);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
-            // check the audio duration
-
             setIsAudioPlaying(true);
             setTimer(true);
 
         } catch (error) {
             console.error('Error fetching question:', error);
         }
+
         setLoading(false);
     };
+
 
     useEffect(() => {
         if (currentQuestion < totalQuestions) {
@@ -275,7 +329,7 @@ const LiveInterview = () => {
                                     <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
                                 </div>
                                 <div className="title-and-name ml-4">
-                                    <p className="text-2xl font-semibold">Full Stack Interview</p>
+                                    <p className="text-2xl font-semibold">Interview</p>
                                     <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
@@ -349,7 +403,8 @@ const LiveInterview = () => {
                                     variant='filled'
                                     color='red'
                                     size='lg'
-                                    onClick={handleClose}
+                                    disabled={currentQuestion < totalQuestions-1}
+                                    onClick={handleNextQuestion}
                                     className='w-full mx-3'
                                 >
                                     End Interview
