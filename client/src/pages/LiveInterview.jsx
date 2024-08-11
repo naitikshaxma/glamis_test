@@ -12,14 +12,14 @@ import Cookies from 'js-cookie';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
-const Timer = () => {
+const Timer = (props) => {
     return (
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={60}
+            duration={props.duration || 120}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-            colorsTime={[45, 30, 15, 0]}
+            colorsTime={[120, 90, 60, 45, 20, 15, 10, 5]}
         >
             {({ remainingTime }) => remainingTime}
         </CountdownCircleTimer>
@@ -146,11 +146,16 @@ const LiveInterview = () => {
     const [question, setQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
-    const [timer, setTimer] = useState(true);
+    const [timer, setTimer] = useState(120);
     const [skipMessage, setSkipMessage] = useState("")
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = 4;
+
+    // const restetTimer = () => {
+    //     setTimer(120);
+    // }
+
 
     // if this someone copy the url and paste it in another tab, then this will show 404 page
     // force the user for full screen mode
@@ -219,7 +224,7 @@ const LiveInterview = () => {
             setQuestion(response.data.data.question);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
             setIsAudioPlaying(true);
-            setTimer(true);
+            setTimer(120);
 
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -252,7 +257,6 @@ const LiveInterview = () => {
             setIsAudioPlaying(false);
             setTimer(false);
             setCurrentQuestion((prev) => prev + 1);
-
         }
     };
 
@@ -311,6 +315,36 @@ const LiveInterview = () => {
         }
     };
 
+    const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isRecording) {
+                setIsNextButtonDisabled(false);
+            } else {
+                setIsNextButtonDisabled(true);
+            }
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [isRecording]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimer((prevTimer) => prevTimer - 1);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        console.log('Timer:', timer);
+        if (timer === 0) {
+            // Auto-submit the answer when the timer reaches 0
+            handleNextQuestion();
+        }
+    }, [timer]);
+
     return (
         <>
             {currentQuestion < totalQuestions ? (
@@ -333,7 +367,8 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && <Timer />}
+                                    {timer}
+                                    {timer && <Timer duration={120} />}
                                 </div>
                             </div>
 
@@ -364,7 +399,7 @@ const LiveInterview = () => {
                                             ripple="light"
                                             size="lg"
                                             className="w-1/3"
-                                            disabled={loading}
+                                            disabled={isNextButtonDisabled}
                                             onClick={handleNextQuestion}
                                         >
                                             {loading ? "Loading..." : "Next"}

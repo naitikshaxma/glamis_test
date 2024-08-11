@@ -2,7 +2,9 @@ import { Router } from "express";
 import {
     generateQuestion, evaluateAnswer, createInterview, saveResultToDb,
     createInterviewByJD,
-    generateQuestionForJD
+    generateQuestionForJD,
+    getInterviewHeld,
+    getPartialDetailsByInterviewId
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -16,6 +18,8 @@ router.route('/evaluateQuestion').post(RateLimiter1min, isAuthenticated, extract
 router.route('/createInterview').post(RateLimiter1min, isAuthenticated, createInterview);
 router.route('/createInterviewByJD').post(RateLimiter1min, isAuthenticated, createInterviewByJD);
 router.route("/saveResultToDb").post(RateLimiter1min, isAuthenticated, saveResultToDb);
+router.route("/getInterviewsHeld").get(RateLimiter1min, isAuthenticated, getInterviewHeld);
+router.route("/getPartialDetailsByInterviewId").post(RateLimiter1min, isAuthenticated, getPartialDetailsByInterviewId);
 
 export default router;
 

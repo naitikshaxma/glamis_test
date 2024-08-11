@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const EvaluationResult = ({ data }) => {
     const navigate = useNavigate();
@@ -48,6 +48,7 @@ const EvaluationResult = ({ data }) => {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
             Your Result will be Available at History Page
+            <Link to="/history" className="text-white bg-green-800 px-4 py-2">Go to History</Link> 
             {/* <Card className="w-full max-w-md mx-auto mb-4 shadow-lg">
                 <CardBody>
                     <Typography variant="h5" color="blue-gray" className="mb-4">

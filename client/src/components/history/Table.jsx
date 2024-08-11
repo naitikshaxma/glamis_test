@@ -1,40 +1,84 @@
 import { Card, Typography } from "@material-tailwind/react";
 import { Button } from "@material-tailwind/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { resultPopupState } from "../../store/atoms/resultPopup";
 import { useSetRecoilState } from "recoil";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
 
 export default function Table() {
   const TABLE_HEAD = ["S.No", "Interview Name", "Time", 'status', "Result"];
 
-  const TABLE_ROWS = [
-    {
-      title: "Full Stack Developer",
-      time: "17.04PM",
-      status: true
-    },
-    {
-      title: "Full Stack Developer",
-      time: "17.04PM",
-      status: false
-    },
-    {
-      title: "Full Stack Developer",
-      time: "17.04PM",
-      status: false
-    },
-    {
-      title: "Full Stack Developer",
-      time: "17.04PM",
-      status: true
-    },
-    {
-      title: "Full Stack Developer",
-      time: "17.04PM",
-      status: true
-    }
-  ];
+  // const TABLE_ROWS = [
+  //   {
+  //     title: "Full Stack Developer",
+  //     time: "17.04PM",
+  //     status: true
+  //   },
+  //   {
+  //     title: "Full Stack Developer",
+  //     time: "17.04PM",
+  //     status: false
+  //   },
+  //   {
+  //     title: "Full Stack Developer",
+  //     time: "17.04PM",
+  //     status: false
+  //   },
+  //   {
+  //     title: "Full Stack Developer",
+  //     time: "17.04PM",
+  //     status: true
+  //   },
+  //   {
+  //     title: "Full Stack Developer",
+  //     time: "17.04PM",
+  //     status: true
+  //   }
+  // ];
   const setResultPopup = useSetRecoilState(resultPopupState);
+
+  const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
+
+  const axiosInstance = axios.create({
+      baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+      },
+  });
+
+  useEffect(() => {
+      const fetchInterviewHeld = async () => {
+          try {
+              const response = await axiosInstance.get('/interview/getInterviewsHeld');
+              const responseData = response.data.data;
+
+              const detailPromises = responseData.map(interviewId =>
+                  axiosInstance.post('/interview/getPartialDetailsByInterviewId', {
+                      "interviewId": interviewId
+                  })
+              );
+
+              const detailsResponses = await Promise.all(detailPromises);
+
+              const newTableRows = detailsResponses.map(detailResponse => ({
+                  id: detailResponse.data.data.id,
+                  title: detailResponse.data.data.title,
+                  time: detailResponse.data.data.end_time,
+                  status: false
+              }));
+
+              setTABLE_ROWS(prev => [...prev, ...newTableRows]);
+          } catch (error) {
+              console.log(error);
+          }
+      };
+
+      fetchInterviewHeld();
+  }, []);
+
 
 
   return (
@@ -55,7 +99,7 @@ export default function Table() {
           </tr>
         </thead>
         <tbody>
-          {TABLE_ROWS.map(({ title, time, status }, index) => (
+          {TABLE_ROWS.map(({ title, time, status, id }, index) => (
             <tr key={name} className="even:bg-blue-gray-50/50">
               <td className="p-4">
                 <Typography variant="small" color="blue-gray" className="font-normal text-center">
@@ -78,12 +122,16 @@ export default function Table() {
                 </Typography>
               </td>
               <td className="p-4 flex justify-center">
-                <Button
-                onClick={() => {
-                  if (!status) return;
-                  setResultPopup(true);
-                }}
-                className={`${status ? 'bg-[#2b6030]' : 'bg-gray-400 disabled text-black'} `}>{status ? "View Result" : "Expired"}</Button>
+                <Link
+                to={`/history/detailed/${id}`}
+                // onClick={() => {
+                //   if (!status) return;
+                //   // setResultPopup(true);
+                //   console.log(import.meta.env.VITE_FRONTEND_URL+"/history/detailed/"+id)
+                //   // window.location.href = import.meta.env.VITE_FRONTEND_URL+"/history/detailed/"+id;
+                // }}
+                // className={`${status ? 'bg-[#2b6030] text-white font-semibold' : 'bg-gray-400 disabled text-black'} px-4 py-2`}>{status ? "View Result" : "Expired"}</Link>
+                className='bg-[#2b6030] text-white font-semibold px-4 py-2'>View Result</Link>
               </td>
             </tr>
           ))}

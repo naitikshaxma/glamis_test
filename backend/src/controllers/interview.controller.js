@@ -441,3 +441,45 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
         );
     }
 })
+
+export const getInterviewHeld = asyncHandler(async (req, res) => {
+    try{
+        console.log("req.user ####", req.user);
+        const user = req.user;
+        const student = await Student.findOne({ user: user._id });
+        console.log("student ####", student);
+        const interviewTaken = student?.interview_taken;
+        return res.status(200).json(
+            new ApiResponse(200, interviewTaken, "Interviews fetched successfully")
+        )
+    }catch(error){
+        console.log(error.message);
+        return res.status(500).json(
+            ApiError(500, error.message)
+        );
+    }
+})
+
+export const getPartialDetailsByInterviewId = asyncHandler(async (req, res) => {
+    try {
+        console.log("req.body ####", req.body);
+        const interviewId = req.body.interviewId;
+        console.log("interviewId ####", interviewId);
+        const interview = await Interview.findById(interviewId);
+        console.log("interview ####", interview);
+        const interviewDetails = {
+            id : interview._id,
+            title: interview.title,
+            description: interview.description,
+            end_time: interview.end_time.toString().split(" ")[4].slice(0, 5)
+        }
+        return res.status(200).json(
+            new ApiResponse(200, interviewDetails, "Interview details fetched successfully")
+        );
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json(
+            ApiError(500, error.message)
+        );
+    }
+})
