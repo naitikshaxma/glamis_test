@@ -367,7 +367,6 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
-                                    {timer}
                                     {timer && <Timer duration={120} />}
                                 </div>
                             </div>

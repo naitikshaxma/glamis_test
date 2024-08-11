@@ -177,8 +177,9 @@ export default function Sidebar() {
                 block={true}
                 ripple="light"
                 onClick={() => {
-                  Cookies.remove("accessToken");
-                  navigate("/login");
+                  // Cookies.remove("accessToken");
+                  // navigate("/login");
+                  toast.success("Logout Successfully")
                 }}
               >
                 Logout

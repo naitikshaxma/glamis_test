@@ -16,6 +16,7 @@ import SidePic from '../assets/SidePic.png';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
+import { toast } from 'react-toastify';
 
 function Copyright(props) {
     return (
@@ -45,26 +46,39 @@ export default function SignInSide() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (login.email === '' || login.password === '') {
-            alert('Please fill all the fields')
+            toast.error("Please fill all the fields");
         }
         console.log(login);
 
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/login`, login,
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        )
+        // email regexx
 
-        console.log(response.data);
-
-        if (response.status == 201) {
-            Cookies.set('accessToken', response.data.data.accessToken);
-            navigate('/dashboard')
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (!emailRegex.test(login.email)) {
+            toast.error("Please enter a valid email");
             return;
         }
-        alert("something went wrong")
+
+        try{
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/login`, login,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            )
+    
+            console.log(response.data);
+    
+            if (response.status == 201) {
+                Cookies.set('accessToken', response.data.data.accessToken);
+                navigate('/dashboard')
+                toast.success("Login Successful");
+                return;
+            }
+        }
+        catch (error) {
+            toast.error("something went wrong");
+        }
     };
 
     return (

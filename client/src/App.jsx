@@ -16,6 +16,9 @@ import Result from "./pages/Result";
 import DetailedReport from "./pages/DetailedReport";
 import Otp from "./pages/Otp";
 import { useEffect } from "react";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const response = {
     statusCode: 200,
     data: {
@@ -122,6 +125,7 @@ const App = () => {
                     element={<CreateInterview />}
                 />
             </Routes>
+            <ToastContainer />
         </Router>
     );
 };

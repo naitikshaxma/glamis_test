@@ -11,6 +11,7 @@ import avatar from "../../assets/avatar.jpeg";
 import Cookies from "js-cookie";
 import { useRecoilValue } from "recoil";
 import { tokenState } from "../../store/atoms/token";
+import { toast } from "react-toastify";
 
 
 
@@ -120,6 +121,7 @@ export default function Sidebar() {
                                 onClick={() => {
                                     Cookies.remove("accessToken");
                                     navigate("/login");
+                                    toast.success("Logout Successfully")
                                 }}
                             >
                                 Logout
