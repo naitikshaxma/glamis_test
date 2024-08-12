@@ -15,6 +15,8 @@ import { useNavigate } from 'react-router-dom';
 import isOnline from 'is-online';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+
 
 const steps = [
     'Select type of interview',
@@ -73,6 +75,27 @@ export default function CreateInterview() {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = React.useState(0);
     const handleNext = () => {
+        // check if any thing is selected
+        if (activeStep === 0) {
+
+            if (interviewType === 'Resume') {
+                toast.error('This feature is not available yet');
+                return;
+            }
+            else if (!(interviewType === 'JD' || interviewType === 'Core Subjects')) {
+                toast.warning('Please select the type of interview');
+                return;
+
+            }
+        }
+        else if (activeStep === 1 && interviewType === 'JD' && !(selectedCompany && selectedJobTitle)) {
+            toast.warning('Please select the company and job title');
+            return;
+        }
+        else if (activeStep === 1 && interviewType === 'Core Subjects' && !subject) {
+            toast.warning('Please select the core subject');
+            return;
+        }
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
     const handleBack = () => {
@@ -310,20 +333,20 @@ export default function CreateInterview() {
                             <h1 className='text-2xl font-semibold'>Provide Interview Details</h1>
                             <div className="flex flex-col gap-5 my-5">
                                 <div className="flex gap-5 w-1/2">
-                                <select
-                                    className="p-3 border border-gray-300 rounded-lg w-1/2"
-                                    onChange={(e) => {
-                                        const selectedSubject = e.target.value;
-                                        console.log(selectedSubject);
-                                        setSubject(selectedSubject);
-                                    }}
+                                    <select
+                                        className="p-3 border border-gray-300 rounded-lg w-1/2"
+                                        onChange={(e) => {
+                                            const selectedSubject = e.target.value;
+                                            console.log(selectedSubject);
+                                            setSubject(selectedSubject);
+                                        }}
                                     >
-                                    <option value="">Select Core Subjects</option>
-                                    {coreSubjects.map((subject) => (
-                                        <option key={subject} value={subject}>
-                                        {subject}
-                                        </option>
-                                    ))}
+                                        <option value="">Select Core Subjects</option>
+                                        {coreSubjects.map((subject) => (
+                                            <option key={subject} value={subject}>
+                                                {subject}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -383,6 +406,7 @@ export default function CreateInterview() {
                             activeStep === 2 &&
                             <Button variant="contained" color="success"
                                 onClick={() => {
+                                    toast.success('Interview Created Successfully');
                                     CreateInterview();
                                 }}>
                                 Start Interview

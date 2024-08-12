@@ -66,14 +66,20 @@ const LiveInterview = () => {
         if (audioCtxRef.current) {
             audioCtxRef.current.close();
         }
+        console.log("Break 02")
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
+            console.log("Break 02.1")
             mediaRecorderRef.current.onstop = async () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
                 audioChunksRef.current = [];
+                console.log('Break 03')
                 await handleSaveRecording(audioBlob);
+                console.log('Break 07')
+
             };
         }
+        console.log("Break 08")
     };
 
     const [ansMetaData, setAnsMetaData] = useState({
@@ -83,24 +89,24 @@ const LiveInterview = () => {
 
     const handleSaveRecording = async (audioBlob) => {
         setLoading(true);
+        console.log("Break 04")
         const formData = new FormData();
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
         formData.append('interviewId', await Cookies.get('interviewId'));
         console.log('Form data:', formData);
         try {
+            console.log("Break 05")
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${Cookies.get('accessToken')}`,
                 },
             });
-            setResults((prevResults) => [...prevResults, response.data.data]);
-            setAnsMetaData({
-                answer: response.data.data.userAnswer,
-                score: response.data.data.overallScore
-            })
-            
+            console.log('Break 06')
+
+            return;
+
         } catch (error) {
             console.error('Error uploading audio:', error);
         }
@@ -160,7 +166,7 @@ const LiveInterview = () => {
     // if this someone copy the url and paste it in another tab, then this will show 404 page
     // force the user for full screen mode
     useEffect(() => {
-        if(!Cookies.get('interviewId')) {
+        if (!Cookies.get('interviewId')) {
             window.location.href = '/dashboard';
         }
         if (!document.fullscreenElement) {
@@ -253,9 +259,17 @@ const LiveInterview = () => {
 
     const handleNextQuestion = async () => {
         if (isRecording) {
-            await stopRecording();
+            console.log("Break 01")
+            stopRecording();
+            console.log("Break 09")
+
             setIsAudioPlaying(false);
             setTimer(false);
+            console.log("Break 10")
+            if (currentQuestion === totalQuestions - 1) {
+                console.log("Break 11")
+                return;
+            }
             setCurrentQuestion((prev) => prev + 1);
         }
     };
@@ -437,7 +451,7 @@ const LiveInterview = () => {
                                     variant='filled'
                                     color='red'
                                     size='lg'
-                                    disabled={currentQuestion < totalQuestions-1}
+                                    disabled={currentQuestion < totalQuestions - 1}
                                     onClick={handleNextQuestion}
                                     className='w-full mx-3'
                                 >
@@ -448,7 +462,11 @@ const LiveInterview = () => {
                     </div>
                 </>
             ) : (
-                <EvaluationResult data={results} />
+                ((() => {
+                    // close camera and audio
+                    localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                    return null;
+                }) && (<EvaluationResult data={results} />))
             )}
         </>
     );

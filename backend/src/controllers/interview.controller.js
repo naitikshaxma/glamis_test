@@ -372,20 +372,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
         console.log("feedback ####", feedback);
 
-        console.log(typeof feedback)
-        // const interviewQuestion = await InterviewQuestion.create({
-            //         question: question.question,
-            //         answer: question.userAnswer,
-            //         interview: interviewId,
-            //         student: student._id,
-            //         overallPerformance: question.overallScore,
-            //         grammar: question.grammarScore,
-            //         vocabulary: question.vocabularyScore,
-            //         technicalExplanation: [question.technicalExplanation.Pros, question.technicalExplanation.Cons],
-            //         vocabularyExplanation: [question.vocabularyExplanation.Pros, question.vocabularyExplanation.Cons],
-            //         grammarExplanation: [question.grammarExplanation.Pros, question.grammarExplanation.Cons],
-            //         expectedAnswer: question.expectedAnswer
-            //     });
+        console.log(typeof feedback);
 
         const interviewQuestion =   await InterviewQuestion.create({
             question: question,

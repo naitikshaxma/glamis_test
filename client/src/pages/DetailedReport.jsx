@@ -81,7 +81,7 @@ const DetailedReport = () => {
                                             to={`question-${index}`}
                                             smooth={true}
                                             duration={500}
-                                            className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
                                             onClick={() => handleQuestionClick(index)}
                                         >
                                             Q{index + 1}
@@ -91,7 +91,7 @@ const DetailedReport = () => {
                             </div>
                         </div>
                         <div
-                            className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
                             id="scroll-container"
                             ref={scrollContainerRef}
                         >
@@ -107,14 +107,14 @@ const DetailedReport = () => {
                                             improvement: [item.technicalExplanation[1]]
                                         }}
                                         score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
-                                        expectedAnswer={ item.expectedAnswer }
+                                        expectedAnswer={item.expectedAnswer}
                                     />
                                 ))
                             }
                         </div>
                     </div>
                 )
-            case 'verbal': 
+            case 'verbal':
                 return (
                     <div className='w-full flex justify-around mb-5'>
                         <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
