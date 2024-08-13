@@ -3,8 +3,12 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
 
     let prompt = null;
     let subjectType = subject;
+    
+    if (subjectType === "Olympics") {
+        prompt = "Ask the user to write an essay on " + subjectType;
 
-    if (subjectType === "Data Structures and Algorithms") {
+    }
+    else if (subjectType === "Data Structures and Algorithms") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {

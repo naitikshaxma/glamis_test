@@ -56,6 +56,12 @@ const companies = [
     "Capgemini"
 ]
 
+const topicsList = [
+    "Olympics",
+    "Video Games",
+    "Politics"
+]
+
 export default function CreateInterview() {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = React.useState(0);
@@ -67,7 +73,7 @@ export default function CreateInterview() {
                 toast.error('This feature is not available yet');
                 return;
             }
-            else if (!(interviewType === 'JD' || interviewType === 'Core Subjects')) {
+            else if (!(interviewType === 'JD' || interviewType === 'Core Subjects' || interviewType === 'Written')) {
                 toast.warning('Please select the type of interview');
                 return;
 
@@ -115,6 +121,7 @@ export default function CreateInterview() {
     }
     const [interviewType, setInterviewType] = React.useState('');
     const [subject, setSubject] = React.useState('');
+    const [topic, setTopic] = React.useState('');
 
     const [selectedCompany, setSelectedCompany] = React.useState('');
     const [selectedJobTitle, setSelectedJobTitle] = React.useState('');
@@ -159,6 +166,23 @@ export default function CreateInterview() {
                 Cookies.set('subject', subject);
                 navigate('/live');
             }
+        } else if (interviewType === 'Written') {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
+                subject: topic,
+            },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${Cookies.get('accessToken')}`
+                    }
+                }
+            )
+            console.log(response.data);
+            if (response.data.statusCode === 200) {
+                Cookies.set('interviewId', response.data.data._id);
+                Cookies.set('subject', topic);
+                navigate('/written');
+            }
         }
     }
 
@@ -197,7 +221,7 @@ export default function CreateInterview() {
                     {
                         activeStep === 0 &&
                         <div className="flex justify-between gap-5 my-5">
-                            <CardContent className={` w-1/3 p-6
+                            <CardContent className={` w-1/4 p-6
                         ${interviewType === 'JD' ? 'bg-gray-100' : ''}
                         rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform transform duration-300`}
                                 onClick={() => {
@@ -218,7 +242,7 @@ export default function CreateInterview() {
                             </CardContent>
 
                             <CardContent className={
-                                `w-1/3 p-6
+                                `w-1/4 p-6
                             ${interviewType === 'Resume' ? 'bg-gray-100' : ''}
                             rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform transform duration-300`}
                                 onClick={() => {
@@ -241,7 +265,7 @@ export default function CreateInterview() {
 
 
                             <CardContent className={
-                                `w-1/3 p-6
+                                `w-1/4 p-6
                             ${interviewType === 'Core Subjects' ? 'bg-gray-100' : ''}
                             rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform
                             transform
@@ -258,6 +282,27 @@ export default function CreateInterview() {
                                 </div>
                                 <Typography variant="body2">
                                     provide the core subjects and the system will generate the interview questions
+                                </Typography>
+                            </CardContent>
+
+                            <CardContent className={
+                                `w-1/4 p-6
+                            ${interviewType === 'Written' ? 'bg-gray-100' : ''}
+                            rounded-lg shadow-lg flex flex-col items-center justify-center hover:scale-105 transition-transform
+                            transform
+                            duration-300`}
+                                onClick={() => {
+                                    setInterviewType('Written');
+                                }}>
+                                <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
+                                    Writing Skills Practice
+                                </Typography>
+                                <div className="flex w-24 h-24 m-5 items-center justify-center">
+
+                                    <img src={JDpic} className='w-full' />
+                                </div>
+                                <Typography variant="body2">
+                                    this module will test your written english abilities
                                 </Typography>
                             </CardContent>
 
@@ -330,6 +375,28 @@ export default function CreateInterview() {
                                         {coreSubjects.map((subject) => (
                                             <option key={subject} value={subject}>
                                                 {subject}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>}
+                        {activeStep === 1 && interviewType === 'Written' && <div>
+                            <h1 className='text-2xl font-semibold'>Provide Interview Details</h1>
+                            <div className="flex flex-col gap-5 my-5">
+                                <div className="flex gap-5 w-1/2">
+                                    <select
+                                        className="p-3 border border-gray-300 rounded-lg w-1/2"
+                                        onChange={(e) => {
+                                            const selectedTopic = e.target.value;
+                                            console.log(selectedTopic);
+                                            setTopic(selectedTopic);
+                                        }}
+                                    >
+                                        <option value="">Select Your Preferred Topic</option>
+                                        {topicsList.map((topic) => (
+                                            <option key={topic} value={topic}>
+                                                {topic}
                                             </option>
                                         ))}
                                     </select>

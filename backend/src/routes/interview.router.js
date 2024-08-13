@@ -15,6 +15,7 @@ const router = Router()
 router.route('/generateQuestion').post(RateLimiter1min, isAuthenticated, generateQuestion);
 router.route('/generateQuestionForJD').post(RateLimiter1min, isAuthenticated, generateQuestionForJD);
 router.route('/evaluateQuestion').post(RateLimiter1min, isAuthenticated, extractAnswerAudio, handleAudioUpload, evaluateAnswer); // removed isAuthenticated middleware for testing purposes
+router.route('/evaluateQuestion/sendText').post(RateLimiter1min, isAuthenticated, evaluateAnswer);
 router.route('/createInterview').post(RateLimiter1min, isAuthenticated, createInterview);
 router.route('/createInterviewByJD').post(RateLimiter1min, isAuthenticated, createInterviewByJD);
 router.route("/saveResultToDb").post(RateLimiter1min, isAuthenticated, saveResultToDb);

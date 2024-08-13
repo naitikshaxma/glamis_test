@@ -156,7 +156,7 @@ const LiveInterview = () => {
     const [skipMessage, setSkipMessage] = useState("")
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 4;
+    const totalQuestions = 3;
 
     // const restetTimer = () => {
     //     setTimer(120);

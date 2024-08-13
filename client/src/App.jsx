@@ -18,6 +18,7 @@ import Otp from "./pages/Otp";
 import { useEffect } from "react";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import WrittenInterview from "./pages/WrittenInterview";
 
 const response = {
     statusCode: 200,
@@ -60,17 +61,17 @@ const App = () => {
     useEffect(() => {
         // Function to disable right-click
         const handleContextMenu = (e) => {
-          e.preventDefault(); // Prevents the context menu from appearing
+            e.preventDefault(); // Prevents the context menu from appearing
         };
-    
+
         // Attach the event listener to the document
         document.addEventListener('contextmenu', handleContextMenu);
-    
+
         // Clean up the event listener on component unmount
         return () => {
-          document.removeEventListener('contextmenu', handleContextMenu);
+            document.removeEventListener('contextmenu', handleContextMenu);
         };
-      }, []);
+    }, []);
     const resultPopup = useRecoilValue(resultPopupState);
     return (
 
@@ -116,6 +117,7 @@ const App = () => {
                     path="/live"
                     element={<LiveInterview />}
                 />
+                <Route path="/written" element={<WrittenInterview />} />
                 <Route
                     path="/evaluation"
                     element={<EvaluationResult data={response.data} />}
