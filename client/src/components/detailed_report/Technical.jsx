@@ -103,14 +103,11 @@ export const TechnicalCard = ({ question, answer, feedback, score, qno, expected
                         >
                             Expected Answer
                         </button>
-
-                        {showAnswer && (
-                            <ul className="mt-2 list-disc">
-                                {expectedAnswer.split('\n').map((point, index) => (
-                                    <li key={index}>{point}</li>
-                                ))}
-                            </ul>
-                        )}
+                        <div className='block mt-4'>
+                            {showAnswer && (
+                                expectedAnswer
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
