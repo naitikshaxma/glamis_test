@@ -266,10 +266,6 @@ const LiveInterview = () => {
             setIsAudioPlaying(false);
             setTimer(false);
             console.log("Break 10")
-            if (currentQuestion === totalQuestions - 1) {
-                console.log("Break 11")
-                return;
-            }
             setCurrentQuestion((prev) => prev + 1);
         }
     };

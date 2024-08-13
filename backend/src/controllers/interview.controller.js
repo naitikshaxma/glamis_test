@@ -216,7 +216,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.jobTitle} - \nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    let prompt = generateQuestionsPromptForJD(selectedCompany, jobTitle, conversationHistory, historyPrompt);
+    let prompt = generateQuestionsPromptForJD(selectedCompany, jobTitle,  historyPrompt,conversationHistory);
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
 
@@ -435,9 +435,10 @@ export const getInterviewHeld = asyncHandler(async (req, res) => {
         const user = req.user;
         const student = await Student.findOne({ user: user._id });
         console.log("student ####", student);
-        const interviewTaken = student?.interview_taken;
+        // take only latest 5 interview
+        const interview_taken = student?.interview_taken.slice(-5);
         return res.status(200).json(
-            new ApiResponse(200, interviewTaken, "Interviews fetched successfully")
+            new ApiResponse(200, interview_taken, "Interviews fetched successfully")
         )
     }catch(error){
         console.log(error.message);
@@ -454,11 +455,12 @@ export const getPartialDetailsByInterviewId = asyncHandler(async (req, res) => {
         console.log("interviewId ####", interviewId);
         const interview = await Interview.findById(interviewId);
         console.log("interview ####", interview);
+        
         const interviewDetails = {
             id : interview._id,
             title: interview.title,
             description: interview.description,
-            end_time: interview.end_time.toString().split(" ")[4].slice(0, 5)
+            end_time: interview.end_time?.toString().split(" ")[4].slice(0, 5)
         }
         return res.status(200).json(
             new ApiResponse(200, interviewDetails, "Interview details fetched successfully")

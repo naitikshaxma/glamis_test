@@ -55,6 +55,8 @@ export default function Table() {
               const response = await axiosInstance.get('/interview/getInterviewsHeld');
               const responseData = response.data.data;
 
+              console.log("Interviews held: ", responseData);
+
               const detailPromises = responseData.map(interviewId =>
                   axiosInstance.post('/interview/getPartialDetailsByInterviewId', {
                       "interviewId": interviewId
@@ -69,6 +71,7 @@ export default function Table() {
                   time: detailResponse.data.data.end_time,
                   status: false
               }));
+              newTableRows.reverse();
 
               setTABLE_ROWS(prev => [...prev, ...newTableRows]);
           } catch (error) {

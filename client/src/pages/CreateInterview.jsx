@@ -41,27 +41,12 @@ const coreSubjects = [
 
 const jobTitles = [
     "Software Engineer",
-    "Data Scientist",
-    "Data Analyst",
     "Backend Developer",
     "Frontend Developer",
     "Full Stack Developer",
     "DevOps Engineer",
-    "QA Engineer",
     "ML Engineer",
     "AI Engineer",
-    "Data Engineer",
-    "Cloud Engineer",
-    "Cyber Security Engineer",
-    "Network Engineer",
-    "System Engineer",
-    "Database Engineer",
-    "Software Developer",
-    "Software Architect",
-    "Software Tester",
-    "Software Consultant",
-    "Software Analyst",
-    "MLops Engineer",
 ]
 
 const companies = [

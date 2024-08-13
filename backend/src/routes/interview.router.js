@@ -18,8 +18,8 @@ router.route('/evaluateQuestion').post(RateLimiter1min, isAuthenticated, extract
 router.route('/createInterview').post(RateLimiter1min, isAuthenticated, createInterview);
 router.route('/createInterviewByJD').post(RateLimiter1min, isAuthenticated, createInterviewByJD);
 router.route("/saveResultToDb").post(RateLimiter1min, isAuthenticated, saveResultToDb);
-router.route("/getInterviewsHeld").get(RateLimiter1min, isAuthenticated, getInterviewHeld);
-router.route("/getPartialDetailsByInterviewId").post(RateLimiter1min, isAuthenticated, getPartialDetailsByInterviewId);
+router.route("/getInterviewsHeld").get( isAuthenticated, getInterviewHeld);
+router.route("/getPartialDetailsByInterviewId").post( isAuthenticated, getPartialDetailsByInterviewId);
 
 export default router;
 
