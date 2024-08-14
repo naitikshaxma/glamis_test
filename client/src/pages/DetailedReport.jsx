@@ -69,51 +69,52 @@ const DetailedReport = () => {
         }, []);
         switch (activeTab) {
             case 'technical':
-                return (
-                    <div className='w-full flex justify-around mb-5'>
-                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                            <div className="flex flex-col space-y-4">
+    return (
+        <div className='w-full flex justify-around mb-5'>
+            <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                <div className="flex flex-col space-y-4">
+                    {
+                        result.map((item, index) => (
+                            <Link
+                                key={index}
+                                to={`#question-${index}`}  // Updated: include '#' to match with the id
+                                smooth={true}
+                                duration={500}
+                                className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                onClick={() => handleQuestionClick(index)}
+                            >
+                                Q{index + 1}
+                            </Link>
+                        ))
+                    }
+                </div>
+            </div>
+            <div
+                className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                id="scroll-container"
+                ref={scrollContainerRef}
+            >
+                {
+                    result.map((item, index) => (
+                        <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
+                            <TechnicalCard
+                                qno={index}
+                                question={item.question}
+                                answer={item.answer}
+                                feedback={{
+                                    good: [item.technicalExplanation[0]],
+                                    improvement: [item.technicalExplanation[1]]
+                                }}
+                                score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
+                                expectedAnswer={item.expectedAnswer}
+                            />
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    )
 
-                                {
-                                    result.map((item, index) => (
-                                        <Link
-                                            key={index}
-                                            to={`question-${index}`}
-                                            smooth={true}
-                                            duration={500}
-                                            className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
-                                            onClick={() => handleQuestionClick(index)}
-                                        >
-                                            Q{index + 1}
-                                        </Link>
-                                    ))
-                                }
-                            </div>
-                        </div>
-                        <div
-                            className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
-                            id="scroll-container"
-                            ref={scrollContainerRef}
-                        >
-                            {
-                                result.map((item, index) => (
-                                    <TechnicalCard
-                                        key={index}
-                                        qno={index}
-                                        question={item.question}
-                                        answer={item.answer}
-                                        feedback={{
-                                            good: [item.technicalExplanation[0]],
-                                            improvement: [item.technicalExplanation[1]]
-                                        }}
-                                        score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
-                                        expectedAnswer={item.expectedAnswer}
-                                    />
-                                ))
-                            }
-                        </div>
-                    </div>
-                )
             case 'verbal':
                 return (
                     <div className='w-full flex justify-around mb-5'>

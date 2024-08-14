@@ -9,9 +9,9 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
 
     }
     else if (subjectType === "Data Structures and Algorithms") {
-        if (conversationHistory.length < 3) {
+        if (conversationHistory.length == 1) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
-        } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
+        } else if (conversationHistory.length == 2) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. Ask the user to explain the code and predict the output:\n\n\`\`\`java\n# Your java code snippet here\n\`\`\``;
         } else {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;

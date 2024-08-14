@@ -218,8 +218,16 @@ const generateQuestionsPromptForJD = (selectedCompany, jobTitle, historyPrompt, 
         // First three questions: Straightforward, concept-based (non-coding)
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a basic and conceptual technical question related to the job title ${jobTitle} for ${selectedCompany}.\n${JD}`;
     } else if (conversationHistory.length == 2) {
+        let codeSnippetLanguage;
+        if (jobTitle == "Frontend Developer" || jobTitle == "Backend Developer" || jobTitle == "Full Stack Developer") {
+            codeSnippetLanguage = "JavaScript";
+        } else if (jobTitle == "Software Engineer") {
+            codeSnippetLanguage = "Java";
+        } else if (jobTitle == "ML Engineer" || jobTitle == "AI Engineer") {
+            codeSnippetLanguage = "Python";
+        }
         // Next four questions: Coding questions related to the JD and role
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new coding question (output based) for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to predict the output of the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`;
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new coding question (output based) for a ${jobTitle} interview at ${selectedCompany}. Provide a ${codeSnippetLanguage} code snippet and ask the user to predict the output of the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`;
     } else {
         // Remaining three questions: Scenario-based, related to real-world tasks
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\n${JD}`;
