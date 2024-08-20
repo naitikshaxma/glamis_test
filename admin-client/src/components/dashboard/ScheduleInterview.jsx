@@ -1,17 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Card,
-    CardHeader,
     CardBody,
     Input,
     Button,
     Typography,
     Select,
     Option,
-    Textarea
+    Textarea,
 } from "@material-tailwind/react";
 
-// Define a list of positions in the software industry
 const softwarePositions = [
     "Software Developer",
     "Product Engineer",
@@ -22,200 +20,252 @@ const softwarePositions = [
     "DevOps Engineer",
     "QA Engineer",
     "UX/UI Designer",
-    "Systems Analyst"
+    "Systems Analyst",
 ];
 
+const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) => (
+    <div className="flex flex-col mb-6">
+        <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+            {label}
+        </Typography>
+        <Input
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            max={max}
+            className="!border-blue-gray-200 focus:!border-gray-900 py-2 px-3 rounded-md"
+        />
+    </div>
+);
+
 export default function ScheduleInterview() {
-    const [interviewName, setInterviewName] = React.useState("");
-    const [companyName, setCompanyName] = React.useState("");
-    const [date, setDate] = React.useState("");
-    const [duration, setDuration] = React.useState({ from: "", to: "" });
-    const [noOfQuestions, setNoOfQuestions] = React.useState("");
-    const [position, setPosition] = React.useState("");
-    const [jobDescription, setJobDescription] = React.useState("");
-    const [studentRecord, setStudentRecord] = React.useState(null);
+    const [currentStep, setCurrentStep] = useState(1);
+    const [interviewName, setInterviewName] = useState("");
+    const [companyName, setCompanyName] = useState("");
+    const [date, setDate] = useState("");
+    const [duration, setDuration] = useState({ from: "", to: "" });
+    const [noOfQuestions, setNoOfQuestions] = useState("");
+    const [position, setPosition] = useState("");
+    const [easy, setEasy] = useState("");
+    const [medium, setMedium] = useState("");
+    const [hard, setHard] = useState("");
+    const [jobDescription, setJobDescription] = useState("");
+    const [questions, setQuestions] = useState([{ question: "", difficulty: "Easy" }]);
+
+    const handleNext = () => {
+        if (currentStep === 1 && interviewName && companyName && date && noOfQuestions && position) {
+            setCurrentStep(2);
+        }
+    };
+
+    const handlePrevious = () => {
+        setCurrentStep(currentStep - 1);
+    };
+
+    const handleSubmit = () => {
+        // Handle form submission logic here
+        console.log("Form submitted");
+    };
+
+    const handleAddQuestion = () => {
+        if (questions.length < parseInt(noOfQuestions)) {
+            setQuestions([...questions, { question: "", difficulty: "Easy" }]);
+        }
+    };
+
+    const handleQuestionChange = (index, field, value) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[index][field] = value;
+        setQuestions(updatedQuestions);
+    };
 
     return (
-        <div className="p-8 flex flex-col h-[95vh]">
-            <div className="flex justify-between w-full border-b pb-2 mb-[8vh]">
-                <h1 className="text-2xl font-semibold mb-4">Interview Creation</h1>
-            </div>
-            <Card className="mt-4 mr-8">
-                <CardHeader
-                    color=""
-                    floated={false}
-                    shadow={true}
-                    className="text-center bg-[#2c6031] p-4"
-                >
-                    <Typography variant="h5" color="white">
-                        Schedule Interview
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-8">
+            <div className="w-full max-w-6xl h-full p-8 rounded-lg shadow-lg bg-white flex flex-col">
+                <div className="mb-6 flex justify-between items-center border-b pb-4">
+                    <Typography variant="h4" color="blue-gray" className="font-semibold">
+                        Interview Creation
                     </Typography>
-                </CardHeader>
-                <CardBody>
-                    <form className="space-y-6">
-                        {/* First row: Interview Name, Company Name, and Date */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Interview Name
-                                </Typography>
-                                <Input
+                </div>
+
+                <div className="flex-grow">
+                    {/* Combined Form: Basic Information and Duration */}
+                    {currentStep === 1 && (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <FormInput
+                                    label="Interview Name"
                                     value={interviewName}
                                     onChange={(e) => setInterviewName(e.target.value)}
                                     placeholder="Interview Name"
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                                 />
-                            </div>
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Company Name
-                                </Typography>
-                                <Input
+                                <FormInput
+                                    label="Company Name"
                                     value={companyName}
                                     onChange={(e) => setCompanyName(e.target.value)}
                                     placeholder="Company Name"
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                                 />
-                            </div>
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Date
-                                </Typography>
-                                <Input
+                                <FormInput
+                                    label="Date"
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                                 />
                             </div>
-                        </div>
-
-                        {/* Second row: Duration, No. of Questions, and Position */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Duration (From)
-                                </Typography>
-                                <Input
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                                <FormInput
+                                    label="Duration (From)"
                                     type="time"
                                     value={duration.from}
                                     onChange={(e) => setDuration({ ...duration, from: e.target.value })}
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                                 />
-                            </div>
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Duration (To)
-                                </Typography>
-                                <Input
+                                <FormInput
+                                    label="Duration (To)"
                                     type="time"
                                     value={duration.to}
                                     onChange={(e) => setDuration({ ...duration, to: e.target.value })}
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
                                 />
-                            </div>
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    No. of Questions
-                                </Typography>
-                                <Input
+                                <div className="flex flex-col">
+                                    <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                        Position
+                                    </Typography>
+                                    <Select
+                                        value={position}
+                                        onChange={(value) => setPosition(value)}
+                                        className="!border-blue-gray-200 focus:!border-gray-900 py-2 px-3 rounded-md"
+                                        placeholder="Select Position"
+                                    >
+                                        {softwarePositions.map((pos) => (
+                                            <Option key={pos} value={pos}>
+                                                {pos}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </div>
+                                <FormInput
+                                    label="No. of Questions"
                                     type="number"
-                                    max={20}
                                     value={noOfQuestions}
                                     onChange={(e) => setNoOfQuestions(e.target.value)}
                                     placeholder="Number of Questions"
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+                                    max={20}
                                 />
                             </div>
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Position
-                                </Typography>
-                                <Select
-                                    value={position}
-                                    onChange={(value) => setPosition(value)}
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-                                    placeholder="Select Position"
-                                >
-                                    {softwarePositions.map((pos) => (
-                                        <Option key={pos} value={pos}>
-                                            {pos}
-                                        </Option>
-                                    ))}
-                                </Select>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <FormInput
+                                    label="Easy"
+                                    type="number"
+                                    value={easy}
+                                    onChange={(e) => setEasy(e.target.value)}
+                                    max={8}
+                                />
+                                <FormInput
+                                    label="Medium"
+                                    type="number"
+                                    value={medium}
+                                    onChange={(e) => setMedium(e.target.value)}
+                                    max={7}
+                                />
+                                <FormInput
+                                    label="Hard"
+                                    type="number"
+                                    value={hard}
+                                    onChange={(e) => setHard(e.target.value)}
+                                    max={5}
+                                />
                             </div>
-                        </div>
+                        </>
+                    )}
 
-                        {/* Third row: Job Description and Student Record */}
-                        <div className="space-y-4">
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Paste Job Description
-                                </Typography>
-                                <Textarea
-                                    value={jobDescription}
-                                    onChange={(e) => setJobDescription(e.target.value)}
-                                    placeholder="Paste the job description here"
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-                                />
+                    {/* Step 2: Job Description, Add Questions, and Upload Record */}
+                    {currentStep === 2 && (
+                        <>
+                            <div className="space-y-6 mb-6">
+                                <div className="flex flex-col mb-6">
+                                    <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                        Paste Job Description
+                                    </Typography>
+                                    <Textarea
+                                        value={jobDescription}
+                                        onChange={(e) => setJobDescription(e.target.value)}
+                                        placeholder="Paste the job description here"
+                                        className="!border-blue-gray-200 focus:!border-gray-900 py-2 px-3 rounded-md"
+                                    />
+                                </div>
+                                {questions.map((q, index) => (
+                                    <div key={index} className="flex justify-between mb-4">
+                                        <div className="flex flex-col flex-1">
+                                            <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                                Add New Question (Optional)
+                                            </Typography>
+                                            <Input
+                                                value={q.question}
+                                                onChange={(e) => handleQuestionChange(index, "question", e.target.value)}
+                                                placeholder="Enter question"
+                                                className="w-full"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col ml-4">
+                                            <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                                Set Question Difficulty
+                                            </Typography>
+                                            <Select
+                                                value={q.difficulty}
+                                                onChange={(value) => handleQuestionChange(index, "difficulty", value)}
+                                                className="w-full"
+                                            >
+                                                <Option value="Easy">Easy</Option>
+                                                <Option value="Medium">Medium</Option>
+                                                <Option value="Hard">Hard</Option>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                ))}
+                                {questions.length < parseInt(noOfQuestions) && (
+                                    <Button
+                                        size="sm"
+                                        className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                                        onClick={handleAddQuestion}
+                                    >
+                                        +
+                                    </Button>
+                                )}
                             </div>
-                            <div className="flex flex-col">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="mb-2 font-medium"
-                                >
-                                    Upload Student Record
-                                </Typography>
-                                <input
-                                    type="file"
-                                    onChange={(e) => setStudentRecord(e.target.files[0])}
-                                    className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-                                />
-                            </div>
-                        </div>
+                        </>
+                    )}
 
-                        <Button
-                            size="lg"
-                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                        >
-                            Submit
-                        </Button>
-                    </form>
-                </CardBody>
-            </Card>
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between mt-auto">
+                        {currentStep > 1 && (
+                            <Button
+                                size="lg"
+                                onClick={handlePrevious}
+                                className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                            >
+                                Previous
+                            </Button>
+                        )}
+                        {currentStep < 2 ? (
+                            <Button
+                                size="lg"
+                                onClick={handleNext}
+                                className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                size="lg"
+                                onClick={handleSubmit}
+                                className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
