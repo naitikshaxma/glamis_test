@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { createCompanyInterview } from "../controllers/admin.controller.js";
 
-const adminRouter = Router();
+const router = Router();
 
-adminRouter.post("/interview/company/create", createCompanyInterview);
+router.post("/interview/company/create", createCompanyInterview);
 
-export default adminRouter;
+export default router;

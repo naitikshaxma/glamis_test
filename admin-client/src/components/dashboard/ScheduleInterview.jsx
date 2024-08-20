@@ -8,6 +8,7 @@ import {
     Textarea,
 } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
+import axios from "axios";
 
 const softwarePositions = [
     "Software Developer",
@@ -38,7 +39,7 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
     </div>
 );
 
-const sampleCSV = `name,email,age\nJohn Doe,john.doe@example.com,22\nJane Smith,jane.smith@example.com,25`;
+const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function ScheduleInterview() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -64,9 +65,43 @@ export default function ScheduleInterview() {
         setCurrentStep(currentStep - 1);
     };
 
-    const handleSubmit = () => {
-        // Handle form submission logic here
-        console.log("Form submitted");
+    const handleSubmit = async () => {
+        console.log({
+            name: interviewName,
+            company: companyName,
+            date,
+            from: duration.from,
+            to: duration.to,
+            no_of_questions: noOfQuestions,
+            position,
+            easy_remaining: easy,
+            medium_remaining: medium,
+            hard_remaining: hard,
+            job_description: jobDescription,
+            questions
+        });
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/company/create`, {
+                name: interviewName,
+                company: companyName,
+                date,
+                from: duration.from,
+                to: duration.to,
+                no_of_questions: noOfQuestions,
+                position: position,
+                easy_remaining: easy,
+                medium_remaining: medium,
+                hard_remaining: hard,
+                job_description: jobDescription,
+                questions
+            }, {
+                headers: { "Content-Type": "application/json" }
+            });
+            console.log("Form submitted successfully:", response.data);
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
     };
 
     const handleAddQuestion = () => {
@@ -190,19 +225,29 @@ export default function ScheduleInterview() {
                                 />
                             </div>
                             <div className="flex space-x-4 mb-6">
-                                <input
-                                    type="file"
-                                    accept=".csv"
-                                    onChange={handleFileUpload}
-                                    className="file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 file:rounded-md file:text-sm file:font-semibold file:bg-[#2c6031] file:text-white hover:file:bg-[#1f4d26]"
-                                />
-                                <Button
-                                    size="sm"
-                                    onClick={handleDownloadSampleCSV}
-                                    className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                                >
-                                    Show Sample CSV
-                                </Button>
+                                <div className="flex flex-col">
+                                    <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                        Upload Student EmailIDs
+                                    </Typography>
+                                    <input
+                                        type="file"
+                                        accept=".csv"
+                                        onChange={handleFileUpload}
+                                        className="file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 file:rounded-md file:text-sm file:font-semibold file:bg-[#2c6031] file:text-white hover:file:bg-[#1f4d26]"
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                        Download Sample CSV
+                                    </Typography>
+                                    <Button
+                                        size="sm"
+                                        onClick={handleDownloadSampleCSV}
+                                        className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                                    >
+                                        Show Sample CSV
+                                    </Button>
+                                </div>
                             </div>
                         </>
                     )}

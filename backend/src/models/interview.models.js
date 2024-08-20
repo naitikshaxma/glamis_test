@@ -123,91 +123,93 @@ const InterviewByCoreSubjects = mongoose.model('InterviewByCoreSubjects', interv
 
 
 const adminCompanyInterview = new mongoose.Schema({
-    name : {
-        type : String,
-        required : true
+    name: {
+        type: String,
+        required: true
     },
-    company : {
-        type : String,
-        required : true
+    company: {
+        type: String,
+        required: true
     },
-    date : {
-        type : Date,
-        required : true
+    date: {
+        type: Date,
+        required: true
     },
-    from : {
-        type : String,
-        required : true
+    from: {
+        type: String,
+        required: true
     },
-    to : {
-        type : String,
-        required : true
+    to: {
+        type: String,
+        required: true
     },
-    job_description : {
-        type : String,
-        required : true
+    job_description: {
+        type: String,
+        required: true
     },
-    students : {
-        type : [mongoose.Schema.Types.ObjectId],
-        required : true,
-        ref : "Student"
+    students: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Student"
     },
-    interview : {
-        type : [mongoose.Schema.Types.ObjectId],
-        required : true,
-        ref : "Interview"
+    interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
     },
-    is_active : {
-        type : Boolean,
-        default : true
+    is_active: {
+        type: Boolean,
+        default: true
     },
-    no_of_questions : {
-        type : Number,
-        required : true
+    no_of_questions: {
+        type: Number,
+        required: true
     },
-    easy_remaning : {
-        type : Number,
-        required : true
+    easy_remaining: {
+        type: Number,
+        required: true
     },
-    medium_remaning : {
-        type : Number,
-        required : true
+    medium_remaining: {
+        type: Number,
+        required: true
     },
-    hard_remaning : {
-        type : Number,
-        required : true
+    hard_remaining: {
+        type: Number,
+        required: true
     },
-    questions : {
-        type : [mongoose.Schema.Types.ObjectId],
-        ref : "InterviewQuestionByAdmin"
+    questions: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "InterviewQuestionByAdmin"
     },
-    position : {
-        type : String,
-        required : true
+    position: {
+        type: String,
+        required: true
     },
-    link : {
-        type : String,
-        required : true
-    }},
-    { timestamps : true }
+    link: {
+        type: String,
+        required: true
+    }
+},
+    { timestamps: true }
 );
 
 const AdminCompanyInterview = mongoose.model('AdminCompanyInterview', adminCompanyInterview);
 
 
 const interviewQuestionByAdmin = new mongoose.Schema({
-    question : {
-        type : String,
-        required : true
+    question: {
+        type: String,
+        required: true
     },
-    difficulty : {
-        type : String,
-        required : true
-    }},
-    { timestamps : true }
+    difficulty: {
+        type: String,
+        required: true
+    }
+},
+    { timestamps: true }
 );
 
-const InterviewQuestionByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
+const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 
 
-export { Interview, InterviewQuestion, InterviewByJD, InterviewByResume, InterviewByCoreSubjects , AdminCompanyInterview };
+export { Interview, InterviewQuestion, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };
