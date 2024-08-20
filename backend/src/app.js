@@ -24,11 +24,13 @@ import userRouter from './routes/user.router.js';
 import interviewRouter from './routes/interview.router.js';
 import resultRouter from './routes/result.router.js';
 import objectRouter from './routes/object.router.js';
+import adminRouter from './routes/admin.router.js';
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/interview", interviewRouter)
 app.use("/api/v1/result", resultRouter)
 app.use("/api/v1/objectStore", objectRouter)
+app.use("/api/v1/admin", adminRouter)
 
 
 // health check route
