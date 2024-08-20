@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import {
-    Card,
-    CardBody,
     Input,
     Button,
     Typography,
@@ -9,6 +7,7 @@ import {
     Option,
     Textarea,
 } from "@material-tailwind/react";
+import { saveAs } from 'file-saver';
 
 const softwarePositions = [
     "Software Developer",
@@ -38,6 +37,8 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
         />
     </div>
 );
+
+const sampleCSV = `name,email,age\nJohn Doe,john.doe@example.com,22\nJane Smith,jane.smith@example.com,25`;
 
 export default function ScheduleInterview() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -80,16 +81,29 @@ export default function ScheduleInterview() {
         setQuestions(updatedQuestions);
     };
 
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Handle file upload logic here
+            console.log("File selected:", file);
+        }
+    };
+
+    const handleDownloadSampleCSV = () => {
+        const blob = new Blob([sampleCSV], { type: 'text/csv;charset=utf-8' });
+        saveAs(blob, 'sample.csv');
+    };
+
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-8">
-            <div className="w-full max-w-6xl h-full p-8 rounded-lg shadow-lg bg-white flex flex-col">
+        <div className="flex flex-col h-screen w-full bg-gray-100">
+            <div className="flex-grow flex flex-col p-8 bg-white">
                 <div className="mb-6 flex justify-between items-center border-b pb-4">
                     <Typography variant="h4" color="blue-gray" className="font-semibold">
                         Interview Creation
                     </Typography>
                 </div>
 
-                <div className="flex-grow">
+                <div className="flex-grow overflow-hidden">
                     {/* Combined Form: Basic Information and Duration */}
                     {currentStep === 1 && (
                         <>
@@ -175,6 +189,21 @@ export default function ScheduleInterview() {
                                     max={5}
                                 />
                             </div>
+                            <div className="flex space-x-4 mb-6">
+                                <input
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={handleFileUpload}
+                                    className="file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 file:rounded-md file:text-sm file:font-semibold file:bg-[#2c6031] file:text-white hover:file:bg-[#1f4d26]"
+                                />
+                                <Button
+                                    size="sm"
+                                    onClick={handleDownloadSampleCSV}
+                                    className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                                >
+                                    Show Sample CSV
+                                </Button>
+                            </div>
                         </>
                     )}
 
@@ -193,77 +222,80 @@ export default function ScheduleInterview() {
                                         className="!border-blue-gray-200 focus:!border-gray-900 py-2 px-3 rounded-md"
                                     />
                                 </div>
-                                {questions.map((q, index) => (
-                                    <div key={index} className="flex justify-between mb-4">
-                                        <div className="flex flex-col flex-1">
-                                            <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                Add New Question (Optional)
-                                            </Typography>
-                                            <Input
-                                                value={q.question}
-                                                onChange={(e) => handleQuestionChange(index, "question", e.target.value)}
-                                                placeholder="Enter question"
-                                                className="w-full"
-                                            />
+
+                                <div className="overflow-y-auto max-h-[400px]">
+                                    {questions.map((q, index) => (
+                                        <div key={index} className="flex justify-between mb-4">
+                                            <div className="flex flex-col flex-1">
+                                                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                                    Add New Question (Optional)
+                                                </Typography>
+                                                <Input
+                                                    value={q.question}
+                                                    onChange={(e) => handleQuestionChange(index, "question", e.target.value)}
+                                                    placeholder="Enter question"
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col ml-4">
+                                                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                                                    Set Question Difficulty
+                                                </Typography>
+                                                <Select
+                                                    value={q.difficulty}
+                                                    onChange={(value) => handleQuestionChange(index, "difficulty", value)}
+                                                    className="w-full"
+                                                >
+                                                    <Option value="Easy">Easy</Option>
+                                                    <Option value="Medium">Medium</Option>
+                                                    <Option value="Hard">Hard</Option>
+                                                </Select>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col ml-4">
-                                            <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                Set Question Difficulty
-                                            </Typography>
-                                            <Select
-                                                value={q.difficulty}
-                                                onChange={(value) => handleQuestionChange(index, "difficulty", value)}
-                                                className="w-full"
-                                            >
-                                                <Option value="Easy">Easy</Option>
-                                                <Option value="Medium">Medium</Option>
-                                                <Option value="Hard">Hard</Option>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                ))}
-                                {questions.length < parseInt(noOfQuestions) && (
-                                    <Button
-                                        size="sm"
-                                        className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                                        onClick={handleAddQuestion}
-                                    >
-                                        +
-                                    </Button>
-                                )}
+                                    ))}
+                                    {questions.length < parseInt(noOfQuestions) && (
+                                        <Button
+                                            size="sm"
+                                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                                            onClick={handleAddQuestion}
+                                        >
+                                            +
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         </>
                     )}
+                </div>
 
-                    {/* Navigation Buttons */}
-                    <div className="flex justify-between mt-auto">
-                        {currentStep > 1 && (
-                            <Button
-                                size="lg"
-                                onClick={handlePrevious}
-                                className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                            >
-                                Previous
-                            </Button>
-                        )}
-                        {currentStep < 2 ? (
-                            <Button
-                                size="lg"
-                                onClick={handleNext}
-                                className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                            >
-                                Next
-                            </Button>
-                        ) : (
-                            <Button
-                                size="lg"
-                                onClick={handleSubmit}
-                                className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                            >
-                                Submit
-                            </Button>
-                        )}
-                    </div>
+                {/* Navigation Buttons */}
+                <div className="flex justify-between mt-auto p-4 border-t border-gray-300">
+                    {currentStep > 1 && (
+                        <Button
+                            size="lg"
+                            onClick={handlePrevious}
+                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                        >
+                            Previous
+                        </Button>
+                    )}
+                    {currentStep < 2 ? (
+                        <Button
+                            size="lg"
+                            onClick={handleNext}
+                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                        >
+                            Next
+                        </Button>
+                    ) : (
+                        <Button
+                            size="lg"
+                            onClick={handleSubmit}
+                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
+                        >
+                            Submit
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

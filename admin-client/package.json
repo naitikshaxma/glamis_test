@@ -20,6 +20,7 @@
     "@mui/icons-material": "^5.15.20",
     "@mui/material": "^5.15.20",
     "axios": "^1.7.2",
+    "file-saver": "^2.0.5",
     "js-cookie": "^3.0.5",
     "lamejs": "^1.2.1",
     "openai": "^4.52.2",
