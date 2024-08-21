@@ -1,21 +1,48 @@
 import { AdminCompanyInterview } from "../models/interview.models.js";
-import { Student } from "../models/users.models.js";
+import { Student, User } from "../models/users.models.js";
 import { InterviewQuestionsByAdmin } from "../models/interview.models.js";
+import { Interview } from "../models/interview.models.js";
+import sendMail from "../utils/sendMail.js";
+import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvitation.js";
 
 
 export const createCompanyInterview = async (req, res) => {
     try {
-        const { name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions, position } = req.body;
+        const { name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions, position, students } = req.body;
 
-        // const studentEmails = students;
-        // const studentIds = [];
-        // for (let i = 0; i < studentEmails.length; i++) {
-        //     const student = await Student.findOne({ email_id: studentEmails[i] });
-        //     if (student) {
-        //         studentIds.push(student._id);
-        //     }
+        const link = `https://glamis.in/interview/${company}/${position}`;
+        const studentEmails = students;
+        const studentIds = [];
+        const interviewIds = [];
+        for (let i = 0; i < studentEmails.length; i++) {
+            const user = await User.findOne({ email_id: studentEmails[i] });
+            if (user) {
+                const student = await Student.findOne({ user: user._id });
+                if (student) {
+                    try {
+                        await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, company, link, date + ' at ' + from));
+                    } catch (error) {
+                        console.log(error);
+                    }
+                    studentIds.push(student._id);
+                    const interview = new Interview({
+                        description: job_description,
+                        start_time: date + 'T' + from,
+                        end_time: date + 'T' + to,
+                        title: position,
+                    });
+                    await interview.save();
 
-        // }
+                    student.interview_taken.push(interview._id);
+                    student.save();
+
+                    interviewIds.push(interview._id);
+                }
+            }
+
+        }
+
+        console.log(students);
         const questionIds = [];
         for (let i = 0; i < questions.length; i++) {
             const newQuestion = new InterviewQuestionsByAdmin({ question: questions[i].question, difficulty: questions[i].difficulty });
@@ -23,24 +50,11 @@ export const createCompanyInterview = async (req, res) => {
             questionIds.push(newQuestion._id);
         }
 
-        const link = `https://glamis.in/interview/${company}/${position}`;
+
 
 
         console.log(name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questionIds, position, link);
-        const newCompanyInterview = new AdminCompanyInterview({ name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions: questionIds, position, link });
-
-
-
-
-
-
-
-
-
-
-
-
-
+        const newCompanyInterview = new AdminCompanyInterview({ name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions: questionIds, position, link, students: studentIds, interview: interviewIds });
 
 
         // const newCompanyInterview = new AdminCompanyInterview({name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions : questionIds, position, link });

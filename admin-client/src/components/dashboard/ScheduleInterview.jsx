@@ -54,6 +54,7 @@ export default function ScheduleInterview() {
     const [hard, setHard] = useState("");
     const [jobDescription, setJobDescription] = useState("");
     const [questions, setQuestions] = useState([{ question: "", difficulty: "Easy" }]);
+    const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && companyName && date && noOfQuestions && position) {
@@ -66,20 +67,6 @@ export default function ScheduleInterview() {
     };
 
     const handleSubmit = async () => {
-        console.log({
-            name: interviewName,
-            company: companyName,
-            date,
-            from: duration.from,
-            to: duration.to,
-            no_of_questions: noOfQuestions,
-            position,
-            easy_remaining: easy,
-            medium_remaining: medium,
-            hard_remaining: hard,
-            job_description: jobDescription,
-            questions
-        });
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/company/create`, {
@@ -94,7 +81,8 @@ export default function ScheduleInterview() {
                 medium_remaining: medium,
                 hard_remaining: hard,
                 job_description: jobDescription,
-                questions
+                questions,
+                students: emailObject
             }, {
                 headers: { "Content-Type": "application/json" }
             });
@@ -119,8 +107,15 @@ export default function ScheduleInterview() {
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
-            // Handle file upload logic here
-            console.log("File selected:", file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const contents = e.target.result;
+                const emailRegex = /\b[A-Za-z0-9._%+-]+@gla\.ac\.in\b/g;
+                const emailIds = contents.match(emailRegex);
+                console.log(emailIds)
+                setEmailObject(emailIds);
+            };
+            reader.readAsText(file);
         }
     };
 
