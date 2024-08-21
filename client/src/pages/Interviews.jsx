@@ -94,6 +94,7 @@ const OngoingInterview = (props) => {
                 <InterviewCard
                     key={interview.id}
                     props={interview}
+                    status={ "active now" }
                 />
             ))}
         </div>
@@ -108,6 +109,7 @@ const UpcomingInterview = (props) => {
                 <InterviewCard
                     key={interview.id}
                     props={interview}
+                    status={ "Upcoming Interview" }
                 />
             ))}
         </div>
@@ -122,6 +124,7 @@ const PastInterview = (props) => {
                 <InterviewCard
                     key={interview.id}
                     props={interview}
+                    status={ "Past Interview" }
                 />
             ))}
         </div>

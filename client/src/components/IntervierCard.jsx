@@ -5,34 +5,11 @@ import {
     Typography,
     Button,
 } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
 
-export default function InterviewCard({ props }) {
+export default function InterviewCard({ props, status }) {
+    const navigate = useNavigate();
     return (
-        // createdAt
-        // :
-        // "2024-08-21T16:23:57.617Z"
-        // description
-        // :
-        // "undefined Software Engineer"
-        // is_active
-        // :
-        // true
-        // start_time
-        // :
-        // "2024-08-21T16:23:57.605Z"
-        // title
-        // :
-        // "Software Engineer"
-        // updatedAt
-        // :
-        // "2024-08-21T16:23:57.617Z"
-        // __v
-        // :
-        // 0
-        // _id
-        // :
-        // "66c6149d36e4131e38f1c000"
-
         <Card className="m-4 h-fit w-1/4" >
             <CardBody>
                 <Typography color="blue-gray" className="mb-2">
@@ -78,18 +55,17 @@ export default function InterviewCard({ props }) {
 
             </CardBody>
             <CardFooter>
-
-                {props.status === 'active now' ? (
+                {status === 'active now' ? (
                     <Button color="lightGreen"
                         className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
                     >Join Interview</Button>
-                ) : props.status === 'Upcoming Interview' ? (
+                ) : status === 'Upcoming Interview' ? (
                     <Button color="lightGreen"
-                        className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
+                            className="w-full bg-yellow-900 hover:bg-yellow-800" disabled
                     >Coming Soon</Button>
                 ) : (
                     <Button color="lightGreen"
-                        className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
+                        className="w-full bg-red-900 hover:bg-red-800" onClick={() => navigate(`/history/detailed/${props._id}`)}
                     >View Result</Button>
                 )}
             </CardFooter>
