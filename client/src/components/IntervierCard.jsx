@@ -71,7 +71,7 @@ export default function InterviewCard({ props }) {
                     </div>
                     <div className="my-2">
                         <div>
-                            <span className="font-bold">Duration:</span> {props.end_time?.split('T')[1]}
+                            <span className="font-bold">Duration:</span> {(new Date(props.end_time) - new Date(props.start_time)) / 1000 / 60} minutes
                         </div>
                     </div>
                 </Typography>

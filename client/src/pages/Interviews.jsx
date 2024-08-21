@@ -20,30 +20,6 @@ const Interviews = () => {
 
         if (response.data.statusCode === 200) {
             setInterviews(response.data.data)
-            // createdAt
-            // :
-            // "2024-08-21T16:23:57.617Z"
-            // description
-            // :
-            // "undefined Software Engineer"
-            // is_active
-            // :
-            // true
-            // start_time
-            // :
-            // "2024-08-21T16:23:57.605Z"
-            // title
-            // :
-            // "Software Engineer"
-            // updatedAt
-            // :
-            // "2024-08-21T16:23:57.617Z"
-            // __v
-            // :
-            // 0
-            // _id
-            // :
-            // "66c6149d36e4131e38f1c000"
         }
     }
     useEffect(() => {
@@ -57,7 +33,7 @@ const Interviews = () => {
     switch (activeTab) {
         case 'Ongoing Interview':
             const ongoingInterview = interviews.filter(interview => {
-                return interview.is_active;
+                return new Date(interview.start_time) < new Date() && new Date(interview.end_time) > new Date();
             });
             return <OngoingInterview ongoingInterview={ongoingInterview} />;
         case 'Upcoming Interview':
