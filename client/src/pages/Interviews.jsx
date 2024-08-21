@@ -1,106 +1,80 @@
 import React, { useState } from 'react';
 import InterviewCard from '../components/IntervierCard';
-
-const interviews = [
-    {
-        id: 1,
-        title: "React.js Interview | GLA University",
-        description: "React.js Interview | GLA University",
-        status: "active now",
-        date: "12/12/2021",
-        time: "12:00 PM",
-        duration: "30 min",
-    },
-    {
-        id: 2,
-        title: "Golang Interview | GLA University",
-        description: "Golang Interview | GLA University",
-        status: "active now",
-        date: "10/12/2021",
-        time: "07:00 PM",
-        duration: "30 min",
-    },
-    {
-        id: 3,
-        title: "Node.js Interview | GLA University",
-        description: "Node.js Interview | GLA University",
-        status: "active now",
-        date: "15/12/2021",
-        time: "02:00 PM",
-        duration: "30 min",
-    },
-    {
-        id: 4,
-        title: "Java Interview | GLA University",
-        description: "Java Interview | GLA University",
-        status: "Upcoming Interview",
-        date: "20/12/2021",
-        time: "11:00 AM",
-        duration: "50 min",
-    },
-    {
-        id: 5,
-        title: "Python Interview | GLA University",
-        description: "Python Interview | GLA University",
-        status: "Upcoming Interview",
-        date: "25/12/2021",
-        time: "09:00 AM",
-        duration: "40 min",
-    },
-    {
-        id: 6,
-        title: "C++ Interview | GLA University",
-        description: "C++ Interview | GLA University",
-        status: "Upcoming Interview",
-        date: "30/12/2021",
-        time: "10:00 AM",
-        duration: "45 min",
-    },
-    {
-        id: 7,
-        title: "Angular Interview | GLA University",
-        description: "Angular Interview | GLA University",
-        status: "Past Interview",
-        date: "05/12/2021",
-        time: "03:00 PM",
-        duration: "30 min",
-    },
-    {
-        id: 8,
-        title: "Vue.js Interview | GLA University",
-        description: "Vue.js Interview | GLA University",
-        status: "Past Interview",
-        date: "08/12/2021",
-        time: "04:00 PM",
-        duration: "30 min",
-    },
-    {
-        id: 9,
-        title: "React Interview | GLA University",
-        description: "React Interview | GLA University",
-        status: "Past Interview",
-        date: "01/12/2021",
-        time: "01:00 PM",
-        duration: "30 min",
-    }
-];
+import { useEffect } from 'react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const Interviews = () => {
+
+    const [interviews, setInterviews] = useState([])
+
+    const fetchInterviews = async () => {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/fetch`, {},
+            {
+                headers: {
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        )
+
+        if (response.data.statusCode === 200) {
+            setInterviews(response.data.data)
+            // createdAt
+            // :
+            // "2024-08-21T16:23:57.617Z"
+            // description
+            // :
+            // "undefined Software Engineer"
+            // is_active
+            // :
+            // true
+            // start_time
+            // :
+            // "2024-08-21T16:23:57.605Z"
+            // title
+            // :
+            // "Software Engineer"
+            // updatedAt
+            // :
+            // "2024-08-21T16:23:57.617Z"
+            // __v
+            // :
+            // 0
+            // _id
+            // :
+            // "66c6149d36e4131e38f1c000"
+        }
+    }
+    useEffect(() => {
+        fetchInterviews();
+    }, [])
 
     const [activeTab, setActiveTab] = useState("Ongoing Interview")
 
     const renderContent = () => {
-        switch (activeTab) {
-            case 'Ongoing Interview':
-                return <OngoingInerview />;
-            case 'Upcoming Interview':
-                return <UpcomingInterview />;
-            case 'Past Interview':
-                return <PastInterview />;
-            default:
-                return <OngoingInerview />;
-        }
+    console.log(new Date());
+    switch (activeTab) {
+        case 'Ongoing Interview':
+            const ongoingInterview = interviews.filter(interview => {
+                return interview.is_active;
+            });
+            return <OngoingInterview ongoingInterview={ongoingInterview} />;
+        case 'Upcoming Interview':
+            const upcomingInterview = interviews.filter(interview => {
+                return new Date(interview.start_time) > new Date();
+            });
+            return <UpcomingInterview upcomingInterview={upcomingInterview} />;
+        case 'Past Interview':
+            const pastInterview = interviews.filter(interview => {
+                return new Date(interview.end_time) < new Date();
+            });
+            return <PastInterview pastInterview={pastInterview} />;
+        default:
+            return <OngoingInterview />;
     }
+}
+
 
     return (
         <div className="flex flex-col w-full p-6 bg-white h-screen rounded-lg">
@@ -136,11 +110,11 @@ const Interviews = () => {
     );
 };
 
-const OngoingInerview = () => {
+const OngoingInterview = (props) => {
     return (
 
-        <div className="flex mb-6 w-full">
-            {interviews.filter(interview => interview.status === 'active now').map(interview => (
+        <div className="flex mb-6 w-[100vw] flex-wrap">
+            {props.ongoingInterview.map(interview => (
                 <InterviewCard
                     key={interview.id}
                     props={interview}
@@ -151,10 +125,10 @@ const OngoingInerview = () => {
     );
 }
 
-const UpcomingInterview = () => {
+const UpcomingInterview = (props) => {
     return (
-        <div className="flex mb-6 w-full">
-            {interviews.filter(interview => interview.status === 'Upcoming Interview').map(interview => (
+        <div className="flex mb-6 w-[100vw] flex-wrap">
+            {props.upcomingInterview.map(interview => (
                 <InterviewCard
                     key={interview.id}
                     props={interview}
@@ -164,11 +138,11 @@ const UpcomingInterview = () => {
     );
 }
 
-const PastInterview = () => {
+const PastInterview = (props) => {
     return (
-        <div className="flex mb-6 w-full">
+        <div className="flex mb-6 w-[100vw] flex-wrap">
 
-            {interviews.filter(interview => interview.status === 'Past Interview').map(interview => (
+            {props.pastInterview.map(interview => (
                 <InterviewCard
                     key={interview.id}
                     props={interview}

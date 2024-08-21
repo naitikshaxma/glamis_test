@@ -216,7 +216,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.jobTitle} - \nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    let prompt = generateQuestionsPromptForJD(selectedCompany, jobTitle,  historyPrompt,conversationHistory);
+    let prompt = generateQuestionsPromptForJD(selectedCompany, jobTitle, historyPrompt, conversationHistory);
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
 
@@ -370,7 +370,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
         console.log(typeof feedback);
 
-        const interviewQuestion =   await InterviewQuestion.create({
+        const interviewQuestion = await InterviewQuestion.create({
             question: question,
             answer: feedback.userAnswer,
             expectedAnswer: feedback.expectedAnswer,
@@ -426,7 +426,7 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
 })
 
 export const getInterviewHeld = asyncHandler(async (req, res) => {
-    try{
+    try {
         console.log("req.user ####", req.user);
         const user = req.user;
         const student = await Student.findOne({ user: user._id });
@@ -436,7 +436,7 @@ export const getInterviewHeld = asyncHandler(async (req, res) => {
         return res.status(200).json(
             new ApiResponse(200, interview_taken, "Interviews fetched successfully")
         )
-    }catch(error){
+    } catch (error) {
         console.log(error.message);
         return res.status(500).json(
             ApiError(500, error.message)
@@ -451,9 +451,9 @@ export const getPartialDetailsByInterviewId = asyncHandler(async (req, res) => {
         console.log("interviewId ####", interviewId);
         const interview = await Interview.findById(interviewId);
         console.log("interview ####", interview);
-        
+
         const interviewDetails = {
-            id : interview._id,
+            id: interview._id,
             title: interview.title,
             description: interview.description,
             end_time: interview.end_time?.toString().split(" ")[4].slice(0, 5)
@@ -466,5 +466,25 @@ export const getPartialDetailsByInterviewId = asyncHandler(async (req, res) => {
         return res.status(500).json(
             ApiError(500, error.message)
         );
+    }
+})
+
+export const fetchAllInterviews = asyncHandler(async (req, res) => {
+    try {
+        console.log("req.user ####", req.user);
+
+        const student = await Student.findOne({ user: req.user._id })
+        console.log("student ####", student);
+        if (!student) {
+            res.status(404).json(ApiError(404, "Student not found"))
+        }
+
+        const interviews = await Interview.find({ _id: { $in: student.interview_taken } })
+
+        console.log(interviews)
+
+        res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
+    } catch (error) {
+        res.status(500).json(ApiError(500, error.message || "Internal Server Error"))
     }
 })
