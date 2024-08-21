@@ -65,3 +65,16 @@ export const createCompanyInterview = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+export const fetchAdminInterviewbyinterviewId = async (req, res) => {
+    try {
+        const { interviewId } = req.body;
+        // interview = [ " ", "" ] it is an array of interview ids
+        const admin = await AdminCompanyInterview.find({ interview: { $in: interviewId } });
+
+        res.status(200).json({ company : admin.company , adminInterviewId: admin._id});
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
