@@ -5,7 +5,9 @@ import {
     generateQuestionForJD,
     getInterviewHeld,
     getPartialDetailsByInterviewId,
-    fetchAllInterviews
+    fetchAllInterviews,
+    createInterviewByJDAdmin,
+    generateQuestionForJDAdmin
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -22,6 +24,8 @@ interviewRouter.route("/saveResultToDb").post(RateLimiter1min, isAuthenticated, 
 interviewRouter.route("/getInterviewsHeld").get(isAuthenticated, getInterviewHeld);
 interviewRouter.route("/getPartialDetailsByInterviewId").post(isAuthenticated, getPartialDetailsByInterviewId);
 interviewRouter.route("/fetch").post(isAuthenticated, fetchAllInterviews)
+interviewRouter.route("/createInterviewByJDAdmin").post(isAuthenticated, createInterviewByJDAdmin)
+interviewRouter.route("/generateQuestionForJDAdmin").post(isAuthenticated, generateQuestionForJDAdmin)
 
 export default interviewRouter;
 
