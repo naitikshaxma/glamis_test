@@ -153,10 +153,9 @@ const LiveInterview = () => {
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
     const [timer, setTimer] = useState(120);
-    const [skipMessage, setSkipMessage] = useState("")
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 3;
+    const totalQuestions = Cookies.get("delta");
 
     // const restetTimer = () => {
     //     setTimer(120);
@@ -205,14 +204,25 @@ const LiveInterview = () => {
                 score: ansMetaData.score
             };
         } else if (jobTitle && selectedCompany) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;
+            // url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;
+            // data = {
+            //     jobTitle: jobTitle,
+            //     selectedCompany: selectedCompany,
+            //     interviewId: Cookies.get('interviewId'),
+            //     answer: ansMetaData.answer,
+            //     score: ansMetaData.score
+            // };
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJDAdmin`;
             data = {
-                jobTitle: jobTitle,
-                selectedCompany: selectedCompany,
+                selectedCompany: Cookies.get('selectedCompany'),
+                jobTitle: Cookies.get('jobTitle'),
+                jdDetails: localStorage.getItem('jd'),
                 interviewId: Cookies.get('interviewId'),
                 answer: ansMetaData.answer,
-                score: ansMetaData.score
-            };
+                score: ansMetaData.score,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+                questionNo: currentQuestion,
+            }
         } else {
             console.error('Required cookies are missing.');
             setLoading(false);
