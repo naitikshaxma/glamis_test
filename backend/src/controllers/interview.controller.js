@@ -121,11 +121,11 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     console.log(conversationHistory + "????")
 
     // Adjust difficulty based on score
-    let difficulty = "medium";
+    let difficulty = "Medium";
     if (score >= 70) {
-        difficulty = "hard";
+        difficulty = "Hard";
     } else if (score < 40) {
-        difficulty = "easy";
+        difficulty = "Easy";
     }
 
     // Create a prompt with conversation history
@@ -191,11 +191,11 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
     // Adjust difficulty based on score
-    let difficulty = "medium";
+    let difficulty = "Medium";
     if (score >= 70) {
-        difficulty = "hard";
+        difficulty = "Hard";
     } else if (score < 40) {
-        difficulty = "easy";
+        difficulty = "Easy";
     }
 
     // Create a prompt with conversation history
@@ -241,11 +241,14 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
 
 
 export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
+    console.log("entered jd admin")
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, difficulty , questionNo , adminInterviewId} = req.body;
+    const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    console.log(req.body);
 
     let redisClient = await connectRedis();
     let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    console.log("connected redis")
 
     if (conversationHistory.length > 0) {
         conversationHistory.push({
@@ -264,12 +267,25 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         return res.status(404).json(ApiError(404, "Interview not found"));
     }
 
-    // if difficulty is easy and no of questions are less than easy_remaining then fetch the question from db 
 
-    if(difficulty === "easy"){
-        const easyQuestions = await InterviewQuestionsByAdmin.find({difficulty: "easy", _id: {$in: adminInterview.questions}});
-        if(easyQuestions.length - adminInterview.easy_remaining + questionNo >=0){
-            const question = easyQuestions[adminInterview.easy_remaining + questionNo - 1].question;
+    console.log('wow')
+    let difficulty = '';
+    if (adminInterview.easy_remaining > questionNo) {
+        difficulty = 'Easy';
+    } else if (adminInterview.medium_remaining + adminInterview.easy_remaining > questionNo) {
+        difficulty = 'Medium';
+    } else {
+        difficulty = 'Hard';
+    }
+
+    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db 
+
+    if (difficulty === "Easy") {
+        const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
+        if (questionNo < easyQuestions.length) {
+            const question = easyQuestions[questionNo].question;
+            console.log(question)
+            console.log(easyQuestions)
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
             const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -292,10 +308,11 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         }
     }
 
-    if(difficulty === "medium"){
-        const mediumQuestions = await InterviewQuestionsByAdmin.find({difficulty: "medium", _id: {$in: adminInterview.questions}});
-        if(mediumQuestions.length - adminInterview.medium_remaining + questionNo >=0){
-            const question = mediumQuestions[adminInterview.medium_remaining + questionNo - 1].question;
+    if (difficulty === "Medium") {
+        const mediumQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Medium", _id: { $in: adminInterview.questions } });
+        console.log("______________________________\n" + mediumQuestions + "\n_______________________________________")
+        if (questionNo - adminInterview.easy_remaining < mediumQuestions.length) {
+            const question = mediumQuestions[questionNo - adminInterview.easy_remaining].question;
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
             const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -318,14 +335,14 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         }
     }
 
-    if(difficulty === "hard"){
-        const hardQuestions = await InterviewQuestionsByAdmin.find({difficulty: "hard", _id: {$in: adminInterview.questions}});
-        if(hardQuestions.length - adminInterview.hard_remaining + questionNo >=0){
-            const question = hardQuestions[adminInterview.hard_remaining + questionNo - 1].question;
+    if (difficulty === "Hard") {
+        const hardQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Hard", _id: { $in: adminInterview.questions } });
+        if (questionNo - (adminInterview.easy_remaining + adminInterview.medium_remaining) < hardQuestions.length) {
+            const question = hardQuestions[questionNo - (adminInterview.easy_remaining + adminInterview.medium_remaining)].question;
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
             const audioFilePath = path.join(objectStorePath, audioFileName);
-            
+
             const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
             await textToSpeech(cleanedQuestion, audioFilePath);
 
@@ -345,13 +362,15 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     }
 
     let prompt = "";
-    if (difficulty === "easy") {
-        prompt = `You are a hiring manager at ${selectedCompany}. You are looking to hire a ${jobTitle}. You have provided the following job description to the candidates: ${jdDetails}. Based on the job description, generate a conceptual question (technical based) that can be asked to the candidates.`
-    } else if (difficulty === "medium") {
-        prompt = `You are a hiring manager at ${selectedCompany}. You are looking to hire a ${jobTitle}. You have provided the following job description to the candidates: ${jdDetails}. Based on the job description, generate a technical output based/ numerical based  question that can be asked to the candidates.`
+    if (difficulty === "Easy") {
+        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description and not involve coding or complex scenarios.\n\n${jdDetails}`
+    } else if (difficulty === "Medium") {
+        prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
     } else {
-        prompt = `You are a hiring manager at ${selectedCompany}. You are looking to hire a ${jobTitle}. You have provided the following job description to the candidates: ${jdDetails}. Based on the job description, generate a challenging scenario based question that can be asked to the candidates.`
+        prompt = `Based on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\n${jdDetails}`
     }
+
+    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
 
     const completion = await openai.chat.completions.create({
         messages: [
@@ -625,19 +644,21 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
 
 export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
 
-    try{
-        const { intervewId } = req.body;
-            let redisClient = await connectRedis();
-            await redisClient.set(String(intervewId), JSON.stringify([]));
-        
-        } catch (error) {
-            console.log("Error while connecting to Redis", error);
-            return res.status(500).json(
-                ApiError(500, error.message || "Internal Server Error")
-            );
-        }
-    })
+    try {
+        const { interviewId } = req.body;
+        let redisClient = await connectRedis();
+        await redisClient.set(String(interviewId), JSON.stringify([]));
+        return res.status(200).json(
+            new ApiResponse(200, {}, "Interview created successfully")
+        );
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(
+            ApiError(500, error.message || "Internal Server Error")
+        );
+    }
+
+})
 
 
 
-    

@@ -6,9 +6,55 @@ import {
     Button,
 } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie'
+import axios from 'axios';
+import { useEffect, useState } from "react";
 
 export default function InterviewCard({ props, status }) {
     const navigate = useNavigate();
+    const [totalQuestions, setTotalQuestions] = useState(15);
+    const [company, setCompany] = useState();
+    const [adminInterviewId, setAdminInterviewId] = useState();
+
+
+    const handleInterview = async (e) => {
+        Cookies.set('interviewId', props._id);
+        Cookies.set('jobTitle', props.title);
+        Cookies.set('selectedCompany', company);
+        Cookies.set('adminInterviewId', adminInterviewId);
+        Cookies.set('delta', totalQuestions);
+
+        localStorage.setItem('jd', props.description);
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByJDAdmin`, {
+            interviewId: props._id
+        }, {
+            headers: {
+                "content-type": "application/json",
+            }
+        },)
+        navigate('/live');
+    }
+
+    const fetchAdminInterviewDetails = async() => {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetch`, {
+            interviewId: props._id
+        }, {
+            headers: {
+                "content-type": "application/json",
+            }
+        });
+        
+        console.log(response.data);
+
+        setCompany(response.data.company);
+        setAdminInterviewId(response.data.adminInterviewId);
+        setTotalQuestions(response.data.totalQuestions);
+    }
+
+    useEffect(() => {
+        fetchAdminInterviewDetails();
+    }, []);
+
     return (
         <Card className="m-4 h-fit w-1/4" >
             <CardBody>
@@ -57,7 +103,7 @@ export default function InterviewCard({ props, status }) {
             <CardFooter>
                 {status === 'active now' ? (
                     <Button color="lightGreen"
-                        className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
+                        className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]" onClick={handleInterview}
                     >Join Interview</Button>
                 ) : status === 'Upcoming Interview' ? (
                     <Button color="lightGreen"
