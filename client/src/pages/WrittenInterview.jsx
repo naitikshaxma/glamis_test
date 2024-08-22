@@ -13,7 +13,7 @@ const Timer = (props) => {
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={120}
+            duration={900}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[120, 90, 60, 45, 20, 15, 10, 5]}
         >
@@ -28,7 +28,7 @@ const WrittenInterview = () => {
     const [loading, setLoading] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = 1;
-    const [timer, setTimer] = useState(120);
+    const [timer, setTimer] = useState(900);
     const [results, setResults] = useState([]);
 
     // Handle fetching questions from the server
@@ -36,26 +36,15 @@ const WrittenInterview = () => {
         setLoading(true);
 
         const subject = Cookies.get('subject');
-        const jobTitle = Cookies.get('jobTitle');
-        const selectedCompany = Cookies.get('selectedCompany');
 
         let url;
         let data;
 
         if (subject) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`;
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWritten`;
             data = {
                 subject: subject,
                 interviewId: Cookies.get('interviewId'),
-                answer: answer
-            };
-        } else if (jobTitle && selectedCompany) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;
-            data = {
-                jobTitle: jobTitle,
-                selectedCompany: selectedCompany,
-                interviewId: Cookies.get('interviewId'),
-                answer: answer
             };
         } else {
             console.error('Required cookies are missing.');
@@ -72,7 +61,7 @@ const WrittenInterview = () => {
             });
 
             setQuestion(response.data.data.question);
-            setTimer(120);
+            setTimer(900);
 
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -85,20 +74,21 @@ const WrittenInterview = () => {
         setLoading(true);
         await handleSaveAnswer();
         setAnswer('');
-        setCurrentQuestion((prev) => prev + 1);
+        setCurrentQuestion(currentQuestion + 1);
         setLoading(false);
     };
 
     const handleSaveAnswer = async () => {
-        const formData = new FormData();
-        formData.append('answer', answer);
-        formData.append('question', question);
-        formData.append('interviewId', Cookies.get('interviewId'));
+        const data = {
+            question: question,
+            answer: answer,
+            interviewId: Cookies.get('interviewId'),
+        }
 
         try {
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion/sendText`, formData, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionWritten`, data, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${Cookies.get('accessToken')}`,
                 },
             });

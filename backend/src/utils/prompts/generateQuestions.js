@@ -3,12 +3,8 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
 
     let prompt = null;
     let subjectType = subject;
-    
-    if (subjectType === "Olympics") {
-        prompt = "Ask the user to write an essay on " + subjectType;
 
-    }
-    else if (subjectType === "Data Structures and Algorithms") {
+    if (subjectType === "Data Structures and Algorithms") {
         if (conversationHistory.length == 1) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
         } else if (conversationHistory.length == 2) {
@@ -59,7 +55,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "Cloud Computing") {
+    else if (subjectType === "Cloud Computing") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for Cloud Computing`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -69,7 +65,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "Web Development") {
+    else if (subjectType === "Web Development") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for Web Development`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -79,7 +75,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "Cyber Security") {
+    else if (subjectType === "Cyber Security") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for Cyber Security`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -89,7 +85,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "Java") {
+    else if (subjectType === "Java") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for Java`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -99,7 +95,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "Python") {
+    else if (subjectType === "Python") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for Python`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -109,7 +105,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "C/C++") {
+    else if (subjectType === "C/C++") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for C/C++`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {
@@ -119,7 +115,7 @@ const generateQuestionsPrompt = (subject, conversationHistory, historyPrompt, di
         }
     }
 
-    else if(subjectType === "Javascript") {
+    else if (subjectType === "Javascript") {
         if (conversationHistory.length < 3) {
             prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} concept-based question for JavaScript`;
         } else if (conversationHistory.length >= 3 && conversationHistory.length < 7) {

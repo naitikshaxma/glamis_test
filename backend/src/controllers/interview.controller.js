@@ -10,6 +10,7 @@ import { ApiError } from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
 import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
+import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import { AdminCompanyInterview, InterviewQuestionsByAdmin } from "../models/interview.models.js";
 
 const objectStorePath = path.resolve("../objectStore");
@@ -164,6 +165,60 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         question,
         audioFileName: audioFileName
     }
+
+    return res.status(200).json(
+        new ApiResponse(200, dataToSend, "Question generated successfully")
+    );
+});
+
+export const generateQuestionForWritten = asyncHandler(async (req, res) => {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+    const { subject, interviewId } = req.body;
+
+    let redisClient = await connectRedis();
+
+    // Add the current question and answer to the conversation history
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    if (conversationHistory.length > 0) {
+        conversationHistory.push({
+            subject
+        });
+    } else {
+        conversationHistory.push({ subject });
+    }
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+    let prompt = generateQuestionsPromptForWritten(subject);
+
+    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. Question should be under 100 words.";
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { role: "system", content: "You are an English professor." },
+            { role: "user", content: prompt }
+        ],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+    await textToSpeech(cleanedQuestion, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+    }
+
+    const dataToSend = {
+        question,
+        audioFileName: audioFileName
+    };
 
     return res.status(200).json(
         new ApiResponse(200, dataToSend, "Question generated successfully")
@@ -553,6 +608,79 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
         );
     }
 });
+
+export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
+    const { question, answer, interviewId } = req.body;
+    console.log("answer ####", answer);
+    console.log("question ####", question);
+
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
+    });
+    const prompt = `
+    You are an essay evaluator. I will provide you with an essay prompt and the corresponding essay written by the user. Your task is to evaluate the essay on a scale of 0 to 100 and provide detailed, constructive feedback.
+
+    Here is the essay prompt: "${question}"
+    Here is the essay: "${answer}"
+
+    Please evaluate the essay based on the following criteria:
+
+    Overall Score: An integer score out of 100 for the overall quality of the essay.
+    Grammar: An integer score out of 100 for the grammatical correctness of the essay.
+    Vocabulary: An integer score out of 100 for the vocabulary used in the essay.
+    Content: An integer score out of 100 for the relevance, depth, and originality of the content.
+    Structure: An integer score out of 100 for the logical flow and organization of the essay.
+    contentExplanation: Feedback on the content of the essay.
+    vocabularyExplanation: Feedback on the vocabulary used in the essay.
+    grammarExplanation: Feedback on the grammatical correctness of the essay.
+    structureExplanation: Feedback on the structure and organization of the essay.
+    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure there are no symbols like tilde so that I can parse it as JSON:
+    {
+        "prompt": "The essay prompt",
+        "userEssay": "The user's essay text",
+        "overallScore": 90,
+        "grammarScore": 85,
+        "vocabularyScore": 88,
+        "contentScore": 92,
+        "structureScore": 87,
+        "contentExplanation": {
+            "Pros": "Explain the strong points of the content\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10",
+            "Cons": "Explain the weak points of the content and suggest improvements\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10"
+        },
+        "vocabularyExplanation": {
+            "Pros": "Explain the strong points of the vocabulary used\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10",
+            "Cons": "Explain the weak points of the vocabulary used\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10"
+        },
+        "grammarExplanation": {
+            "Pros": "Explain the strong points of the grammar used\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10",
+            "Cons": "Explain the weak points of the grammar used and suggest corrections\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10"
+        },
+        "structureExplanation": {
+            "Pros": "Explain the strong points of the structure used\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10",
+            "Cons": "Explain the weak points of the structure used and suggest improvements\nFirst Point\nSecond Point\nand so on...\nEach point should have a max word limit of 10"
+        },
+        "expectedEssay": "The expected essay response to the prompt. The essay should be in 200 words."
+    }
+
+    Ensure the keys are exactly "prompt", "userEssay", "overallScore", "grammarScore", "vocabularyScore", "contentScore", "structureScore", "contentExplanation", "vocabularyExplanation", "grammarExplanation", and "structureExplanation". All scores should be integers.
+
+    `;
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { role: "system", content: "You are a strict but constructive english professor." },
+            { role: "user", content: prompt }
+        ],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+    });
+
+    //  
+
+    console.log("__________________________________________________\n\n" + completion.choices[0].message.content + "\n\n__________________________________________________");
+    return completion.choices[0].message.content;
+});
+
 
 export const saveResultToDb = asyncHandler(async (req, res) => {
     try {

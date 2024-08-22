@@ -57,7 +57,7 @@ const companies = [
 ]
 
 const topicsList = [
-    "Olympics",
+    "Sports",
     "Video Games",
     "Politics"
 ]
