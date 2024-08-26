@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import path from "path";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { Interview, InterviewQuestion } from "../models/interview.models.js"
+import { AdminSubjectInterview, Interview, InterviewQuestion } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
 import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -423,6 +423,170 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
     } else {
         prompt = `Based on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\n${jdDetails}`
+    }
+
+    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
+
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: prompt }
+        ],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+    await textToSpeech(cleanedQuestion, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+    }
+
+    const dataToSend = {
+        question,
+        audioFileName: audioFileName
+    };
+
+    return res.status(200).json(
+        new ApiResponse(200, dataToSend, "Question generated successfully")
+    );
+
+});
+
+export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => {
+    console.log("entered subject admin")
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const { subject, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    console.log(req.body);
+
+    let redisClient = await connectRedis();
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    console.log("connected redis")
+
+    if (conversationHistory.length > 0) {
+        conversationHistory.push({
+            answer: answer,
+            score: score
+        });
+    } else {
+        conversationHistory.push({ subject });
+    }
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+
+    const adminInterview = await AdminSubjectInterview.findById(adminInterviewId);
+
+    if (adminInterview === null) {
+        return res.status(404).json(ApiError(404, "Interview not found"));
+    }
+
+
+    console.log('wow')
+    let difficulty = '';
+    if (adminInterview.easy > questionNo) {
+        difficulty = 'Easy';
+    } else if (adminInterview.medium + adminInterview.easy > questionNo) {
+        difficulty = 'Medium';
+    } else {
+        difficulty = 'Hard';
+    }
+
+    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db 
+
+    if (difficulty === "Easy") {
+        const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
+        if (questionNo < easyQuestions.length) {
+            const question = easyQuestions[questionNo].question;
+            console.log(question)
+            console.log(easyQuestions)
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({ error: 'Failed to generate audio' });
+            }
+
+            const dataToSend = {
+                question,
+                audioFileName: audioFileName
+            };
+
+            return res.status(200).json(
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+            );
+        }
+    }
+
+    if (difficulty === "Medium") {
+        const mediumQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Medium", _id: { $in: adminInterview.questions } });
+        console.log("______________________________\n" + mediumQuestions + "\n_______________________________________")
+        if (questionNo - adminInterview.easy < mediumQuestions.length) {
+            const question = mediumQuestions[questionNo - adminInterview.easy].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({ error: 'Failed to generate audio' });
+            }
+
+            const dataToSend = {
+                question,
+                audioFileName: audioFileName
+            };
+
+            return res.status(200).json(
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+            );
+        }
+    }
+
+    if (difficulty === "Hard") {
+        const hardQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Hard", _id: { $in: adminInterview.questions } });
+        if (questionNo - (adminInterview.easy + adminInterview.medium) < hardQuestions.length) {
+            const question = hardQuestions[questionNo - (adminInterview.easy + adminInterview.medium)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({ error: 'Failed to generate audio' });
+            }
+
+            const dataToSend = {
+                question,
+                audioFileName: audioFileName
+            };
+
+            return res.status(200).json(
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+            );
+        }
+    }
+
+    let prompt = "";
+    if (difficulty === "Easy") {
+        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to ${subject}. It should be a conceptual question.`
+    } else if (difficulty === "Medium") {
+        prompt = `Based on the previous questions and answers, generate a new coding question for ${subject} in the appropriate programming language. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
+    } else {
+        prompt = `Based on the previous questions and answers, generate a scenario-based question for ${subject}. The question should involve real-world tasks and challenges directly related to the jsubject in hand.`
     }
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";

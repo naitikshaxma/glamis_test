@@ -196,12 +196,14 @@ const LiveInterview = () => {
         let data;
 
         if (subject) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestion`;
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSubjectAdmin`;
             data = {
                 subject: subject,
                 interviewId: Cookies.get('interviewId'),
                 answer: ansMetaData.answer,
-                score: ansMetaData.score
+                score: ansMetaData.score,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+                questionNo: currentQuestion,
             };
         } else if (jobTitle && selectedCompany) {
             // url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;

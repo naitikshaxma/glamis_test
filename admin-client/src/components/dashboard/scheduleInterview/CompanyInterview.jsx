@@ -41,7 +41,7 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
-export default function ScheduleInterview() {
+export default function CompanyInterview() {
     const [currentStep, setCurrentStep] = useState(1);
     const [interviewName, setInterviewName] = useState("");
     const [companyName, setCompanyName] = useState("");
@@ -82,7 +82,8 @@ export default function ScheduleInterview() {
                 hard_remaining: hard,
                 job_description: jobDescription,
                 questions,
-                students: emailObject
+                students: emailObject,
+                type: "company"
             }, {
                 headers: { "Content-Type": "application/json" }
             });

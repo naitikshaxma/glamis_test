@@ -5,7 +5,8 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ReviewBoard from "./components/dashboard/ReviewBoard";
 import Sidebar from "./components/globalComponents/Sidebar";
-import ScheduleInterview from "./components/dashboard/ScheduleInterview";
+import CompanyInterview from "./components/dashboard/scheduleInterview/CompanyInterview";
+import SubjectInterview from "./components/dashboard/scheduleInterview/SubjectInterview";
 
 // Layout component that includes Sidebar
 const MainLayout = ({ children }) => (
@@ -27,7 +28,10 @@ const App = () => {
                 <Route path="/admin" element={<AdminSignup />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<MainLayout><AdminDashboard /></MainLayout>} />
-                <Route path="/admin/schedule" element={<MainLayout><ScheduleInterview /></MainLayout>} />
+                <Route path="/admin/schedule/company" element={<MainLayout><CompanyInterview /></MainLayout>} />
+                <Route path="/admin/schedule/written" element={<MainLayout><SubjectInterview /></MainLayout>} />
+                <Route path="/admin/schedule/subject" element={<MainLayout><SubjectInterview /></MainLayout>} />
+                <Route path="/admin/schedule/verbal" element={<MainLayout><CompanyInterview /></MainLayout>} />
                 <Route path="/admin/review-board" element={<MainLayout><ReviewBoard /></MainLayout>} />
             </Routes>
         </Router>

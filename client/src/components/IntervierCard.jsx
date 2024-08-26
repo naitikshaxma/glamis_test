@@ -19,8 +19,12 @@ export default function InterviewCard({ props, status }) {
 
     const handleInterview = async (e) => {
         Cookies.set('interviewId', props._id);
-        Cookies.set('jobTitle', props.title);
-        Cookies.set('selectedCompany', company);
+        if (props.type === 'subject') {
+            Cookies.set('subject', props.description);
+        } else {
+            Cookies.set('jobTitle', props.title);
+            Cookies.set('selectedCompany', company);
+        }
         Cookies.set('adminInterviewId', adminInterviewId);
         Cookies.set('delta', totalQuestions);
 
@@ -44,7 +48,7 @@ export default function InterviewCard({ props, status }) {
             }
         });
         
-        console.log(response.data);
+        console.log(response.data.adminInterviewId);
 
         setCompany(response.data.company);
         setAdminInterviewId(response.data.adminInterviewId);

@@ -8,7 +8,7 @@ import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvita
 
 export const createCompanyInterview = async (req, res) => {
     try {
-        const { name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions, position, students } = req.body;
+        const { name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions, position, students, type } = req.body;
 
         const link = `https://glamis.in/interview/${company}/${position}`;
         const studentEmails = students;
@@ -30,6 +30,7 @@ export const createCompanyInterview = async (req, res) => {
                         start_time: date + 'T' + from,
                         end_time: date + 'T' + to,
                         title: position,
+                        type
                     });
                     await interview.save();
 
@@ -68,9 +69,9 @@ export const createCompanyInterview = async (req, res) => {
 
 export const createSubjectInterview = async (req, res) => {
     try {
-        const { name, subject, date, from, to, no_of_questions, easy, medium, hard, questions, students } = req.body;
-
-        const link = `https://glamis.in/interview/${company}/${position}`;
+        const { name, subject, date, from, to, no_of_questions, type, easy, medium, hard, questions, students } = req.body;
+        
+        const link = `https://glamis.in/interview/${subject}`;
         const studentEmails = students;
         const studentIds = [];
         const interviewIds = [];
@@ -80,16 +81,17 @@ export const createSubjectInterview = async (req, res) => {
                 const student = await Student.findOne({ user: user._id });
                 if (student) {
                     try {
-                        await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, company, link, date + ' at ' + from));
+                        await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, subject, link, date + ' at ' + from));
                     } catch (error) {
                         console.log(error);
                     }
                     studentIds.push(student._id);
                     const interview = new Interview({
-                        description: job_description,
+                        description: subject,
                         start_time: date + 'T' + from,
                         end_time: date + 'T' + to,
-                        title: position,
+                        title: `${name} | ${subject}`,
+                        type
                     });
                     await interview.save();
 
@@ -110,9 +112,7 @@ export const createSubjectInterview = async (req, res) => {
             questionIds.push(newQuestion._id);
         }
 
-        console.log(name, subject, date, from, to, no_of_questions, easy, medium, hard, questionIds);
-
-        const newSubjectInterview = new AdminSubjectInterview({ name, subject, date, from, to, no_of_questions, easy, medium, hard, questions: questionIds, students: studentIds, interview: interviewIds });
+        const newSubjectInterview = new AdminSubjectInterview({ name, subject, date, from, to, no_of_questions, easy, medium, hard, questions: questionIds, students: studentIds, interview: interviewIds, link });
         await newSubjectInterview.save();
 
         res.status(200).json({ message: "Subject Interview Created Successfully", link: newSubjectInterview.link });
@@ -126,10 +126,14 @@ export const createSubjectInterview = async (req, res) => {
 export const fetchAdminInterviewbyinterviewId = async (req, res) => {
     try {
         const { interviewId } = req.body;
-        // interview = [ " ", "" ] it is an array of interview ids
-        const admin = await AdminCompanyInterview.findOne({ interview: { $in: interviewId } });
 
-        res.status(200).json({ company : admin.company , adminInterviewId: admin._id, totalQuestions: admin.no_of_questions});
+        let admin = await AdminCompanyInterview.findOne({ interview: { $in: interviewId } });
+
+        if (!admin) {
+            admin = await AdminSubjectInterview.findOne({ interview: { $in: interviewId } });
+        }
+
+        res.status(200).json({ company: admin.company || admin.subject, adminInterviewId: admin._id, totalQuestions: admin.no_of_questions });
     }
     catch (error) {
         res.status(500).json({ message: error.message });

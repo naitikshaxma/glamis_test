@@ -1,13 +1,13 @@
 import React from 'react'
 import Sidebar from '../components/globalComponents/Sidebar'
-import ScheduleInterview from '../components/dashboard/ScheduleInterview'
+import ScheduleInterview from '../components/dashboard/scheduleInterview/CompanyInterview'
 import ReviewBoard from '../components/dashboard/ReviewBoard'
 
 const AdminDashboard = () => {
   return (
     <>
-    <Sidebar/>
-    <ReviewBoard/>
+      <Sidebar />
+      <ReviewBoard />
     </>
   )
 }

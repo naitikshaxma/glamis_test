@@ -91,7 +91,7 @@ export default function Sidebar() {
               </ListItem>
               <AccordionBody className="py-1">
                 <List className="p-0">
-                  <Link to="/admin/schedule">
+                  <Link to="/admin/schedule/company">
                     <ListItem>
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
@@ -99,7 +99,7 @@ export default function Sidebar() {
                       Company Mock Interview
                     </ListItem>
                   </Link>
-                  <Link to="/admin/schedule">
+                  <Link to="/admin/schedule/subject">
                     <ListItem>
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
@@ -107,7 +107,7 @@ export default function Sidebar() {
                       Interview By Subject
                     </ListItem>
                   </Link>
-                  <Link to="/admin/schedule">
+                  <Link to="/admin/schedule/written">
                     <ListItem>
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
@@ -115,7 +115,7 @@ export default function Sidebar() {
                       Written SKills
                     </ListItem>
                   </Link>
-                  <Link to="/admin/schedule">
+                  <Link to="/admin/schedule/verbal">
                     <ListItem>
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />

@@ -27,7 +27,7 @@ const WrittenInterview = () => {
     const [answer, setAnswer] = useState('');
     const [loading, setLoading] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const totalQuestions = 1;
+    const totalQuestions = 10;
     const [timer, setTimer] = useState(900);
     const [results, setResults] = useState([]);
 
@@ -74,7 +74,7 @@ const WrittenInterview = () => {
         setLoading(true);
         await handleSaveAnswer();
         setAnswer('');
-        setCurrentQuestion(currentQuestion + 1);
+        setCurrentQuestion((currentQuestion => currentQuestion + 1));
         setLoading(false);
     };
 
