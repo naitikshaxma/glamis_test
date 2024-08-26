@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import WrittenInterview from "./pages/WrittenInterview";
+import WrittenReport from "./pages/WrittenReport";
 
 const response = {
     statusCode: 200,
@@ -113,6 +114,7 @@ const App = () => {
                         <DetailedReport />
                     }
                 />
+                <Route path="/history/detailed-written" element={<WrittenReport />} />
                 <Route
                     path="/live"
                     element={<LiveInterview />}

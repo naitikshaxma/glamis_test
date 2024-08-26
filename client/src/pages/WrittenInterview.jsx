@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import EvaluationResult from './EvaluationResult';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 
-const Timer = (props) => {
+const Timer = () => {
     return (
         <CountdownCircleTimer
             size={100}

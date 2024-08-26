@@ -104,7 +104,7 @@ export default function Sidebar() {
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
                       </ListItemPrefix>
-                      Viva Assessment
+                      Interview By Subject
                     </ListItem>
                   </Link>
                   <Link to="/admin/schedule">
@@ -112,7 +112,15 @@ export default function Sidebar() {
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
                       </ListItemPrefix>
-                      Assignments
+                      Written SKills
+                    </ListItem>
+                  </Link>
+                  <Link to="/admin/schedule">
+                    <ListItem>
+                      <ListItemPrefix>
+                        <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                      </ListItemPrefix>
+                      Verbal SKills
                     </ListItem>
                   </Link>
                 </List>
