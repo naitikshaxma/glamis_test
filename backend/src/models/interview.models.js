@@ -195,6 +195,71 @@ const adminCompanyInterview = new mongoose.Schema({
 
 const AdminCompanyInterview = mongoose.model('AdminCompanyInterview', adminCompanyInterview);
 
+const adminSubjectInterview = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    subject: {
+        type: String,
+        required: true
+    },
+    date: {
+        type: Date,
+        required: true
+    },
+    from: {
+        type: String,
+        required: true
+    },
+    to: {
+        type: String,
+        required: true
+    },
+    students: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Student"
+    },
+    interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
+    },
+    is_active: {
+        type: Boolean,
+        default: true
+    },
+    no_of_questions: {
+        type: Number,
+        required: true
+    },
+    easy: {
+        type: Number,
+        required: true
+    },
+    medium: {
+        type: Number,
+        required: true
+    },
+    hard: {
+        type: Number,
+        required: true
+    },
+    questions: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "InterviewQuestionByAdmin"
+    },
+    link: {
+        type: String,
+        required: true
+    }
+},
+    { timestamps: true }
+);
+
+const AdminSubjectInterview = mongoose.model('AdminSubjectInterview', adminSubjectInterview);
+
 
 const interviewQuestionByAdmin = new mongoose.Schema({
     question: {
@@ -212,4 +277,4 @@ const interviewQuestionByAdmin = new mongoose.Schema({
 const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 
 
-export { Interview, InterviewQuestion, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };
+export { Interview, InterviewQuestion,AdminSubjectInterview, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };

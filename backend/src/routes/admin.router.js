@@ -4,6 +4,7 @@ import { createCompanyInterview, fetchAdminInterviewbyinterviewId } from "../con
 const router = Router();
 
 router.post("/interview/company/create", createCompanyInterview);
+router.post("/interview/subject/create", createCompanyInterview);
 router.post("/interview/fetch", fetchAdminInterviewbyinterviewId);
 
 export default router;
