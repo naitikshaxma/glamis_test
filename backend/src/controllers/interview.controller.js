@@ -956,5 +956,29 @@ export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
 
 })
 
+export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
+    try {
+        const { interviewId } = req.body;
+        const interview = await Interview.findById(interviewId);
+
+        if (interview === null) {
+            return res.status(404).json(ApiError(404, "Interview not found"));
+        }
+
+        let redisClient = await connectRedis();
+
+        await redisClient.set(String(interviewId), JSON.stringify([]));
+
+        return res.status(200).json(
+            new ApiResponse(200, {}, "Interview created successfully")
+        );
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(
+            ApiError(500, error.message || "Internal Server Error")
+        );
+    }
+})
+
 
 

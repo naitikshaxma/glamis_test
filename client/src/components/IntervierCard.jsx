@@ -21,7 +21,11 @@ export default function InterviewCard({ props, status }) {
         Cookies.set('interviewId', props._id);
         if (props.type === 'subject') {
             Cookies.set('subject', props.description);
-        } else {
+        }
+        else if(props.type === 'written') {
+            Cookies.set('subject', props.description);
+        }
+         else {
             Cookies.set('jobTitle', props.title);
             Cookies.set('selectedCompany', company);
         }
@@ -29,13 +33,27 @@ export default function InterviewCard({ props, status }) {
         Cookies.set('delta', totalQuestions);
 
         localStorage.setItem('jd', props.description);
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByJDAdmin`, {
-            interviewId: props._id
-        }, {
-            headers: {
-                "content-type": "application/json",
-            }
-        },)
+        if(props.type === 'written') {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByWrittenAdmin`, {
+                interviewId: props._id
+            }, {
+                headers: {
+                    "content-type": "application/json",
+                }
+            },)
+            navigate('/written');
+            return;
+        }
+        else {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByJDAdmin`, {
+                interviewId: props._id
+            }, {
+                headers: {
+                    "content-type": "application/json",
+                }
+            },)
+        }
+        
         navigate('/live');
     }
 
