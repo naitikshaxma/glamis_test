@@ -132,8 +132,11 @@ export const fetchAdminInterviewbyinterviewId = async (req, res) => {
         if (!admin) {
             admin = await AdminSubjectInterview.findOne({ interview: { $in: interviewId } });
         }
+        if (!admin) {
+            admin = await AdminWrittenInterview.findOne({ interview: { $in: interviewId } });
+        }
 
-        res.status(200).json({ company: admin.company || admin.subject, adminInterviewId: admin._id, totalQuestions: admin.no_of_questions });
+        res.status(200).json({ company: admin.company || admin.subject || admin.domain, adminInterviewId: admin._id, totalQuestions: admin.no_of_questions });
     }
     catch (error) {
         res.status(500).json({ message: error.message });
