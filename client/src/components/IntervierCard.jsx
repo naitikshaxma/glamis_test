@@ -39,6 +39,7 @@ export default function InterviewCard({ props, status }) {
             }, {
                 headers: {
                     "content-type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
                 }
             },)
             navigate('/written');
@@ -50,6 +51,7 @@ export default function InterviewCard({ props, status }) {
             }, {
                 headers: {
                     "content-type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
                 }
             },)
         }
@@ -63,6 +65,7 @@ export default function InterviewCard({ props, status }) {
         }, {
             headers: {
                 "content-type": "application/json",
+                "Authorization": `Bearer ${Cookies.get('accessToken')}`
             }
         });
         
