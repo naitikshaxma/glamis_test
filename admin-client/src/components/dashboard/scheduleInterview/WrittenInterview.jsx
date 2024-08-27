@@ -49,14 +49,14 @@ export default function WrittenInterview() {
     const [date, setDate] = useState("");
     const [duration, setDuration] = useState({ from: "", to: "" });
     const [noOfQuestions, setNoOfQuestions] = useState("");
-    const [easy, setEasy] = useState("");
-    const [medium, setMedium] = useState("");
-    const [hard, setHard] = useState("");
-    const [questions, setQuestions] = useState([{ question: "", difficulty: "Easy" }]);
+    const [essay, setEssay] = useState("");
+    const [errorDetection, setErrorDetection] = useState("");
+    const [jumbled, setJumbled] = useState("");
+    const [questions, setQuestions] = useState([{ question: "", questionType: "essay" }]);
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
-        if (currentStep === 1 && interviewName && subjectName && date && noOfQuestions) {
+        if (currentStep === 1 && interviewName && domainName && date && noOfQuestions) {
             setCurrentStep(2);
         }
     };
@@ -75,9 +75,9 @@ export default function WrittenInterview() {
                 from: duration.from,
                 to: duration.to,
                 no_of_questions: noOfQuestions,
-                easy,
-                medium,
-                hard,
+                essay,
+                jumbled,
+                errorDetection,
                 questions,
                 students: emailObject,
                 type: "written"
@@ -92,7 +92,7 @@ export default function WrittenInterview() {
 
     const handleAddQuestion = () => {
         if (questions.length < parseInt(noOfQuestions)) {
-            setQuestions([...questions, { question: "", difficulty: "Easy" }]);
+            setQuestions([...questions, { question: "", questionType: "essay" }]);
         }
     };
 
@@ -189,24 +189,24 @@ export default function WrittenInterview() {
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                                     <FormInput
-                                                        label="Easy"
+                                                        label="No of Essay questions"
                                                         type="number"
-                                                        value={easy}
-                                                        onChange={(e) => setEasy(e.target.value)}
+                                                        value={essay}
+                                                        onChange={(e) => setEssay(e.target.value)}
                                                         max={8}
                                                     />
                                                     <FormInput
-                                                        label="Medium"
+                                                        label="No of Jumbled questions"
                                                         type="number"
-                                                        value={medium}
-                                                        onChange={(e) => setMedium(e.target.value)}
+                                                        value={jumbled}
+                                                        onChange={(e) => setJumbled(e.target.value)}
                                                         max={7}
                                                     />
                                                     <FormInput
-                                                        label="Hard"
+                                                        label="No of Error Detection questions"
                                                         type="number"
-                                                        value={hard}
-                                                        onChange={(e) => setHard(e.target.value)}
+                                                        value={errorDetection}
+                                                        onChange={(e) => setErrorDetection(e.target.value)}
                                                         max={5}
                                                     />
                                                 </div>
@@ -258,16 +258,16 @@ export default function WrittenInterview() {
                                             </div>
                                             <div className="flex flex-col ml-4">
                                                 <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                    Set Question Difficulty
+                                                    Set Question types
                                                 </Typography>
                                                 <Select
-                                                    value={q.difficulty}
-                                                    onChange={(value) => handleQuestionChange(index, "difficulty", value)}
+                                                    value={q.questionType}
+                                                    onChange={(value) => handleQuestionChange(index, "questionType", value)}
                                                     className="w-full"
                                                 >
-                                                    <Option value="Easy">Easy</Option>
-                                                    <Option value="Medium">Medium</Option>
-                                                    <Option value="Hard">Hard</Option>
+                                                    <Option value="essay">Essay</Option>
+                                                    <Option value="jumbled">Jumbled</Option>
+                                                    <Option value="errorDetection">Error Detection</Option>
                                                 </Select>
                                             </div>
                                         </div>
