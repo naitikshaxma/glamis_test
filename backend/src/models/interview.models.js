@@ -265,6 +265,71 @@ const adminSubjectInterview = new mongoose.Schema({
 
 const AdminSubjectInterview = mongoose.model('AdminSubjectInterview', adminSubjectInterview);
 
+const adminWrittenInterview = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    domain: {
+        type: String,
+        required: true
+    },
+    date: {
+        type: Date,
+        required: true
+    },
+    from: {
+        type: String,
+        required: true
+    },
+    to: {
+        type: String,
+        required: true
+    },
+    students: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Student"
+    },
+    interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
+    },
+    is_active: {
+        type: Boolean,
+        default: true
+    },
+    no_of_questions: {
+        type: Number,
+        required: true
+    },
+    essay: {
+        type: Number,
+        required: true
+    },
+    jumbled: {
+        type: Number,
+        required: true
+    },
+    errorDetection: {
+        type: Number,
+        required: true
+    },
+    questions: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "InterviewQuestionByAdmin"
+    },
+    link: {
+        type: String,
+        required: true
+    }
+},
+    { timestamps: true }
+);
+
+const AdminWrittenInterview = mongoose.model('AdminWrittenInterview', adminWrittenInterview);
+
 
 const interviewQuestionByAdmin = new mongoose.Schema({
     question: {
@@ -282,4 +347,4 @@ const interviewQuestionByAdmin = new mongoose.Schema({
 const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 
 
-export { Interview, InterviewQuestion,AdminSubjectInterview, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };
+export { Interview,AdminWrittenInterview, InterviewQuestion,AdminSubjectInterview, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };
