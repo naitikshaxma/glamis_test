@@ -41,10 +41,15 @@ const WrittenInterview = () => {
         let data;
 
         if (subject) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWritten`;
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWrittenAdmin`;
             data = {
+                // subject, answer, score, interviewId, questionNo, adminInterviewId
                 subject: subject,
                 interviewId: Cookies.get('interviewId'),
+                answer: answer,
+                questionNo: currentQuestion,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+
             };
         } else {
             console.error('Required cookies are missing.');

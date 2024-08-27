@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import path from "path";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { AdminSubjectInterview, Interview, InterviewQuestion } from "../models/interview.models.js"
+import { AdminSubjectInterview, AdminWrittenInterview, Interview, InterviewQuestion } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
 import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -458,6 +458,188 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     );
 
 });
+
+export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => {
+    console.log("entered written admin")
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const { subject, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+
+    let redisClient = await connectRedis();
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    console.log("connected redis")
+
+    if (conversationHistory.length > 0) {
+        conversationHistory.push({
+            answer: answer,
+            score: score
+        });
+    } else {
+        conversationHistory.push({ subject });
+    }
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+    const adminInterview = await AdminWrittenInterview.findById(adminInterviewId);
+
+    if (adminInterview === null) {
+        return res.status(404).json(ApiError(404, "Interview not found"));
+    }
+
+    console.log('wow')
+
+    let difficulty = '';
+
+    if (adminInterview.essay > questionNo) {
+        difficulty = 'Essay';
+    } else if (adminInterview.jumbled + adminInterview.essay > questionNo) {
+        difficulty = 'Jumbled';
+    } else {
+        difficulty = 'ErrorDetection';
+    }
+
+    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
+
+    if (difficulty === "Essay") {
+        const essayQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Essay", _id: { $in: adminInterview.questions } });
+        if (questionNo < essayQuestions.length) {
+            const question = essayQuestions[questionNo].question;
+            console.log(question)
+            console.log(essayQuestions)
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({ error: 'Failed to generate audio' });
+            }
+        }
+    }
+
+    if (difficulty === "Jumbled") {
+        const jumbledQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Jumbled", _id: { $in: adminInterview.questions } });
+        if (questionNo - adminInterview.essay < jumbledQuestions.length) {
+            const question = jumbledQuestions[questionNo - adminInterview.essay].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+
+                return res.status(500).json({ error: 'Failed to generate audio' });
+
+            }
+
+            const dataToSend = {
+                question,
+
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+        }
+    }
+
+    if (difficulty === "ErrorDetection") {
+
+        const errorDetectionQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "ErrorDetection", _id: { $in: adminInterview.questions } });
+
+        if (questionNo - (adminInterview.essay + adminInterview.jumbled) < errorDetectionQuestions.length) {
+
+            const question = errorDetectionQuestions[questionNo - (adminInterview.essay + adminInterview.jumbled)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+
+                return res.status(500).json({ error: 'Failed to generate audio' });
+
+            }
+        }
+    }
+
+    let prompt = "";
+
+    if (difficulty === "Essay") {
+
+        prompt = `Write an essay on the topic ${subject}. The essay should be at least 200 words long and should be well-structured and coherent. Ensure that the essay is free of grammatical errors and is written in a formal tone.`
+
+    } else if (difficulty === "Jumbled") {
+
+        prompt = `Based on the previous questions and answers, generate a jumbled sentence. The sentence should be related to the topic and should be challenging to unscramble. Provide the user with a hint to help them unscramble the sentence.`
+
+    } else {
+
+        prompt = `Based on the previous questions and answers, generate a sentence with an error. The sentence should be related to the topic and should contain a grammatical or spelling error. Provide the user with a hint to help them identify and correct the error.`
+    }
+
+    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
+
+    const completion = await openai.chat.completions.create({
+
+        messages: [
+
+            { role: "system", content: "You are an English professor." },
+
+            { role: "user", content: prompt }
+
+        ],
+
+        model: "gpt-4o-mini",
+
+        max_tokens: 1000,
+
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+    await textToSpeech(cleanedQuestion, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+
+        return res.status(500).json({ error: 'Failed to generate audio' });
+
+    }
+
+    const dataToSend = {
+
+        question,
+
+        audioFileName: audioFileName
+
+
+    };
+
+    return res.status(200).json(
+
+        new ApiResponse(200, dataToSend, "Question generated successfully")
+
+    );
+});
+
 
 export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => {
     console.log("entered subject admin")
