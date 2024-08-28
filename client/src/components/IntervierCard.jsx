@@ -18,12 +18,23 @@ export default function InterviewCard({ props, status }) {
 
 
     const handleInterview = async (e) => {
+        // clear all cookies
+        Cookies.remove('interviewId');
+        Cookies.remove('subject');
+        Cookies.remove('jobTitle');
+        Cookies.remove('selectedCompany');
+        Cookies.remove('adminInterviewId');
+        Cookies.remove('delta');
+        Cookies.remove('verbal');
         Cookies.set('interviewId', props._id);
         if (props.type === 'subject') {
             Cookies.set('subject', props.description);
         }
         else if(props.type === 'written') {
             Cookies.set('subject', props.description);
+        }
+        else if(props.type === 'verbal') {
+            Cookies.set('verbal', true);
         }
          else {
             Cookies.set('jobTitle', props.title);
@@ -43,6 +54,18 @@ export default function InterviewCard({ props, status }) {
                 }
             },)
             navigate('/written');
+            return;
+        }
+        else if(props.type === 'verbal'){
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByVerbalAdmin`, {
+                interviewId: props._id
+            }, {
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
+                }
+            },)
+            navigate('/live');
             return;
         }
         else {

@@ -15,6 +15,7 @@ const DetailedReport = () => {
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
     const [activeTab, setActiveTab] = useState('technical');
+    const [varTab, setVarTab] = useState('Technical Skills');
 
     const handleOpen = (value) => {
         setOpen(open === value ? null : value);
@@ -49,7 +50,10 @@ const DetailedReport = () => {
         );
         console.log(response.data);
 
-        setResult(response.data);
+        setResult(response.data.interviewResults);
+        if(response.data.interviewType === 'verbal'){
+            setVarTab('Relevancy Score');
+        }
     }
 
 
@@ -243,7 +247,8 @@ const DetailedReport = () => {
                         <Technical technicalScore={[
                             { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
                             { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
-                        ]} />
+                        ]} varTab={varTab}
+                         />
                         <Verbal data={
                             [
                                 { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
@@ -259,7 +264,7 @@ const DetailedReport = () => {
                     <div className="w-full shadow">
                         <div className="flex border-b mb-6">
                             <button className={`py-2 px-4 ${activeTab === 'technical' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('technical')} >
-                                Technical Skills
+                                {varTab}
                             </button>
                             <button
                                 className={`py-2 px-4 ${activeTab === 'verbal' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`}

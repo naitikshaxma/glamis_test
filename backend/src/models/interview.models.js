@@ -265,6 +265,67 @@ const adminSubjectInterview = new mongoose.Schema({
 
 const AdminSubjectInterview = mongoose.model('AdminSubjectInterview', adminSubjectInterview);
 
+const adminVerbalInterview = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    date: {
+        type: Date,
+        required: true
+    },
+    from: {
+        type: String,
+        required: true
+    },
+    to: {
+        type: String,
+        required: true
+    },
+    students: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Student"
+    },
+    interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
+    },
+    easy: {
+        type: Number,
+        required: true
+    },
+    medium: {
+        type: Number,
+        required: true
+    },
+    hard: {
+        type: Number,
+        required: true
+    },
+    is_active: {
+        type: Boolean,
+        default: true
+    },
+    no_of_questions: {
+        type: Number,
+        required: true
+    },
+    questions: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "InterviewQuestionByAdmin"
+    },
+    link: {
+        type: String,
+        required: true
+    }
+},
+    { timestamps: true }
+);
+
+const AdminVerbalInterview = mongoose.model('AdminVerbalInterview', adminVerbalInterview);
+
 const adminWrittenInterview = new mongoose.Schema({
     name: {
         type: String,
@@ -347,4 +408,4 @@ const interviewQuestionByAdmin = new mongoose.Schema({
 const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 
 
-export { Interview,AdminWrittenInterview, InterviewQuestion,AdminSubjectInterview, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };
+export { Interview,AdminWrittenInterview, AdminVerbalInterview, InterviewQuestion,AdminSubjectInterview, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };

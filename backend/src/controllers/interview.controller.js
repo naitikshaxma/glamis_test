@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import path from "path";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { AdminSubjectInterview, AdminWrittenInterview, Interview, InterviewQuestion } from "../models/interview.models.js"
+import { AdminSubjectInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
 import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -333,6 +333,8 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         difficulty = 'Hard';
     }
 
+    
+
     // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db 
 
     if (difficulty === "Easy") {
@@ -458,6 +460,263 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     );
 
 });
+
+export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => { 
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const {  answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    console.log(req.body);
+
+    let redisClient = await connectRedis();
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+    console.log("connected redis")
+
+    if (conversationHistory.length > 0) {
+        conversationHistory.push({
+            answer: answer,
+            score: score
+        });
+    } 
+    else{
+        conversationHistory.push({ verbal : true });
+    }
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+    const adminInterview = await AdminVerbalInterview.findById(adminInterviewId);
+
+    if (adminInterview === null) {
+        return res.status(404).json(ApiError(404, "Interview not found"));
+    }
+
+    console.log('wow')
+
+    console.log(questionNo);
+
+    let difficulty = '';
+
+    console.log(adminInterview.easy, adminInterview.medium, adminInterview.hard);
+
+    if (adminInterview.easy > questionNo) {
+        difficulty = 'Easy';
+    } else if (adminInterview.medium + adminInterview.easy > questionNo) {
+        difficulty = 'Medium';
+    } else {
+        difficulty = 'Hard';
+    }
+
+    console.log("Difficulty: ", difficulty);
+
+    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
+
+    if (difficulty === "Easy") {
+        
+        const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
+        console.log("Easy Questions: ", easyQuestions);
+        if (questionNo < easyQuestions.length) {
+            const question = easyQuestions[questionNo].question;
+            console.log(question)
+            console.log(easyQuestions)
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({ error: 'Failed to generate audio' });
+            }
+
+            const dataToSend = {
+                question,
+                audioFileName: audioFileName
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+        }
+    }
+
+    if (difficulty === "Medium") {
+        const mediumQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Medium", _id: { $in: adminInterview.questions } });
+
+        console.log("Medium Questions: ", mediumQuestions);
+
+        if (questionNo - adminInterview.easy < mediumQuestions.length) {
+            const question = mediumQuestions[questionNo - adminInterview.easy].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+
+                return res.status(500).json({ error: 'Failed to generate audio' });
+
+            }
+
+            const dataToSend = {
+
+                question,
+                
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+        }
+
+    }
+
+    if (difficulty === "Hard") {
+
+        const hardQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Hard", _id: { $in: adminInterview.questions } });
+
+        console.log("Hard Questions: ", hardQuestions);
+
+        if (questionNo - (adminInterview.easy + adminInterview.medium) < hardQuestions.length) {
+
+            const question = hardQuestions[questionNo - (adminInterview.easy + adminInterview.medium)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+
+                return res.status(500).json({ error: 'Failed to generate audio' });
+
+            }
+
+            const dataToSend = {
+
+                question,
+
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+        }
+
+    }
+
+    let prompt = "";
+
+if (difficulty === "Easy") {
+    prompt = `Based on the candidate's previous response "${answer}", generate a simple and straightforward question related to their personal background. Examples include:
+    - "Can you introduce yourself?"
+    - "What are your greatest strengths?"
+    - "What are your hobbies and interests?"
+    Ensure the question encourages the candidate to share more about themselves in a comfortable manner.`;
+} else if (difficulty === "Medium") {
+    prompt = `Considering the candidate's previous response "${answer}", formulate a question that delves into their past experiences. Focus on eliciting detailed responses about:
+    - "Can you describe a challenging situation you faced and how you overcame it?"
+    - "What is one of your most significant accomplishments?"
+    - "Tell me about a time you had to deal with failure and what you learned from it."
+    The question should prompt the candidate to reflect on and articulate their experiences comprehensively.`;
+} else if (difficulty === "Hard") {
+    prompt = `Building upon the candidate's response "${answer}", craft a thought-provoking question that explores their perspectives and critical thinking abilities. Topics can include:
+    - "What are your views on the current trends in our industry?"
+    - "How do you approach ethical dilemmas in the workplace?"
+    - "Can you discuss your opinion on the importance of lifelong learning in your profession?"
+    The question should challenge the candidate to provide insightful and well-reasoned answers demonstrating depth of thought.`;
+} else {
+    prompt = `Please specify a valid difficulty level: "Easy", "Medium", or "Hard".`;
+}
+
+prompt += " Generate only the question text without any additional explanations or context.";
+
+    const completion = await openai.chat.completions.create({
+
+        messages: [
+
+            { role: "system", content: "You are a helpful assistant." },
+
+            { role: "user", content: prompt }
+
+        ],
+
+        model: "gpt-4o-mini",
+
+        max_tokens: 1000,
+
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+    await textToSpeech(cleanedQuestion, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+
+        return res.status(500).json({ error: 'Failed to generate audio' });
+
+    }
+
+    const dataToSend = {
+
+        question,
+
+        audioFileName: audioFileName
+
+    };
+
+    return res.status(200).json(
+
+        new ApiResponse(200, dataToSend, "Question generated successfully")
+
+    );
+
+});
+
+
+export const createInterviewByVerbalAdmin = asyncHandler(async (req, res) => {
+    const { interviewId } = req.body;
+    const interview = await Interview.findById(interviewId);
+    if (interview === null) {
+        return res.status(404).json(ApiError(404, "Interview not found"));
+    }
+    try {
+        let redisClient = await connectRedis();
+        await redisClient.set(String(interview._id), JSON.stringify([]));
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(
+            ApiError(500, error.message || "Internal Server Error")
+        );
+    }
+    return res.status(200).json(
+        new ApiResponse(200, interview, "Interview created successfully")
+    );
+});
+
 
 export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => {
     console.log("entered written admin")

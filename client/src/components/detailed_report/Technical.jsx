@@ -121,7 +121,7 @@ const Technical = (props) => {
         <div className="flex w-1/2 flex-col items-center m-3">
             <Card className="w-full rounded-lg shadow-lg">
                 <div className="bg-lightBlue-500 rounded-t-lg p-4">
-                    <Typography variant="h3">Technical Skills</Typography>
+                    <Typography variant="h3">{props.varTab}</Typography>
                 </div>
                 <CardBody className="flex flex-col items-center space-y-4 p-4">
                     <ResponsiveContainer width="50%" height={250}>

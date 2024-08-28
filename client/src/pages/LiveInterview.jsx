@@ -191,11 +191,12 @@ const LiveInterview = () => {
         const subject = Cookies.get('subject');
         const jobTitle = Cookies.get('jobTitle');
         const selectedCompany = Cookies.get('selectedCompany');
+        const verbal = Cookies.get('verbal');
 
         let url;
         let data;
 
-        if (subject) {
+        if (subject && !jobTitle && !selectedCompany && !verbal) {
             url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSubjectAdmin`;
             data = {
                 subject: subject,
@@ -205,7 +206,7 @@ const LiveInterview = () => {
                 adminInterviewId: Cookies.get('adminInterviewId'),
                 questionNo: currentQuestion,
             };
-        } else if (jobTitle && selectedCompany) {
+        } else if (jobTitle && selectedCompany && !subject && !verbal) {
             // url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJD`;
             // data = {
             //     jobTitle: jobTitle,
@@ -225,7 +226,18 @@ const LiveInterview = () => {
                 adminInterviewId: Cookies.get('adminInterviewId'),
                 questionNo: currentQuestion,
             }
-        } else {
+        }
+        else if (verbal && !subject && !jobTitle && !selectedCompany) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForVerbalAdmin`;
+            data = {
+                answer: ansMetaData.answer,
+                score: ansMetaData.score,
+                interviewId: Cookies.get('interviewId'),
+                questionNo: currentQuestion,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+            };
+        }
+        else {
             console.error('Required cookies are missing.');
             setLoading(false);
             return;

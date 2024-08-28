@@ -11,7 +11,9 @@ import {
     generateQuestionForWritten,
     evaluateAnswerWritten,
     generateQuestionForSubjectAdmin,
-    createInterviewByWrittenAdmin
+    createInterviewByWrittenAdmin,
+    createInterviewByVerbalAdmin,
+    generateQuestionForVerbalAdmin
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -35,6 +37,8 @@ router.route("/createInterviewByJDAdmin").post(createInterviewByJDAdmin);
 router.route("/generateQuestionForJDAdmin").post(isAuthenticated, generateQuestionForJDAdmin);
 router.route("/generateQuestionForSubjectAdmin").post(isAuthenticated, generateQuestionForSubjectAdmin);
 router.route("/createInterviewByWrittenAdmin").post(isAuthenticated, createInterviewByWrittenAdmin);
+router.route("/createInterviewByVerbalAdmin").post(isAuthenticated, createInterviewByVerbalAdmin);
+router.route("/generateQuestionForVerbalAdmin").post(isAuthenticated, generateQuestionForVerbalAdmin);
 
 export default router;
 
