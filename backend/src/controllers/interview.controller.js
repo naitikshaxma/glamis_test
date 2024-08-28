@@ -418,7 +418,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
     let prompt = "";
     if (difficulty === "Easy") {
-        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description and not involve coding or complex scenarios.\n\n${jdDetails}`
+        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description keywords , they can be related to particular core cs subjects and not involve coding or complex scenarios.\n\n${jdDetails}`
     } else if (difficulty === "Medium") {
         prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
     } else {
