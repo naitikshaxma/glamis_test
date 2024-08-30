@@ -8,12 +8,12 @@ import Cookies from 'js-cookie';
 import EvaluationResult from './EvaluationResult';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 
-const Timer = () => {
+const Timer = (props) => {
     return (
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={300}
+            duration={props.duration ||300}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[300 , 200 , 100 , 30]}
         >
@@ -28,7 +28,7 @@ const WrittenInterview = () => {
     const [loading, setLoading] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = 10;
-    const [timer, setTimer] = useState(900);
+    const [timer, setTimer] = useState(300);
     const [results, setResults] = useState([]);
 
     // Handle fetching questions from the server
@@ -66,7 +66,7 @@ const WrittenInterview = () => {
             });
 
             setQuestion(response.data.data.question);
-            setTimer(900);
+            setTimer(300);
 
         } catch (error) {
             console.error('Error fetching question:', error);
