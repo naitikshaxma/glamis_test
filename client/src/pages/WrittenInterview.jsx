@@ -13,9 +13,9 @@ const Timer = () => {
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={900}
+            duration={300}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-            colorsTime={[120, 90, 60, 45, 20, 15, 10, 5]}
+            colorsTime={[300 , 200 , 100 , 30]}
         >
             {({ remainingTime }) => remainingTime}
         </CountdownCircleTimer>

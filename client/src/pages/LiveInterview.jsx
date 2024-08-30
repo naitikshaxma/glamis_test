@@ -17,9 +17,9 @@ const Timer = (props) => {
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={props.duration || 120}
+            duration={props.duration || 100}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-            colorsTime={[120, 90, 60, 45, 20, 15, 10, 5]}
+            colorsTime={[100, 70, 40, 10]}
         >
             {({ remainingTime }) => remainingTime}
         </CountdownCircleTimer>
@@ -152,7 +152,7 @@ const LiveInterview = () => {
     const [question, setQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
-    const [timer, setTimer] = useState(120);
+    const [timer, setTimer] = useState(100);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = Cookies.get("delta");
@@ -254,7 +254,7 @@ const LiveInterview = () => {
             setQuestion(response.data.data.question);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
             setIsAudioPlaying(true);
-            setTimer(120);
+            setTimer(100);
 
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -401,7 +401,7 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && <Timer duration={120} />}
+                                    {timer && <Timer duration={timer} />}
                                 </div>
                             </div>
 
