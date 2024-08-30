@@ -401,7 +401,7 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">Demo User</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && <Timer duration={timer} />}
+                                    {timer && !loading && <Timer duration={timer} />}
                                 </div>
                             </div>
 
@@ -422,7 +422,7 @@ const LiveInterview = () => {
                                             ripple="light"
                                             size="lg"
                                             className="p-4 rounded-full"
-                                            onClick={isRecording ? stopRecording : startRecording}
+                                            onClick={isRecording ? handleNextQuestion : startRecording}
                                             title='Tap to Speak'
                                         >
                                             {isRecording ? <StopIcon /> : <MicIcon />}

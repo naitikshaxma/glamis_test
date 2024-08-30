@@ -20,6 +20,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import WrittenInterview from "./pages/WrittenInterview";
 import WrittenReport from "./pages/WrittenReport";
+import Feedback from "./pages/Feedback";
 
 const response = {
     statusCode: 200,
@@ -94,6 +95,10 @@ const App = () => {
                     element={<MainLayout><Profile /></MainLayout>}
                 />
                 <Route
+                    path="/feedback"
+                    element={<MainLayout><Feedback /></MainLayout>}
+                />
+                <Route
                     path="/history"
                     element={<MainLayout><History />
                         {
@@ -124,10 +129,10 @@ const App = () => {
                     path="/evaluation"
                     element={<EvaluationResult data={response.data} />}
                 />
-                <Route
+                {/* <Route
                     path="/interview/create"
                     element={<CreateInterview />}
-                />
+                /> */}
             </Routes>
             <ToastContainer />
         </Router>
