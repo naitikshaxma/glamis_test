@@ -1281,9 +1281,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
     });
 
     //  
-
-    console.log("__________________________________________________\n\n" + completion.choices[0].message.content + "\n\n__________________________________________________");
-    return completion.choices[0].message.content;
+    res.status(200).send(completion.choices[0].message.content);
 });
 
 
