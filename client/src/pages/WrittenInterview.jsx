@@ -347,7 +347,7 @@ const WrittenInterview = () => {
                                 </div>
                                 <div className="flex justify-between w-full mt-2">
                                     <p className="text-lg">Total Skipped</p>
-                                    <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{currentQuestion - results.length - 1}</span>
+                                    <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{currentQuestion - results.length}</span>
                                 </div>
                                 <div className="flex justify-between w-full mt-2">
                                     <p className="text-lg">Total Answered</p>
