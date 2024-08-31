@@ -1,51 +1,286 @@
-import React from 'react';
-import { Card, CardBody, Typography } from '@material-tailwind/react';
-import { ResponsiveContainer } from 'recharts';
-import { Written, WrittenCard } from '../components/detailed_report/Written';
+import React, { useEffect, useMemo, useState } from 'react';
+import Technical from '../components/detailed_report/Technical';
+import { Verbal, VerbalCard } from '../components/detailed_report/Verbal';
+import Behavioral from '../components/detailed_report/Behavioral';
+import { Link, Element, scroller } from 'react-scroll';
+import { TechnicalCard } from '../components/detailed_report/Technical';
+import { useRef } from 'react';
+import avatar from "../assets/avatar.jpeg"
+import axios from "axios";
+import Cookies from "js-cookie";
+
 
 
 const WrittenReport = () => {
-    const data = {
-        "prompt": "Consider the role of video games in shaping collective memory and cultural identity. How do specific games reflect or challenge social norms, historical narratives, or personal experiences? Analyze a particular game or genre and discuss its impact on players’ perceptions of reality, community, or self. What insights can this provide regarding the evolving relationship between gaming and societal values?",
-        "userEssay": "Video games play a significant role in shaping collective memory and cultural identity by reflecting or challenging social norms, historical narratives, and personal experiences. *Assassin’s Creed* is a notable example, blending historical events with fictional narratives to engage players with different eras and cultural contexts. By immersing players in historical settings—such as Renaissance Italy or Revolutionary America—the game series provides a reimagined view of history, making it accessible and engaging while influencing players’ perceptions of historical events and cultural identities.\n\nFor instance, *Assassin’s Creed III* reinterprets the American Revolution, presenting a narrative that includes Native American perspectives often overlooked in mainstream history. This approach challenges dominant historical narratives and encourages players to reconsider historical events from multiple viewpoints.\n\nThe impact on players is profound, as such games offer a form of historical engagement that combines education with entertainment, shaping how individuals and communities understand and relate to their past. By interacting with these narratives, players develop a nuanced view of historical and cultural identities, reflecting evolving societal values and the growing role of gaming in cultural discourse.",
-        "overallScore": 90,
-        "grammarScore": 85,
-        "vocabularyScore": 88,
-        "contentScore": 92,
-        "structureScore": 87,
-        "contentExplanation": {
-            "Pros": "Strong analysis of game content\nHighlights diverse perspectives\nConnects gaming with cultural impact",
-            "Cons": "Could include more examples\nLacks deeper engagement with identity\nMore discussion on societal values needed"
-        },
-        "vocabularyExplanation": {
-            "Pros": "Varied and appropriate vocabulary\nEffective use of terms like 'nuanced'\nEngaging language enhances readability",
-            "Cons": "Some phrases could be simplified\nAvoid overly complex terminology\nCould use more technical terms"
-        },
-        "grammarExplanation": {
-            "Pros": "Generally strong grammatical structure\nEffective sentence variation\nCorrect use of punctuation",
-            "Cons": "Few awkward sentence constructions\nMinor typographical errors\nConsistency with tense usage needed"
-        },
-        "structureExplanation": {
-            "Pros": "Clear introduction and conclusion\nLogical flow of ideas\nWell-defined paragraphs enhance readability",
-            "Cons": "Transition between paragraphs could improve\nSome ideas feel rushed\nMore elaboration on key points needed"
-        },
-        "expectedEssay": "Video games significantly contribute to shaping collective memory and cultural identity by reflecting and challenging social norms, historical narratives, and personal experiences. A prime example is the *Assassin's Creed* series, which melds real historical events with creative storytelling to immerse players in various cultural contexts. For instance, *Assassin's Creed III* offers a fresh perspective on the American Revolution by including Native American viewpoints, prompting players to reconsider established narratives. The series not only educates players about historical contexts but also influences their understanding of cultural identities. This interaction fosters a more nuanced perception of history among players, demonstrating how gaming can reshape societal views and values. The evolving relationship between gaming and societal norms highlights the potential of video games as mediums for cultural reflection and identity formation."
+    const [result, setResult] = useState([]);
+    const [open, setOpen] = useState(null);
+    const [activeTab, setActiveTab] = useState('technical');
+    const [varTab, setVarTab] = useState('Technical Skills');
+
+    const handleOpen = (value) => {
+        setOpen(open === value ? null : value);
     };
 
-    const chartData = [
-        { name: 'Overall', score: data.overallScore },
-        { name: 'Grammar', score: data.grammarScore },
-        { name: 'Vocabulary', score: data.vocabularyScore },
-        { name: 'Content', score: data.contentScore },
-        { name: 'Structure', score: data.structureScore }
-    ];
+    const [selectedQuestion, setSelectedQuestion] = useState(0);
+    const scrollContainerRef = useRef(null);
+
+    const handleQuestionClick = (index) => {
+        setSelectedQuestion(index);
+        scroller.scrollTo(`question-${index}`, {
+            duration: 500,
+            delay: 0,
+            smooth: true,
+            containerId: 'scroll-container'
+        });
+    };
+
+
+
+    const fetchResultData = async () => {
+        const interviewId = window.location.pathname.split('/').pop();
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/result/interviewresult`, { interviewId },
+
+            {
+                headers: {
+
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${Cookies.get('accessToken')}`
+                }
+            }
+        );
+        console.log(response.data);
+
+        setResult(response.data.interviewResults);
+        if (response.data.interviewType === 'verbal') {
+            setVarTab('Relevancy Score');
+        }
+    }
+
+
+
+    useEffect(() => {
+        fetchResultData();
+    }, []);
+
+
+    const actionBar = () => {
+        const uniqueResults = result.reduce((acc, item) => {
+            // Check if the item with the same question already exists in the accumulator
+            if (!acc.some(existingItem => existingItem.question === item.question)) {
+                acc.push(item);
+            }
+            return acc;
+        }, []);
+        switch (activeTab) {
+            case 'technical':
+                return (
+                    <div className='w-full flex justify-around mb-5'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                            <div className="flex flex-col space-y-4">
+                                {
+                                    result.map((item, index) => (
+                                        <Link
+                                            key={index}
+                                            to={`#question-${index}`}  // Updated: include '#' to match with the id
+                                            smooth={true}
+                                            duration={500}
+                                            className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            onClick={() => handleQuestionClick(index)}
+                                        >
+                                            Q{index + 1}
+                                        </Link>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                        <div
+                            className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            id="scroll-container"
+                            ref={scrollContainerRef}
+                        >
+                            {
+                                result.map((item, index) => (
+                                    <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
+                                        <TechnicalCard
+                                            qno={index}
+                                            question={item.question}
+                                            answer={item.answer}
+                                            feedback={{
+                                                good: [item.technicalExplanation[0]],
+                                                improvement: [item.technicalExplanation[1]]
+                                            }}
+                                            score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
+                                            expectedAnswer={item.expectedAnswer}
+                                        />
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                )
+
+            case 'verbal':
+                return (
+                    <div className='w-full flex justify-around mb-5'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                            <div className="flex flex-col space-y-4">
+
+                                {
+                                    result.map((item, index) => (
+                                        <Link
+                                            key={index}
+                                            to={`question-${index}`}
+                                            smooth={true}
+                                            duration={500}
+                                            className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            onClick={() => handleQuestionClick(index)}
+                                        >
+                                            Q{index + 1}
+                                        </Link>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                        <div
+                            className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            id="scroll-container"
+                            ref={scrollContainerRef}
+                        >
+                            {
+                                result.map((item, index) => (
+                                    <VerbalCard
+                                        key={index}
+                                        qno={index}
+                                        question={item.question}
+                                        answer={item.answer}
+                                        feedback={{
+                                            good: [item.grammarExplanation[0]],
+                                            improvement: [item.grammarExplanation[1]]
+                                        }}
+                                        grammarScore={item.grammar}
+                                        vocabularyScore={item.vocabulary}
+                                    />
+                                ))
+                            }
+                        </div>
+                    </div>
+                )
+            case 'behavioral':
+                return (
+                    <div className='w-full flex mb-5'>
+                        <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
+                            <div className="flex flex-col space-y-2 font-semibold">Feedback</div>
+                            <hr />
+                            <div className='flex w-full justify-between font-semibold'>
+                                <div className="flex flex-col space-y-2 font-semibold w-1/3">Attributes</div>
+                                <div className="flex flex-col space-y-2 font-semibold w-2/3">Description</div>
+                            </div>
+                            <hr />
+                            <div className='flex w-full justify-between'>
+                                <div className="flex flex-col space-y-2 w-1/3">What went well</div>
+                                <div className="flex flex-col space-y-2 w-2/3">
+                                    <ul className="list-disc">
+                                        <li>
+                                            You have a good vocabulary and have used it effectively in the conversation.
+                                        </li>
+                                        <li>
+                                            You are able to express your thoughts clearly and concisely.
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr />
+                            <div className='flex w-full justify-between'>
+                                <div className="flex flex-col space-y-2 w-1/3">Areas for improvement</div>
+                                <div className="flex flex-col space-y-2 w-2/3">
+                                    <ul className="list-disc">
+                                        <li>
+                                            You can improve your fluency and pronunciation.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr />
+                        </div>
+                    </div>
+
+                )
+            default:
+                return (
+                    <>Technical</>
+                )
+        }
+    }
 
     return (
-        <>
-            <Written data={chartData} />
-            <WrittenCard {...data} />
-        </>
+        <div className="w-[80%] mx-auto">
+            <div className="header bg-green-100 w-full flex justify-between p-4 border-b-0 border-2 border-green-900">
+                <div className="flex">
+                    <div className="avatar w-20">
+                        <img className='w-full overflow-hidden' src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="" />
+                    </div>
+                    <div className="flex flex-col ml-4">
+                        <div className="font-semibold text-lg">GLAMIS</div>
+                        <div className="font-semibold text-sm">G.L.A. University</div>
+                        <div className="font-semibold text-sm">Mathura, Uttar Pradesh</div>
+                        <div className="font-semibold text-sm">India, 250909</div>
+                    </div>
+                </div>
+                <div className="flex items-center">
+                    <div className="flex flex-col mr-4">
+                        <div className="font-semibold text-lg text-right">Demo User</div>
+                        <div className="font-semibold text-sm text-right">2115000000</div>
+                        <div className="font-semibold text-sm text-right">Data Structures and Algorithms</div>
+                    </div>
+                    <div className="avatar w-20 border-2 border-green-900">
+                        <img src={avatar} alt="" />
+                    </div>
+                </div>
+            </div>
+            <div className="analysis flex flex-col h-full">
+                <div className="border-t-0">
+                    <div className="bg-[#2b6030] text-white text-lg flex justify-center p-1 font-semibold">
+                        <span>Analysis</span>
+                    </div>
+                    <div className='flex w-full'>
+                        <Technical technicalScore={[
+                            { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
+                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
+                        ]} varTab={varTab}
+                        />
+                        <Verbal data={
+                            [
+                                { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
+                                { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                            ]
+                        } />
+                    </div>
+                </div>
+                <div className="report mt-4">
+                    <div className="bg-[#2b6030] text-white text-lg flex justify-center p-1 font-semibold">
+                        <span>Detailed Report</span>
+                    </div>
+                    <div className="w-full shadow">
+                        <div className="flex border-b mb-6">
+                            <button className={`py-2 px-4 ${activeTab === 'technical' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('technical')} >
+                                {varTab}
+                            </button>
+                            <button
+                                className={`py-2 px-4 ${activeTab === 'verbal' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`}
+                                onClick={() => setActiveTab('verbal')}
+                            >
+                                Verbal Skills
+                            </button>
+                        </div>
+                        <div className="flex">
+                            {actionBar()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
-}
+};
 
 export default WrittenReport;

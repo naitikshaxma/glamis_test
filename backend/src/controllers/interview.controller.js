@@ -748,17 +748,17 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
     let difficulty = '';
 
     if (adminInterview.essay > questionNo) {
-        difficulty = 'Essay';
+        difficulty = 'essay';
     } else if (adminInterview.jumbled + adminInterview.essay > questionNo) {
-        difficulty = 'Jumbled';
+        difficulty = 'jumbled';
     } else {
-        difficulty = 'ErrorDetection';
+        difficulty = 'errorDetection';
     }
 
     // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
-    if (difficulty === "Essay") {
-        const essayQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Essay", _id: { $in: adminInterview.questions } });
+    if (difficulty === "essay") {
+        const essayQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "essay", _id: { $in: adminInterview.questions } });
         if (questionNo < essayQuestions.length) {
             const question = essayQuestions[questionNo].question;
             console.log(question)
@@ -776,8 +776,8 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         }
     }
 
-    if (difficulty === "Jumbled") {
-        const jumbledQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Jumbled", _id: { $in: adminInterview.questions } });
+    if (difficulty === "jumbled") {
+        const jumbledQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "jumbled", _id: { $in: adminInterview.questions } });
         if (questionNo - adminInterview.essay < jumbledQuestions.length) {
             const question = jumbledQuestions[questionNo - adminInterview.essay].question;
 
@@ -810,9 +810,9 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         }
     }
 
-    if (difficulty === "ErrorDetection") {
+    if (difficulty === "errorDetection") {
 
-        const errorDetectionQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "ErrorDetection", _id: { $in: adminInterview.questions } });
+        const errorDetectionQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "errorDetection", _id: { $in: adminInterview.questions } });
 
         if (questionNo - (adminInterview.essay + adminInterview.jumbled) < errorDetectionQuestions.length) {
 
@@ -836,11 +836,11 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     let prompt = "";
 
-    if (difficulty === "Essay") {
+    if (difficulty === "essay") {
 
         prompt = `Write an essay on the topic ${subject}. The essay should be at least 200 words long and should be well-structured and coherent. Ensure that the essay is free of grammatical errors and is written in a formal tone.`
 
-    } else if (difficulty === "Jumbled") {
+    } else if (difficulty === "jumbled") {
 
         prompt = `Based on the previous questions and answers, generate a jumbled sentence. The sentence should be related to the topic and should be challenging to unscramble. Provide the user with a hint to help them unscramble the sentence.`
 
