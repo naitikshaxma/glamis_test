@@ -646,7 +646,8 @@ if (difficulty === "Easy") {
     prompt = `Please specify a valid difficulty level: "Easy", "Medium", or "Hard".`;
 }
 
-prompt += " Generate only the question text without any additional explanations or context.";
+    prompt += `Generate only the question text without any additional explanations or context. The question you generate must include sections from ${answer}`;
+    console.log(answer)
 
     const completion = await openai.chat.completions.create({
 

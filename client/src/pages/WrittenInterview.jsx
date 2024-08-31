@@ -73,14 +73,11 @@ const WrittenInterview = () => {
         setLoading(true);
 
         const subject = Cookies.get('subject');
-        const jobTitle = Cookies.get('jobTitle');
-        const selectedCompany = Cookies.get('selectedCompany');
-        const verbal = Cookies.get('verbal');
 
         let url;
         let data;
 
-        if (subject && !jobTitle && !selectedCompany && !verbal) {
+        if (subject) {
             url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWrittenAdmin`;
             data = {
                 subject: subject,
@@ -90,30 +87,7 @@ const WrittenInterview = () => {
                 adminInterviewId: Cookies.get('adminInterviewId'),
                 questionNo: currentQuestion,
             };
-        } else if (jobTitle && selectedCompany && !subject && !verbal) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWrittenAdmin`;
-            data = {
-                selectedCompany: Cookies.get('selectedCompany'),
-                jobTitle: Cookies.get('jobTitle'),
-                jdDetails: localStorage.getItem('jd'),
-                interviewId: Cookies.get('interviewId'),
-                answer: ansMetaData.answer,
-                score: ansMetaData.score,
-                adminInterviewId: Cookies.get('adminInterviewId'),
-                questionNo: currentQuestion,
-            }
-        }
-        else if (verbal && !subject && !jobTitle && !selectedCompany) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWrittenAdmin`;
-            data = {
-                answer: ansMetaData.answer,
-                score: ansMetaData.score,
-                interviewId: Cookies.get('interviewId'),
-                questionNo: currentQuestion,
-                adminInterviewId: Cookies.get('adminInterviewId'),
-            };
-        }
-        else {
+        } else {
             console.error('Required cookies are missing.');
             setLoading(false);
             return;
@@ -159,14 +133,6 @@ const WrittenInterview = () => {
         await handleSaveAnswer();
         console.log("saved")
     };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const generateUniqueKey = () => {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    }
 
     const handleSaveAnswer = async () => {
         if (!userAnswer.trim()) {
