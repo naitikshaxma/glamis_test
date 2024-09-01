@@ -271,6 +271,34 @@ const resendOTP = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, "OTP Sent Successfully"))
 })
 
+const verifyUser = asyncHandler(async (req, res) => {
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
+    }
+
+    try {
+
+        const decodedAccessToken = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+
+        const user = await User.findById(decodedAccessToken._id)
+
+        if (!user) {
+            return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
+        }
+
+        return res.status(200).json(new ApiResponse(200, {
+            status: true
+        }, "User Verified Successfully"))
+    } catch (error) {
+        return res.status(401).json(new ApiError(401, "Unauthorized Request"))
+    }
+}
+)
+
+    
+
 
 const addStudent = asyncHandler(async (req, res) => {
     const { user_id } = req.body;
@@ -307,5 +335,6 @@ export {
     refreshAccessToken,
     verifyEmail,
     resendOTP,
-    addStudent
+    addStudent,
+    verifyUser
 }
