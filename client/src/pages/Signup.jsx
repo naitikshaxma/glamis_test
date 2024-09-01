@@ -3,13 +3,10 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SidePic from '../assets/SidePic.png';
@@ -17,32 +14,13 @@ import { InputAdornment } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import axios from 'axios';
-
-
-// TODO remove, this demo shouldn't need to reset the theme.
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const defaultTheme = createTheme();
 
 export default function Signup() {
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
-
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        setIsLoading(true);
-        console.log(signupData);
-        const rersponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/signup`, signupData, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        console.log(rersponse.data);
-        setIsLoading(false);
-    };
-
     const [signupData, setSignupData] = React.useState({
         name: '',
         email_id: '',
@@ -50,8 +28,31 @@ export default function Signup() {
         password: '',
         confirm_password: ''
     });
-
     const [isLoading, setIsLoading] = React.useState(false);
+    const navigate = useNavigate(); // Initialize useNavigate
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setIsLoading(true);
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/signup`, signupData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log(response.data);
+            setIsLoading(false);
+            // Redirect to /account/verification with email_id
+            console.log(signupData.email_id);
+            navigate('/account/verification', { state: { email_id: signupData.email_id } });
+        } catch (error) {
+            console.error(error);
+            setIsLoading(false);
+        }
+    };
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -86,8 +87,6 @@ export default function Signup() {
                             Welcome to GLA Mock Interview System
                         </Typography>
                         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                            {/* name */}
-
                             <TextField
                                 margin='normal'
                                 required
@@ -109,10 +108,6 @@ export default function Signup() {
                                 }}
                                 onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                             />
-
-                            {/* email */}
-
-
                             <TextField
                                 margin="normal"
                                 required
@@ -134,7 +129,6 @@ export default function Signup() {
                                 }}
                                 onChange={(e) => setSignupData({ ...signupData, email_id: e.target.value })}
                             />
-                            {/* phone */}
                             <TextField
                                 margin="normal"
                                 required
@@ -156,7 +150,6 @@ export default function Signup() {
                                 }}
                                 onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
                             />
-                            {/* password */}
                             <div className="flex">
                                 <TextField
                                     margin="normal"
@@ -164,12 +157,12 @@ export default function Signup() {
                                     className='w-1/2'
                                     name="password"
                                     label="Password"
-                                    type={setShowConfirmPassword ? 'text' : 'password'}
+                                    type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     autoComplete="current-password"
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">
-                                            {showConfirmPassword ? <VisibilityOff className='cursor-pointer' onClick={handleClickShowPassword} /> : <VisibilityIcon className='cursor-pointer' onClick={handleClickShowConfirmPassword} />}
+                                            {showPassword ? <VisibilityOff className='cursor-pointer' onClick={handleClickShowPassword} /> : <VisibilityIcon className='cursor-pointer' onClick={handleClickShowPassword} />}
                                         </InputAdornment>,
                                     }}
                                     sx={{
@@ -186,19 +179,18 @@ export default function Signup() {
                                     }}
                                     onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                                 />
-                                {/* confirm password */}
                                 <TextField
                                     margin="normal"
                                     required
                                     className='w-1/2'
-                                    name="password"
-                                    label="Password"
+                                    name="confirm_password"
+                                    label="Confirm Password"
                                     type={showConfirmPassword ? 'text' : 'password'}
-                                    id="password"
+                                    id="confirm_password"
                                     autoComplete="current-password"
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">
-                                            {showPassword ? <VisibilityOff className='cursor-pointer' onClick={handleClickShowPassword} /> : <VisibilityIcon className='cursor-pointer' onClick={handleClickShowPassword} />}
+                                            {showConfirmPassword ? <VisibilityOff className='cursor-pointer' onClick={handleClickShowConfirmPassword} /> : <VisibilityIcon className='cursor-pointer' onClick={handleClickShowConfirmPassword} />}
                                         </InputAdornment>,
                                     }}
                                     sx={{

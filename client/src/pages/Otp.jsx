@@ -10,12 +10,15 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SidePic from '../assets/SidePic.png';
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation and useNavigate
 
 const defaultTheme = createTheme();
 
 export default function Otp() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [otp, setOtp] = React.useState(Array(6).fill(''));
+    const location = useLocation(); // Use useLocation hook to access route location
+    const navigate = useNavigate(); // Use useNavigate hook for navigation
 
     const handleChange = (e, index) => {
         const { value } = e.target;
@@ -44,7 +47,8 @@ export default function Otp() {
 
         const enteredOtp = otp.join(''); // Combine OTP array into a single string
         console.log(enteredOtp);
-        const emailId = 'suneo@gla.ac.in'; // Replace this with the actual email ID you are working with
+        const emailId = location.state?.email_id; // Use location.state to get email ID
+        console.log(emailId);
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/verify-email`, {
@@ -54,6 +58,7 @@ export default function Otp() {
 
             if (response.data.success) {
                 alert('OTP verified successfully');
+                navigate('/login'); // Redirect to login page on success
             } else {
                 alert('Invalid OTP');
             }
