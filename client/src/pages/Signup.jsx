@@ -214,9 +214,11 @@ export default function Signup() {
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030", '&:hover': { backgroundColor: "#1c3d1f" } }}
                                 disabled={isLoading}
-                                className={isLoading ? 'loader' : ''}
                             >
+                                <span  className={isLoading ? 'loader' : ''}>
+
                                 {!isLoading ? "Sign Up" : ""}
+                                </span>
                             </Button>
                             <div className="flex justify-center">
                                 <span>Already have an account?&nbsp;</span>

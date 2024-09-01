@@ -111,7 +111,7 @@ export default function CompanyInterview() {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const contents = e.target.result;
-                const emailRegex = /\b[A-Za-z0-9._%+-]+@gla\.ac\.in\b/g;
+                // accept global.ac.in or glamis.in  
                 const emailIds = contents.match(emailRegex);
                 console.log(emailIds)
                 setEmailObject(emailIds);

@@ -112,7 +112,7 @@ export default function WrittenInterview() {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const contents = e.target.result;
-                const emailRegex = /\b[A-Za-z0-9._%+-]+@gla\.ac\.in\b/g;
+                const emailRegex = /([a-zA-Z0-9._-]+)@(gla.ac.in|glamis.in)/g;
                 const emailIds = contents.match(emailRegex);
                 console.log(emailIds)
                 setEmailObject(emailIds);

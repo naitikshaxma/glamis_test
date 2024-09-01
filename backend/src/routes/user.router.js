@@ -7,7 +7,7 @@ const router = Router()
 
 
 
-router.route("/signup").post(RateLimiter15mins,signup)
+router.route("/signup").post(signup)
 router.route("/login").post(RateLimiter15mins,login)
 router.route("/verifyToken").post(verifyUser)
 router.route("/verify-email").post(RateLimiter15mins,verifyEmail)
