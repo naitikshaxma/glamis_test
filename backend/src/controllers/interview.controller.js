@@ -781,6 +781,22 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
             if (!fs.existsSync(audioFilePath)) {
                 return res.status(500).json({ error: 'Failed to generate audio' });
             }
+
+            const dataToSend = {
+
+                question,
+
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+
         }
     }
 
@@ -839,6 +855,22 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
                 return res.status(500).json({ error: 'Failed to generate audio' });
 
             }
+
+            const dataToSend = {
+
+                question,
+
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+
         }
     }
 
@@ -1291,7 +1323,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
             expectedAnswer: feedback.expectedAnswer,
             interview: interviewId,
             student: req.user._id,
-            overallPerformance: feedback.overallScore,
+            overallPerformance: feedback.overallScore  <= 30 ? 0 : feedback.overallPerformance,
             grammar: feedback.grammarScore,
             vocabulary: feedback.vocabularyScore,
             technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
@@ -1380,7 +1412,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
         answer : answer,
         interview : interviewId,
         student : req.user._id,
-        overallPerformance : completionData.overallScore,
+        overallPerformance : completionData.overallScore <= 30 ? 0 : completionData.overallScore,
         grammar : completionData.grammarScore,
         vocabulary : completionData.vocabularyScore,
         technicalExplanation : [completionData.contentStructureExplanation.Pros, completionData.contentStructureExplanation.Cons],

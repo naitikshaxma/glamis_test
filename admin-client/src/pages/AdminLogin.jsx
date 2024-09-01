@@ -63,8 +63,8 @@ const AdminLogin = () => {
     console.log(response.data);
 
     if (response.status == 201) {
-      Cookies.set('accessToken', response.data.data.accessToken);
-      navigate('/dashboard')
+      Cookies.set('accessTokenAdmin', response.data.data.accessToken);
+      navigate('/admin/dashboard')
       return;
     }
     alert("something went wrong")

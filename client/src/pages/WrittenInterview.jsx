@@ -290,9 +290,7 @@ const WrittenInterview = () => {
                                         size="lg"
                                         className="w-1/3"
                                         onClick={() => {
-                                            if (window.confirm("Are you sure you want to skip this question?")) {
-                                                setCurrentQuestion((prev) => prev + 1);
-                                            }
+                                            
                                         }}
                                     >
                                         Skip

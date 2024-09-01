@@ -9,8 +9,8 @@ import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvita
 export const createCompanyInterview = async (req, res) => {
     try {
         const { name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions, position, students, type } = req.body;
-
-        const link = `https://glamis.in/interview/${company}/${position}`;
+        // if not login then first login then redisect to this page
+        const link = `https://glamis.in/myInterviews/`;
         const studentEmails = students;
         const studentIds = [];
         const interviewIds = [];
@@ -29,7 +29,7 @@ export const createCompanyInterview = async (req, res) => {
                         description: job_description,
                         start_time: date + 'T' + from,
                         end_time: date + 'T' + to,
-                        title: position,
+                        title: `${name} | ${company} | ${position}`,
                         type
                     });
                     await interview.save();
@@ -73,7 +73,7 @@ export const createSubjectInterview = async (req, res) => {
     try {
         const { name, subject, date, from, to, no_of_questions, type, easy, medium, hard, questions, students } = req.body;
         
-        const link = `https://glamis.in/interview/${subject}`;
+        const link = `https://glamis.in/myInterviews/`;;
         const studentEmails = students;
         const studentIds = [];
         const interviewIds = [];
@@ -155,7 +155,7 @@ export const createVerbalInterview = async (req, res) => {
     try{
         const { name, date, from, to, no_of_questions, type, easy, medium, hard, questions, students } = req.body;
 
-        const link = `https://glamis.in/interview/${name}`;
+        const link = `https://glamis.in/myInterviews/`;
         const studentEmails = students;
 
         const studentIds = [];
@@ -218,7 +218,7 @@ export const createWrittenInterview = async (req, res) => {
     try{
         const { name, domain, date, from, to, no_of_questions ,fillInTheBlanks,
             synonymsAndAntonyms, type, essay, jumbled, errorDetection, questions, students } = req.body;
-        const link = `https://glamis.in/interview/${domain}`;
+        const link = `https://glamis.in/myInterviews/`;
 
         const studentEmails = students;
 

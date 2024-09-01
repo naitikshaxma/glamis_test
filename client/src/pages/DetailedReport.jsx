@@ -113,7 +113,7 @@ const DetailedReport = () => {
                                                 good: [item.technicalExplanation[0]],
                                                 improvement: [item.technicalExplanation[1]]
                                             }}
-                                            score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
+                                            score={item.overallPerformance}
                                             expectedAnswer={item.expectedAnswer}
                                         />
                                     </div>
