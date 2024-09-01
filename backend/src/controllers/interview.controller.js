@@ -1281,7 +1281,20 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
         max_tokens: 1000,
     });
 
-    //  
+    await InterviewQuestion.create({
+        question: question,
+        answer: feedback.userAnswer,
+        // expectedAnswer: feedback.expectedAnswer,
+        // interview: interviewId,
+        // student: req.user._id,
+        // overallPerformance: feedback.overallScore,
+        // grammar: feedback.grammarScore,
+        // vocabulary: feedback.vocabularyScore,
+        // technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
+        // vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
+        // grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+    }); 
+
     res.status(200).send(completion.choices[0].message.content);
 });
 

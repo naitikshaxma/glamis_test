@@ -165,7 +165,8 @@ const WrittenInterview = () => {
                 score: response.data.contentScore,
             });
 
-            setResults(prev => [...prev, response.data.data]);
+            setResults(prev => [...prev, response.data]);
+            console.log(results);
         } catch (error) {
             console.error('Error uploading answer:', error);
         }
