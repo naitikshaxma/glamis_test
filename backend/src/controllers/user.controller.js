@@ -125,6 +125,24 @@ const login = asyncHandler(async (req, res) => {
         secure: true
     }
 
+    const isStudent = await Student.findOne({ user: isUser._id })
+
+    if (!isStudent) {
+        const student = await Student.create({
+            user: isUser._id,
+            token: 4,
+            avatar: "path/to/avatar.png",
+            interview_taken: [],
+            course: "B.Tech",
+            branch: "Computer Science",
+            semester: 6,
+            section: "A",
+            address: "GLA University, Mathura",
+            idCard: "path/to/idCard.png",
+            resume: "path/to/resume.pdf"
+        })
+    }
+
     return res
         .status(201)
         .cookie("accessToken", accessToken, options)
