@@ -1282,18 +1282,18 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
     });
 
     await InterviewQuestion.create({
-        question: question,
-        answer: feedback.userAnswer,
-        // expectedAnswer: feedback.expectedAnswer,
-        // interview: interviewId,
-        // student: req.user._id,
-        // overallPerformance: feedback.overallScore,
-        // grammar: feedback.grammarScore,
-        // vocabulary: feedback.vocabularyScore,
-        // technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
-        // vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
-        // grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
-    }); 
+        question : question,
+        answer : answer,
+        interview : interviewId,
+        student : req.user._id,
+        overallPerformance : completion.choices[0].message.content.overallScore,
+        grammar : completion.choices[0].message.content.grammarScore,
+        vocabulary : completion.choices[0].message.content.vocabularyScore,
+        technicalExplanation : [completion.choices[0].message.content.technicalExplanation.Pros, completion.choices[0].message.content.technicalExplanation.Cons],
+        vocabularyExplanation : [completion.choices[0].message.content.vocabularyExplanation.Pros, completion.choices[0].message.content.vocabularyExplanation.Cons],
+        grammarExplanation : [completion.choices[0].message.content.grammarExplanation.Pros, completion.choices[0].message.content.grammarExplanation.Cons],
+        expectedAnswer : completion.choices[0].message.content.expectedAnswer,
+    });
 
     res.status(200).send(completion.choices[0].message.content);
 });

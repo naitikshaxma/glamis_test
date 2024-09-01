@@ -21,6 +21,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import WrittenInterview from "./pages/WrittenInterview";
 import WrittenReport from "./pages/WrittenReport";
 import Feedback from "./pages/Feedback";
+import Cookies from 'js-cookie';
+import ProtectedRoute from "./pages/Protectedroute";
 
 const response = {
     statusCode: 200,
@@ -46,7 +48,8 @@ const MainLayout = ({ children }) => (
 );
 
 const App = () => {
-    // a function for disable the inspect panel
+
+    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
     document.onkeydown = function (e) {
         if (e.ctrlKey && (e.keyCode === 73 || e.keyCode === 85)) {
             return false;
@@ -84,55 +87,58 @@ const App = () => {
                 <Route path="/account/verification" element={<Otp />} />
                 <Route
                     path="/dashboard"
-                    element={<MainLayout><Dashboard /></MainLayout>}
+                    element={ <ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>}
+                   
                 />
                 <Route
                     path="/myInterview"
-                    element={<MainLayout><Interviews /></MainLayout>}
+                    element={<ProtectedRoute><MainLayout><Interviews /></MainLayout></ProtectedRoute>}
                 />
                 <Route
                     path="/profile"
-                    element={<MainLayout><Profile /></MainLayout>}
+                    element={<ProtectedRoute><MainLayout><Profile /></MainLayout></ProtectedRoute>}
                 />
                 <Route
                     path="/feedback"
-                    element={<MainLayout><Feedback /></MainLayout>}
+                    element={<ProtectedRoute><MainLayout><Feedback /></MainLayout></ProtectedRoute>}
                 />
                 <Route
                     path="/history"
-                    element={<MainLayout><History />
+                    element={<ProtectedRoute><MainLayout><History />
                         {
                             resultPopup && <Result />
                         }
 
-                    </MainLayout>}
+                    </MainLayout></ProtectedRoute>}
                 />
                 <Route
                     path="/history/detailed"
-                    element={
+                    element={ <ProtectedRoute>
+
                         <DetailedReport />
+                    </ProtectedRoute>
                     }
                 />
                 <Route
                     path="/history/detailed/:id"
-                    element={
+                    element={<ProtectedRoute>
+
                         <DetailedReport />
+                    </ProtectedRoute>
                     }
                 />
-                <Route path="/history/detailed-written" element={<WrittenReport />} />
+                <Route path="/history/detailed-written" element={<ProtectedRoute><WrittenReport /></ProtectedRoute>} />
                 <Route
                     path="/live"
                     element={<LiveInterview />}
                 />
-                <Route path="/written" element={<WrittenInterview />} />
+                <Route path="/written" element={<ProtectedRoute><WrittenInterview /></ProtectedRoute>} />
                 <Route
                     path="/evaluation"
-                    element={<EvaluationResult data={response.data} />}
+                    element={<ProtectedRoute><EvaluationResult data={response.data} /></ProtectedRoute>}
                 />
-                {/* <Route
-                    path="/interview/create"
-                    element={<CreateInterview />}
-                /> */}
+                {/* 404 not found page */}
+                <Route path="*" element={<h1>404 Not Found</h1>} />
             </Routes>
             <ToastContainer />
         </Router>
