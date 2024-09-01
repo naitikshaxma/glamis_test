@@ -40,6 +40,7 @@ const signup = asyncHandler(async (req, res) => {
         return res.status(401).json(ApiError(401, "Password do not match"))
     }
 
+    console.log("yaha tak aa gye")
     const user = await User.findOne({ $or: [{ email_id }, { phone }] })
 
     if (user) {
@@ -49,6 +50,7 @@ const signup = asyncHandler(async (req, res) => {
     const otp = createOtp();
 
     sendMail(email_id, "OTP Verification", OTPTemplate(otp))
+
 
 
 
@@ -121,7 +123,7 @@ const login = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(isUser._id).select("-password -refreshToken")
 
     const options = {
-        httpOnly: true, // can only be modified by server not by client-side
+        httpOnly: false, // can only be modified by server not by client-side
         secure: true
     }
 
@@ -168,7 +170,7 @@ const logout = asyncHandler(async (req, res) => {
         })
 
     const options = {
-        httpOnly: true, // can only be modified by server not by client-side
+        httpOnly: false, // can only be modified by server not by client-side
         secure: true
     }
 
@@ -203,7 +205,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id)
 
         const options = {
-            httpOnly: true,
+            httpOnly: false,
             secure: true
         }
 
@@ -356,6 +358,22 @@ const addStudent = asyncHandler(async (req, res) => {
     return res.status(201).json(new ApiResponse(200, student, "Student Added Successfully"))
 })
 
+const updateStudent = asyncHandler(async (req, res) => {
+    const { user_id } = req.body;
+
+    const user = await User.findById(user_id)
+
+    if (!user) {
+        return res.status(404).json(new ApiError(404, "Student Doesn't Exists"))
+    }
+
+    const student = await Student.findOneAndUpdate({ user: user_id }, req.body, {
+        new: true
+    })
+
+    return res.status(200).json(new ApiResponse(200, student, "Student Updated Successfully"))
+});
+
 
 
 export {
@@ -366,5 +384,6 @@ export {
     verifyEmail,
     resendOTP,
     addStudent,
+    updateStudent,
     verifyUser
 }
