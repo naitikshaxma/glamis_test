@@ -15,7 +15,8 @@ const DetailedReport = () => {
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
     const [activeTab, setActiveTab] = useState('technical');
-    const [varTab, setVarTab] = useState('Technical Skills');
+    const [varTab1, setVarTab1] = useState('Technical Skills');
+    const [varTab2, setVarTab2] = useState('Verbal Skills');
 
     const handleOpen = (value) => {
         setOpen(open === value ? null : value);
@@ -51,8 +52,11 @@ const DetailedReport = () => {
         console.log(response.data);
 
         setResult(response.data.interviewResults);
-        if(response.data.interviewType === 'verbal'){
-            setVarTab('Relevancy Score');
+        if (response.data.interviewType === 'verbal') {
+            setVarTab1('Relevancy Score');
+        } else if (response.data.interviewType === 'written') {
+            setVarTab1('Written Skills');
+            setVarTab2('Content Information');
         }
     }
 
@@ -73,51 +77,51 @@ const DetailedReport = () => {
         }, []);
         switch (activeTab) {
             case 'technical':
-    return (
-        <div className='w-full flex justify-around mb-5'>
-            <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                <div className="flex flex-col space-y-4">
-                    {
-                        result.map((item, index) => (
-                            <Link
-                                key={index}
-                                to={`#question-${index}`}  // Updated: include '#' to match with the id
-                                smooth={true}
-                                duration={500}
-                                className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
-                                onClick={() => handleQuestionClick(index)}
-                            >
-                                Q{index + 1}
-                            </Link>
-                        ))
-                    }
-                </div>
-            </div>
-            <div
-                className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
-                id="scroll-container"
-                ref={scrollContainerRef}
-            >
-                {
-                    result.map((item, index) => (
-                        <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
-                            <TechnicalCard
-                                qno={index}
-                                question={item.question}
-                                answer={item.answer}
-                                feedback={{
-                                    good: [item.technicalExplanation[0]],
-                                    improvement: [item.technicalExplanation[1]]
-                                }}
-                                score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
-                                expectedAnswer={item.expectedAnswer}
-                            />
+                return (
+                    <div className='w-full flex justify-around mb-5'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                            <div className="flex flex-col space-y-4">
+                                {
+                                    result.map((item, index) => (
+                                        <Link
+                                            key={index}
+                                            to={`#question-${index}`}  // Updated: include '#' to match with the id
+                                            smooth={true}
+                                            duration={500}
+                                            className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            onClick={() => handleQuestionClick(index)}
+                                        >
+                                            Q{index + 1}
+                                        </Link>
+                                    ))
+                                }
+                            </div>
                         </div>
-                    ))
-                }
-            </div>
-        </div>
-    )
+                        <div
+                            className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            id="scroll-container"
+                            ref={scrollContainerRef}
+                        >
+                            {
+                                result.map((item, index) => (
+                                    <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
+                                        <TechnicalCard
+                                            qno={index}
+                                            question={item.question}
+                                            answer={item.answer}
+                                            feedback={{
+                                                good: [item.technicalExplanation[0]],
+                                                improvement: [item.technicalExplanation[1]]
+                                            }}
+                                            score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
+                                            expectedAnswer={item.expectedAnswer}
+                                        />
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                )
 
             case 'verbal':
                 return (
@@ -247,14 +251,14 @@ const DetailedReport = () => {
                         <Technical technicalScore={[
                             { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
                             { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
-                        ]} varTab={varTab}
-                         />
+                        ]} varTab1={varTab1}
+                        />
                         <Verbal data={
                             [
                                 { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
                                 { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
                             ]
-                        } />
+                        } varTab2={varTab2} />
                     </div>
                 </div>
                 <div className="report mt-4">
@@ -264,13 +268,13 @@ const DetailedReport = () => {
                     <div className="w-full shadow">
                         <div className="flex border-b mb-6">
                             <button className={`py-2 px-4 ${activeTab === 'technical' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('technical')} >
-                                {varTab}
+                                {varTab1}
                             </button>
                             <button
                                 className={`py-2 px-4 ${activeTab === 'verbal' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`}
                                 onClick={() => setActiveTab('verbal')}
                             >
-                                Verbal Skills
+                                {varTab2}
                             </button>
                         </div>
                         <div className="flex">
