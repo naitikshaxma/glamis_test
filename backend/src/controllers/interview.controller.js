@@ -12,6 +12,7 @@ import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import { AdminCompanyInterview, InterviewQuestionsByAdmin } from "../models/interview.models.js";
+import { json } from "express";
 
 const objectStorePath = path.resolve("../objectStore");
 
@@ -1277,18 +1278,20 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
         max_tokens: 1000,
     });
 
+    const completionData = JSON.parse(completion.choices[0].message.content);
+
     await InterviewQuestion.create({
         question : question,
         answer : answer,
         interview : interviewId,
         student : req.user._id,
-        overallPerformance : completion.choices[0].message.content.overallScore,
-        grammar : completion.choices[0].message.content.grammarScore,
-        vocabulary : completion.choices[0].message.content.vocabularyScore,
-        technicalExplanation : [completion.choices[0].message.content.technicalExplanation.Pros, completion.choices[0].message.content.technicalExplanation.Cons],
-        vocabularyExplanation : [completion.choices[0].message.content.vocabularyExplanation.Pros, completion.choices[0].message.content.vocabularyExplanation.Cons],
-        grammarExplanation : [completion.choices[0].message.content.grammarExplanation.Pros, completion.choices[0].message.content.grammarExplanation.Cons],
-        expectedAnswer : completion.choices[0].message.content.expectedAnswer,
+        overallPerformance : completionData.overallScore,
+        grammar : completionData.grammarScore,
+        vocabulary : completionData.vocabularyScore,
+        technicalExplanation : [completionData.contentStructureExplanation.Pros, completionData.contentStructureExplanation.Cons],
+        vocabularyExplanation : [completionData.vocabularyExplanation.Pros, completionData.vocabularyExplanation.Cons],
+        grammarExplanation : [completionData.grammarExplanation.Pros, completionData.grammarExplanation.Cons],
+        expectedAnswer : completionData.expectedResponse
     });
 
     res.status(200).send(completion.choices[0].message.content);
