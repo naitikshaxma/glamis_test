@@ -1154,7 +1154,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     if (difficulty === "Easy") {
         prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to ${subject}. It should be a conceptual question.`
     } else if (difficulty === "Medium") {
-        prompt = `Based on the previous questions and answers, generate a new coding question for ${subject} in the appropriate programming language. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
+        prompt = `Based on the previous questions and answers, generate a new coding question for ${subject} in the appropriate programming language. Provide a code snippet and ask the user to find error or make it more efficient or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
     } else {
         prompt = `Based on the previous questions and answers, generate a scenario-based question for ${subject}. The question should involve real-world tasks and challenges directly related to the jsubject in hand.`
     }
