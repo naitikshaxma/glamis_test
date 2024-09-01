@@ -331,6 +331,14 @@ const adminWrittenInterview = new mongoose.Schema({
         type: String,
         required: true
     },
+    fillInTheBlanks: {
+        type: Number,
+        required: true
+    },
+    synonymsAndAntonyms: {
+        type: Number,
+        required: true
+    },
     domain: {
         type: String,
         required: true

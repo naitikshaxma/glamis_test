@@ -51,6 +51,8 @@ export default function WrittenInterview() {
     const [noOfQuestions, setNoOfQuestions] = useState("");
     const [essay, setEssay] = useState("");
     const [errorDetection, setErrorDetection] = useState("");
+    const [fillInTheBlanks, setFillInTheBlanks] = useState("");
+    const [synonymsAndAntonyms, setSynonymsAndAntonyms] = useState("");
     const [jumbled, setJumbled] = useState("");
     const [questions, setQuestions] = useState([{ question: "", questionType: "essay" }]);
     const [emailObject, setEmailObject] = useState([]);
@@ -78,6 +80,8 @@ export default function WrittenInterview() {
                 essay,
                 jumbled,
                 errorDetection,
+                fillInTheBlanks,
+                synonymsAndAntonyms,
                 questions,
                 students: emailObject,
                 type: "written"
@@ -193,23 +197,35 @@ export default function WrittenInterview() {
                                                         type="number"
                                                         value={essay}
                                                         onChange={(e) => setEssay(e.target.value)}
-                                                        max={8}
                                                     />
                                                     <FormInput
                                                         label="No of Jumbled questions"
                                                         type="number"
                                                         value={jumbled}
                                                         onChange={(e) => setJumbled(e.target.value)}
-                                                        max={7}
                                                     />
                                                     <FormInput
                                                         label="No of Error Detection questions"
                                                         type="number"
                                                         value={errorDetection}
                                                         onChange={(e) => setErrorDetection(e.target.value)}
-                                                        max={5}
                                                     />
                                                 </div>
+                                                {/* fill in the blanks and synonyms and antonyms */}
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                                    <FormInput
+                                                        label="No of Fill in the blanks questions"
+                                                        type="number"
+                                                        value={fillInTheBlanks}
+                                                        onChange={(e) => setFillInTheBlanks(e.target.value)}
+                                                    />
+                                                    <FormInput
+                                                        label="No of Synonyms and Antonyms questions"
+                                                        type="number"
+                                                        value={synonymsAndAntonyms}
+                                                        onChange={(e) => setSynonymsAndAntonyms(e.target.value)}
+                                                    />
+                                                    </div>
                                                 <div className="flex space-x-4 mb-6">
                                                     <div className="flex flex-col">
                                                         <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
@@ -268,6 +284,8 @@ export default function WrittenInterview() {
                                                     <Option value="essay">Essay</Option>
                                                     <Option value="jumbled">Jumbled</Option>
                                                     <Option value="errorDetection">Error Detection</Option>
+                                                    <Option value="fillInTheBlanks">Fill in the Blanks</Option>
+                                                    <Option value="synonymsAndAntonyms">Synonyms and Antonyms</Option>
                                                 </Select>
                                             </div>
                                         </div>

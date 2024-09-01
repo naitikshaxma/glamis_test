@@ -216,7 +216,8 @@ export const createVerbalInterview = async (req, res) => {
 export const createWrittenInterview = async (req, res) => {
 
     try{
-        const { name, domain, date, from, to, no_of_questions, type, essay, jumbled, errorDetection, questions, students } = req.body;
+        const { name, domain, date, from, to, no_of_questions ,fillInTheBlanks,
+            synonymsAndAntonyms, type, essay, jumbled, errorDetection, questions, students } = req.body;
         const link = `https://glamis.in/interview/${domain}`;
 
         const studentEmails = students;
@@ -261,7 +262,7 @@ export const createWrittenInterview = async (req, res) => {
             questionIds.push(newQuestion._id);
         }
 
-        const newWrittenInterview = new AdminWrittenInterview({ name, domain, date, from, to, no_of_questions, essay, jumbled, errorDetection, questions: questionIds, students: studentIds, interview: interviewIds, link });
+        const newWrittenInterview = new AdminWrittenInterview({ name, domain, date, from, to, no_of_questions, essay, jumbled,fillInTheBlanks, synonymsAndAntonyms ,errorDetection, questions: questionIds, students: studentIds, interview: interviewIds, link });
 
         await newWrittenInterview.save();
 

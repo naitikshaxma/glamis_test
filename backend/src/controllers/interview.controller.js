@@ -753,8 +753,14 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         difficulty = 'essay';
     } else if (adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'jumbled';
-    } else {
+    } else if (adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'errorDetection';
+    }
+    else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
+        difficulty = 'fillInTheBlanks';
+    }
+    else{
+        difficulty = 'synonymsAndAntonyms';
     }
 
     // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
@@ -836,6 +842,85 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         }
     }
 
+    if (difficulty === "fillInTheBlanks") {
+
+        const fillInTheBlanksQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "fillInTheBlanks", _id: { $in: adminInterview.questions } });
+
+        if (questionNo - (adminInterview.essay + adminInterview.jumbled + adminInterview.errorDetection) < fillInTheBlanksQuestions.length) {
+
+            const question = fillInTheBlanksQuestions[questionNo - (adminInterview.essay + adminInterview.jumbled + adminInterview.errorDetection)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+
+                return res.status(500).json({ error: 'Failed to generate audio' });
+
+            }
+
+            const dataToSend = {
+
+                question,
+
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+        }
+    }
+
+    if (difficulty === "synonymsAndAntonyms") {
+
+        const synonymsAndAntonymsQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "synonymsAndAntonyms", _id: { $in: adminInterview.questions } });
+
+        if (questionNo - (adminInterview.essay + adminInterview.jumbled + adminInterview.errorDetection + adminInterview.fillInTheBlanks) < synonymsAndAntonymsQuestions.length) {
+
+            const question = synonymsAndAntonymsQuestions[questionNo - (adminInterview.essay + adminInterview.jumbled + adminInterview.errorDetection + adminInterview.fillInTheBlanks)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+
+            await textToSpeech(cleanedQuestion, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+
+                return res.status(500).json({ error: 'Failed to generate audio' });
+
+            }
+
+            const dataToSend = {
+
+                question,
+
+                audioFileName: audioFileName
+
+            };
+
+            return res.status(200).json(
+
+                new ApiResponse(200, dataToSend, "Question generated successfully")
+
+            );
+
+        }
+
+    }
+
+
     let prompt = "";
 
     if (difficulty === "essay") {
@@ -846,9 +931,19 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
         prompt = `Based on the previous questions and answers, generate a jumbled sentence. The sentence should be related to the topic and should be challenging to unscramble. Provide the user with a hint to help them unscramble the sentence.`
 
-    } else {
+    } else if (difficulty === "errorDetection") {
 
         prompt = `Based on the previous questions and answers, generate a sentence with an error. The sentence should be related to the topic and should contain a grammatical or spelling error. Provide the user with a hint to help them identify and correct the error.`
+    }
+
+    else if (difficulty === "fillInTheBlanks") {
+
+        prompt = `Based on the previous questions and answers, generate a sentence with a blank space. The sentence should be related to the topic and should have a missing word or phrase. Provide the user with a hint to help them fill in the blank space.`
+    }
+
+    else{
+            
+            prompt = `Based on the previous questions and answers, generate a sentence with a word that needs to be replaced with a synonym or antonym. The sentence should be related to the topic and should contain a word that can be replaced with a synonym or antonym. Provide the user with a hint to help them identify the correct word and its synonym or antonym.`
     }
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
