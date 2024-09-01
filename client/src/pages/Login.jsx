@@ -188,7 +188,7 @@ export default function SignInSide() {
                                 </Grid>
                                 <Grid item className='text-sm'>
                                     <span>Don't have an account?</span>
-                                    <Link href="#">
+                                    <Link href="/">
                                         {" Sign Up"}
                                     </Link>
                                 </Grid>

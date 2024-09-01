@@ -275,27 +275,39 @@ const verifyUser = asyncHandler(async (req, res) => {
     const { accessToken } = req.body;
 
     if (!accessToken) {
-        return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
+        console.log("Access token missing");
+        // You can choose to log or handle this differently
+        return;
     }
 
     try {
+        // Verify the access token
+        const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
 
-        const decodedAccessToken = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
-
-        const user = await User.findById(decodedAccessToken._id)
+        const user = await User.findById(decodedAccessToken._id);
 
         if (!user) {
-            return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
+            console.log("User doesn't exist for the provided token");
+            // You can choose to log or handle this differently
+            return;
         }
 
-        return res.status(200).json(new ApiResponse(200, {
-            status: true
-        }, "User Verified Successfully"))
+        console.log("User verified successfully");
+        // You can proceed with your logic here, for example:
+        return res.status(200).json(new ApiResponse(200, "User verified successfully"));
     } catch (error) {
-        return res.status(401).json(new ApiError(401, "Unauthorized Request"))
+        // Log the error instead of sending an error response
+        if (error.name === 'TokenExpiredError') {
+            console.log("Token has expired");
+        } else if (error.name === 'JsonWebTokenError') {
+            console.log("Invalid token");
+        } else {
+            console.log('An unexpected error occurred:', error);
+        }
     }
-}
-)
+});
+
+
 
     
 
