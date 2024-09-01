@@ -112,7 +112,7 @@ export default function Sidebar() {
                       <ListItemPrefix>
                         <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
                       </ListItemPrefix>
-                      Written SKills
+                      Written Skills
                     </ListItem>
                   </Link>
                   <Link to="/admin/schedule/verbal">
