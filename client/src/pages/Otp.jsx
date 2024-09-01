@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axios from 'axios'; // Import axios for API calls
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -10,29 +11,62 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SidePic from '../assets/SidePic.png';
 
-
 const defaultTheme = createTheme();
+
 export default function Otp() {
     const [isLoading, setIsLoading] = React.useState(false);
-    const [showPassword, setShowPassword] = React.useState(false);
-    const [values, setValues] = React.useState({
-        password: '',
-        showPassword: false,
-    });
+    const [otp, setOtp] = React.useState(Array(6).fill(''));
 
-    const handleChange = (prop) => (event) => {
-        setValues({ ...values, [prop]: event.target.value });
+    const handleChange = (e, index) => {
+        const { value } = e.target;
+        const newOtp = [...otp];
+        newOtp[index] = value;
+        setOtp(newOtp);
+
+        if (value.length === 1 && index < 5) {
+            const nextSibling = document.getElementById(`otp${index + 2}`);
+            if (nextSibling) {
+                nextSibling.focus();
+            }
+        }
+
+        if (value.length === 0 && e.nativeEvent.inputType === 'deleteContentBackward' && index > 0) {
+            const previousSibling = document.getElementById(`otp${index}`);
+            if (previousSibling) {
+                previousSibling.focus();
+            }
+        }
     };
 
-    const handleClickShowPassword = () => {
-        setValues({ ...values, showPassword: !values.showPassword });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const enteredOtp = otp.join(''); // Combine OTP array into a single string
+        console.log(enteredOtp);
+        const emailId = 'suneo@gla.ac.in'; // Replace this with the actual email ID you are working with
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/verify-email`, {
+                email: emailId,
+                otp: enteredOtp,
+            });
+
+            if (response.data.success) {
+                alert('OTP verified successfully');
+            } else {
+                alert('Invalid OTP');
+            }
+        } catch (error) {
+            console.error('Error verifying OTP:', error);
+            alert('There was an error verifying the OTP. Please try again.');
+        }
+
+        setIsLoading(false);
     };
 
-    const handleMouseDownPassword = (event) => {
-        event.preventDefault();
-    };
-  return (
-    <ThemeProvider theme={defaultTheme}>
+    return (
+        <ThemeProvider theme={defaultTheme}>
             <Grid container component="main" sx={{ height: '100vh' }}>
                 <CssBaseline />
                 <Grid
@@ -47,7 +81,7 @@ export default function Otp() {
                         backgroundPosition: 'center',
                     }}
                 >
-                    <img src={SidePic} className='mt-10 p-20' />
+                    <img src={SidePic} className='mt-10 p-20' alt="Side Illustration" />
                 </Grid>
                 <Grid item xs={12} sm={8} md={7} component={Paper} elevation={6} square>
                     <Box
@@ -63,81 +97,38 @@ export default function Otp() {
                         <Typography component="h1" variant="h5" className='font-bold'>
                             Welcome to GLA Mock Interview System
                         </Typography>
-                        <Box component="form" noValidate  sx={{ mt: 1 }}>
-                            {/* 6 boxes for otp in flex */}
-                            <div className='flex justify-center my-5 space-x-2 mx-5'>
-                                <TextField
-                                    variant="outlined"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="otp1"
-                                    name="otp1"
-                                    autoFocus
-                                    className='mx-2'
-                                />
-                                <TextField
-                                    variant="outlined"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="otp2"
-                                    name="otp2"
-                                    className='mx-2'
-                                />
-                                <TextField
-                                    variant="outlined"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="otp3"
-                                    name="otp3"
-                                    className='mx-2'
-                                />
-                                <TextField
-                                    variant="outlined"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="otp4"
-                                    name="otp4"
-                                    className='mx-2'
-                                />
-                                <TextField
-                                    variant="outlined"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="otp5"
-                                    name="otp5"
-                                    className='mx-2'
-                                />
-                                <TextField
-                                    variant="outlined"
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="otp6"
-                                    name="otp6"
-                                    className='mx-2'
-                                />
+                        <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit}>
+                            <Grid container spacing={2} justifyContent="center" sx={{ mt: 5, mb: 5 }}>
+                                {Array.from({ length: 6 }).map((_, index) => (
+                                    <Grid item xs={2} key={index}>
+                                        <TextField
+                                            variant="outlined"
+                                            required
+                                            fullWidth
+                                            id={`otp${index + 1}`}
+                                            name={`otp${index + 1}`}
+                                            inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem' } }}
+                                            autoFocus={index === 0}
+                                            onChange={(e) => handleChange(e, index)}
+                                            value={otp[index]}
+                                        />
+                                    </Grid>
+                                ))}
+                            </Grid>
 
-                            </div>
-                           
                             <Button
                                 type="submit"
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2, backgroundColor: "#2b6030", '&:hover': { backgroundColor: "#1c3d1f" } }}
                                 disabled={isLoading}
-                                className={isLoading ? 'loader' : ''}
                             >
                                 {!isLoading ? "Verify OTP" : "Verifying..."}
                             </Button>
-                            
+
                             <div className="flex justify-center">
-                                <span>OTP not received? ;</span>
-                                <Link href="/login">
+                                <span>OTP not received? </span>
+                                <Link href="/" sx={{ ml: 1 }}>
                                     {"Resend OTP"}
                                 </Link>
                             </div>
@@ -146,5 +137,5 @@ export default function Otp() {
                 </Grid>
             </Grid>
         </ThemeProvider>
-  )
+    );
 }

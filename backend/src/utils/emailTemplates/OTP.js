@@ -71,7 +71,7 @@ const OTPTemplate = (otp) => {
     <div class="container">
       <!-- Header -->
       <div>
-        <a href="https://skill-craft.onrender.com/">
+        <a href="https://glamis.in/">
           <img class="logo" src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="SkillCraft-Logo" />
         </a>
       </div>
@@ -81,7 +81,7 @@ const OTPTemplate = (otp) => {
         <p class="message">OTP Verification Email</p>
 
         <p>Dear User,</p>
-        <p>Thank you for registering with SkillCraft. To complete your registration, please use the following OTP (One-Time Password) to verify your account:</p>
+        <p>Thank you for registering with GLA Mock Interview System. To complete your registration, please use the following OTP (One-Time Password) to verify your account:</p>
         <h2 class="highlight">${otp}</h2>
         <p>This OTP is valid for 5 minutes. If you did not request this verification, please disregard this email. Once your account is verified, you will have access to our platform and its features.</p>
       </div>

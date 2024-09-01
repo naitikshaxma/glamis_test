@@ -228,14 +228,14 @@ const DetailedReport = () => {
                         <div className="font-semibold text-lg">GLAMIS</div>
                         <div className="font-semibold text-sm">G.L.A. University</div>
                         <div className="font-semibold text-sm">Mathura, Uttar Pradesh</div>
-                        <div className="font-semibold text-sm">India, 250909</div>
+                        <div className="font-semibold text-sm">India, 281406</div>
                     </div>
                 </div>
                 <div className="flex items-center">
                     <div className="flex flex-col mr-4">
                         <div className="font-semibold text-lg text-right">Demo User</div>
                         <div className="font-semibold text-sm text-right">2115000000</div>
-                        <div className="font-semibold text-sm text-right">Data Structures and Algorithms</div>
+                        <div className="font-semibold text-sm text-right">Mock Interview Results</div>
                     </div>
                     <div className="avatar w-20 border-2 border-green-900">
                         <img src={avatar} alt="" />
