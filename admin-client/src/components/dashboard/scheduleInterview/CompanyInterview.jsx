@@ -106,6 +106,7 @@ export default function CompanyInterview() {
     };
 
     const handleFileUpload = (event) => {
+        const emailRegex = /([a-zA-Z0-9._-]+)@(gla.ac.in|glamis.in)/g;
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
