@@ -88,7 +88,7 @@ const InterviewInvitationTemplate = (interviewName, company, interviewLink, inte
 
       <!-- Footer -->
       <div class="support">
-        <p>If you have any questions or need to reschedule, please contact us at <a href="mailto:anikr262@gmail.com">anikr262@gmail.com</a>. We are here to assist you!</p>
+        <p>If you have any questions or need to reschedule, please contact us at <a href="mailto:advancementsinai@gla.ac.in">advancementsinai@gla.ac.in/a>. We are here to assist you!</p>
       </div>
     </div>
   </body>
