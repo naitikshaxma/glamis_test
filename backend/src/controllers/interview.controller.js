@@ -300,6 +300,11 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     console.log("entered jd admin")
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    const [offset, setOffset] = useState(0);
+    const noOfAttemptedQuestions = await InterviewQuestion.find({ interview: interviewId }).countDocuments();
+
+    questionNo += offset;
+    
     console.log(req.body);
 
     let redisClient = await connectRedis();
@@ -316,6 +321,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
+    setOffset(noOfAttemptedQuestions);
 
     const adminInterview = await AdminCompanyInterview.findById(adminInterviewId);
 
@@ -333,8 +339,6 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     } else {
         difficulty = 'Hard';
     }
-
-    
 
     // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db 
 
@@ -421,11 +425,11 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
     let prompt = "";
     if (difficulty === "Easy") {
-        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description keywords , they can be related to particular core cs subjects and not involve coding or complex scenarios.\n\n${jdDetails}`
+        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description keywords , they can be related to particular core cs subjects and not involve coding or complex scenarios.\n\nJob Description: ${jdDetails}`
     } else if (difficulty === "Medium") {
-        prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
+        prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.\n\nJob Description: ${jdDetails}`
     } else {
-        prompt = `Based on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\n${jdDetails}`
+        prompt = `Based on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\nJob Description: ${jdDetails}`
     }
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
@@ -462,9 +466,9 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
 });
 
-export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => { 
+export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const {  answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    const { answer, score, interviewId, questionNo, adminInterviewId } = req.body;
     console.log(req.body);
 
     let redisClient = await connectRedis();
@@ -476,9 +480,9 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
             answer: answer,
             score: score
         });
-    } 
-    else{
-        conversationHistory.push({ verbal : true });
+    }
+    else {
+        conversationHistory.push({ verbal: true });
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -509,7 +513,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
     if (difficulty === "Easy") {
-        
+
         const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
         console.log("Easy Questions: ", easyQuestions);
         if (questionNo < easyQuestions.length) {
@@ -566,7 +570,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
             const dataToSend = {
 
                 question,
-                
+
                 audioFileName: audioFileName
 
             };
@@ -625,27 +629,27 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
     let prompt = "";
 
-if (difficulty === "Easy") {
-    prompt = `Based on the candidate's previous response "${answer}", generate a simple and straightforward question related to their personal background. Examples include:
+    if (difficulty === "Easy") {
+        prompt = `Based on the candidate's previous response "${answer}", generate a simple and straightforward question related to their personal background. Examples include:
     - "Can you introduce yourself?"
     - "What are your greatest strengths?"
     - "What are your hobbies and interests?"
     Ensure the question encourages the candidate to share more about themselves in a comfortable manner.`;
-} else if (difficulty === "Medium") {
-    prompt = `Considering the candidate's previous response "${answer}", formulate a question that delves into their past experiences. Focus on eliciting detailed responses about:
+    } else if (difficulty === "Medium") {
+        prompt = `Considering the candidate's previous response "${answer}", formulate a question that delves into their past experiences. Focus on eliciting detailed responses about:
     - "Can you describe a challenging situation you faced and how you overcame it?"
     - "What is one of your most significant accomplishments?"
     - "Tell me about a time you had to deal with failure and what you learned from it."
     The question should prompt the candidate to reflect on and articulate their experiences comprehensively.`;
-} else if (difficulty === "Hard") {
-    prompt = `Building upon the candidate's response "${answer}", craft a thought-provoking question that explores their perspectives and critical thinking abilities. Topics can include:
+    } else if (difficulty === "Hard") {
+        prompt = `Building upon the candidate's response "${answer}", craft a thought-provoking question that explores their perspectives and critical thinking abilities. Topics can include:
     - "What are your views on the current trends in our industry?"
     - "How do you approach ethical dilemmas in the workplace?"
     - "Can you discuss your opinion on the importance of lifelong learning in your profession?"
     The question should challenge the candidate to provide insightful and well-reasoned answers demonstrating depth of thought.`;
-} else {
-    prompt = `Please specify a valid difficulty level: "Easy", "Medium", or "Hard".`;
-}
+    } else {
+        prompt = `Please specify a valid difficulty level: "Easy", "Medium", or "Hard".`;
+    }
 
     prompt += `Generate only the question text without any additional explanations or context. The question you generate must include sections from ${answer}`;
     console.log(answer)
@@ -759,7 +763,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
     else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'fillInTheBlanks';
     }
-    else{
+    else {
         difficulty = 'synonymsAndAntonyms';
     }
 
@@ -973,9 +977,9 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         prompt = `Based on the previous questions and answers, generate a sentence with a blank space. The sentence should be related to the topic and should have a missing word or phrase. Provide the user with a hint to help them fill in the blank space.`
     }
 
-    else{
-            
-            prompt = `Based on the previous questions and answers, generate a sentence with a word that needs to be replaced with a synonym or antonym. The sentence should be related to the topic and should contain a word that can be replaced with a synonym or antonym. Provide the user with a hint to help them identify the correct word and its synonym or antonym.`
+    else {
+
+        prompt = `Based on the previous questions and answers, generate a sentence with a word that needs to be replaced with a synonym or antonym. The sentence should be related to the topic and should contain a word that can be replaced with a synonym or antonym. Provide the user with a hint to help them identify the correct word and its synonym or antonym.`
     }
 
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
@@ -1323,7 +1327,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
             expectedAnswer: feedback.expectedAnswer,
             interview: interviewId,
             student: req.user._id,
-            overallPerformance: feedback.overallScore  <= 30 ? 0 : feedback.overallPerformance,
+            overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallPerformance,
             grammar: feedback.grammarScore,
             vocabulary: feedback.vocabularyScore,
             technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
@@ -1392,8 +1396,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
     }
 
     Ensure the keys are exactly "prompt", "userResponse", "overallScore", "grammarScore", "vocabularyScore", "contentStructureScore", "contentStructureExplanation", "vocabularyExplanation", and "grammarExplanation". All scores should be integers.
-
-
+    If the question is fill in the blanks type or asking for antonyms or synonyms, then the expected response should be just one word, and if the user gives the correct word, then all the scores should be 100.
     `;
 
     const completion = await openai.chat.completions.create({
@@ -1408,17 +1411,17 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
     const completionData = JSON.parse(completion.choices[0].message.content);
 
     await InterviewQuestion.create({
-        question : question,
-        answer : answer,
-        interview : interviewId,
-        student : req.user._id,
-        overallPerformance : completionData.overallScore <= 30 ? 0 : completionData.overallScore,
-        grammar : completionData.grammarScore,
-        vocabulary : completionData.vocabularyScore,
-        technicalExplanation : [completionData.contentStructureExplanation.Pros, completionData.contentStructureExplanation.Cons],
-        vocabularyExplanation : [completionData.vocabularyExplanation.Pros, completionData.vocabularyExplanation.Cons],
-        grammarExplanation : [completionData.grammarExplanation.Pros, completionData.grammarExplanation.Cons],
-        expectedAnswer : completionData.expectedResponse
+        question: question,
+        answer: answer,
+        interview: interviewId,
+        student: req.user._id,
+        overallPerformance: completionData.overallScore <= 30 ? 0 : completionData.overallScore,
+        grammar: completionData.grammarScore,
+        vocabulary: completionData.vocabularyScore,
+        technicalExplanation: [completionData.contentStructureExplanation.Pros, completionData.contentStructureExplanation.Cons],
+        vocabularyExplanation: [completionData.vocabularyExplanation.Pros, completionData.vocabularyExplanation.Cons],
+        grammarExplanation: [completionData.grammarExplanation.Pros, completionData.grammarExplanation.Cons],
+        expectedAnswer: completionData.expectedResponse
     });
 
     res.status(200).send(completion.choices[0].message.content);
