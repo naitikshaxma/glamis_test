@@ -39,7 +39,7 @@ export default function VerbalInterview() {
     const [easy, setEasy] = useState("");
     const [medium, setMedium] = useState("");
     const [hard, setHard] = useState("");
-    const [questions, setQuestions] = useState([{ question: "", difficulty: "Easy" }]);
+    const [questions, setQuestions] = useState([]);
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {

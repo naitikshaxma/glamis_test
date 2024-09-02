@@ -54,7 +54,7 @@ export default function WrittenInterview() {
     const [fillInTheBlanks, setFillInTheBlanks] = useState("");
     const [synonymsAndAntonyms, setSynonymsAndAntonyms] = useState("");
     const [jumbled, setJumbled] = useState("");
-    const [questions, setQuestions] = useState([{ question: "", questionType: "essay" }]);
+    const [questions, setQuestions] = useState([]);
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
