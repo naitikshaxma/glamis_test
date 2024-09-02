@@ -72,7 +72,7 @@ export default function Signup() {
             // Redirect to /account/verification with email_id
             console.log(signupData.email_id);
             setIsLoading(false);
-            if (response.data.statusCode == 201) {
+            if (response.data.statusCode == 201 || response.data.statusCode == 200) {
                 toast.success("OTP sent successfully on your registered mail id!");
                 navigate('/account/verification', { state: { email_id: signupData.email_id } });
             }

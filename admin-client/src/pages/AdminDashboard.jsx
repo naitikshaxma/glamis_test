@@ -4,6 +4,14 @@ import ScheduleInterview from '../components/dashboard/scheduleInterview/Company
 import ReviewBoard from '../components/dashboard/ReviewBoard'
 
 const AdminDashboard = () => {
+
+  // useEffect(() => {
+  //   const fetchIsAdmin = async () => {
+
+  //   }
+  //   fetchIsAdmin()
+  // },[])
+
   return (
     <>
       <Sidebar />

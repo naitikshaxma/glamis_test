@@ -16,7 +16,7 @@ import SidePic from '../assets/SidePic.png';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-import { toast } from 'react-toastify';
+// import { alert } from 'react-alertify';
 
 function Copyright(props) {
   return (
@@ -46,7 +46,7 @@ const AdminLogin = () => {
     event.preventDefault();
     console.log("entering", login);
     if (login.email === '' || login.password === '') {
-      toast.error('Please fill all the fields')
+      alert.error('Please fill all the fields')
       console.log("exiting");
       return
     }
@@ -63,7 +63,12 @@ const AdminLogin = () => {
     console.log(response.data);
 
     if (response.status == 201) {
+      if(!response.data.data.isAdmin){
+        alert("You are not an admin")
+        return;
+      }
       Cookies.set('accessTokenAdmin', response.data.data.accessToken);
+
       navigate('/admin/dashboard')
       return;
     }

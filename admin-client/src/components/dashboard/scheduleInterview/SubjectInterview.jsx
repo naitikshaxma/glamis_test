@@ -86,6 +86,7 @@ export default function SubjectInterview() {
                 headers: { "Content-Type": "application/json" }
             });
             console.log("Form submitted successfully:", response.data);
+            alert("Interview Created successfully");
         } catch (error) {
             console.error("Error submitting form:", error);
         }
