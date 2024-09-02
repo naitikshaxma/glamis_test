@@ -35,6 +35,9 @@ const App = () => {
                 <Route path="/admin/schedule/subject" element={<MainLayout><SubjectInterview /></MainLayout>} />
                 <Route path="/admin/schedule/verbal" element={<MainLayout><VerbalInterview /></MainLayout>} />
                 <Route path="/admin/review-board" element={<MainLayout><ReviewBoard /></MainLayout>} />
+                <Route path="*" element={<div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
+                    <h1>404 Not Found</h1>
+                </div>} />
             </Routes>
         </Router>
     );

@@ -138,7 +138,9 @@ const App = () => {
                     element={<ProtectedRoute><EvaluationResult data={response.data} /></ProtectedRoute>}
                 />
                 {/* 404 not found page */}
-                <Route path="*" element={<h1>404 Not Found</h1>} />
+                <Route path="*" element={<div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
+                    <h1>404 Not Found</h1>
+                </div>} />
             </Routes>
             <ToastContainer />
         </Router>

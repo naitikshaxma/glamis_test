@@ -16,14 +16,14 @@ const DashboardContent = () => {
       <div className="flex justify-between w-full">
       <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
 
-      <Button variant="gradient" color="#2b6030" className='mb-4' size="md"
+      {/* <Button variant="gradient" color="#2b6030" className='mb-4' size="md"
       // onClick={() =>{
       //   navigate('/interview/create')
       // }
       // }
       >  
         Start a Interview
-      </Button>
+      </Button> */}
 
       </div>
 
