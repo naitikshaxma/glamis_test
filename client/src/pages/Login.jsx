@@ -37,6 +37,7 @@ const defaultTheme = createTheme();
 
 export default function SignInSide() {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = React.useState(false);
     const [login, setLogin] = React.useState({
         email: '',
         password: '',
@@ -45,8 +46,11 @@ export default function SignInSide() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setIsLoading(true);
         if (login.email === '' || login.password === '') {
             toast.error("Please fill all the fields");
+            setIsLoading(false);
+            return;
         }
         console.log(login);
 
@@ -55,6 +59,7 @@ export default function SignInSide() {
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         if (!emailRegex.test(login.email)) {
             toast.error("Please enter a valid email");
+            setIsLoading(false);
             return;
         }
 
@@ -71,12 +76,14 @@ export default function SignInSide() {
     
             if (response.status == 201) {
                 Cookies.set('accessToken', response.data.data.accessToken);
+                Cookies.set('fullName', response.data.data.userData.name);
                 navigate('/dashboard')
                 toast.success("Login Successful");
                 return;
             }
         }
         catch (error) {
+            setIsLoading(false);
             toast.error("something went wrong");
         }
     };
@@ -165,6 +172,7 @@ export default function SignInSide() {
                                 label="Remember me"
                             />
                             <Button
+                                disabled={isLoading}
                                 onClick={handleSubmit}
                                 fullWidth
                                 variant="contained"
@@ -178,7 +186,7 @@ export default function SignInSide() {
                                 }}
                                 className='hover:bg-green-800'
                             >
-                                Sign In
+                            <span  className={isLoading ? 'loader' : ''}>{!isLoading ? "Sign In" : ""}</span>
                             </Button>
                             <Grid container className='flex justify-between items-center'>
                                 <Grid item>

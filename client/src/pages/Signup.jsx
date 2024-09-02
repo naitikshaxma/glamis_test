@@ -15,6 +15,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { toast } from 'react-toastify';
 
 const defaultTheme = createTheme();
 
@@ -37,6 +38,29 @@ export default function Signup() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsLoading(true);
+
+        if (signupData.name === '' || signupData.email_id === '' || signupData.phone === '' || signupData.password === '' || signupData.confirm_password === '') {
+            toast.error("Please fill all the fields");
+            setIsLoading(false);
+            return;
+        }
+
+        if (signupData.password !== signupData.confirm_password) {
+            toast.error("Passwords do not match");
+            setIsLoading(false);
+            return;
+        }
+
+        // email regexx
+
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (!emailRegex.test(signupData.email_id)) {
+            toast.error("Please enter a valid email");
+            setIsLoading(false);
+            return;
+        }
+
+
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/signup`, signupData, {
                 headers: {
@@ -44,9 +68,10 @@ export default function Signup() {
                 }
             });
             console.log(response.data);
-            setIsLoading(false);
             // Redirect to /account/verification with email_id
             console.log(signupData.email_id);
+            setIsLoading(false);
+            toast.success("OTP sent successfully on your registered mail id!");
             navigate('/account/verification', { state: { email_id: signupData.email_id } });
         } catch (error) {
             console.error(error);

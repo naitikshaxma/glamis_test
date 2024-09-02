@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SidePic from '../assets/SidePic.png';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation and useNavigate
+import { toast } from 'react-toastify';
 
 const defaultTheme = createTheme();
 
@@ -45,6 +46,13 @@ export default function Otp() {
         e.preventDefault();
         setIsLoading(true);
 
+        if (otp.includes('')) {
+            toast.error('Please fill all the fields');
+            setIsLoading(false);
+            return;
+        }
+
+
         const enteredOtp = otp.join(''); // Combine OTP array into a single string
         console.log(enteredOtp);
         const emailId = location.state?.email_id; // Use location.state to get email ID
@@ -57,18 +65,38 @@ export default function Otp() {
             });
 
             if (response.data.success) {
-                alert('OTP verified successfully');
+                toast.success('OTP verified successfully');
                 navigate('/login'); // Redirect to login page on success
             } else {
-                alert('Invalid OTP');
+                toast.error('Invalid OTP. Please try again.');
             }
         } catch (error) {
             console.error('Error verifying OTP:', error);
-            alert('There was an error verifying the OTP. Please try again.');
+            toast.error('Something went wrong. Please try again.');
         }
 
         setIsLoading(false);
     };
+
+    const resendOtp = async () => {
+        const emailId = location.state?.email_id; // Use location.state to get email ID
+        console.log(emailId);
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/resend-otp`, {
+                email: emailId,
+            });
+
+            if (response.data.success) {
+                toast.success('OTP Re-Sent successfully');
+            } else {
+                toast.error('Failed to resend OTP. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error resending OTP:', error);
+            toast.error('Something went wrong. Please try again')
+        }
+    }
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -133,9 +161,9 @@ export default function Otp() {
 
                             <div className="flex justify-center">
                                 <span>OTP not received? </span>
-                                <Link href="/" sx={{ ml: 1 }}>
+                                <Button onClick={resendOtp} sx={{ ml: 1 }}>
                                     {"Resend OTP"}
-                                </Link>
+                                </Button>
                             </div>
                         </Box>
                     </Box>

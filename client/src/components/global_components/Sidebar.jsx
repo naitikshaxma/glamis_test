@@ -100,10 +100,10 @@ export default function Sidebar() {
                         <div className="my-3">
                             <div className="flex justify-between items-center gap-2 px-2">
                                 <div className="flex items-center gap-2 my-3">
-                                    <img src={avatar} alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2" />
                                     <div>
                                         <Typography color="blue-gray" className="font-semibold ml-2">
-                                            Demo User
+                                            {Cookies.get("fullName")}
                                         </Typography>
                                     </div>
                                 </div>
