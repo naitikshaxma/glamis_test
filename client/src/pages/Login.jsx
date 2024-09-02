@@ -81,6 +81,11 @@ export default function SignInSide() {
                 toast.success("Login Successful");
                 return;
             }
+            else{
+                setIsLoading(false);
+                console.log(response.status)
+                toast.error("USer may be exist");                
+            }
         }
         catch (error) {
             setIsLoading(false);

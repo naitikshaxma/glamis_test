@@ -33,19 +33,21 @@ const signup = asyncHandler(async (req, res) => {
     const { name, email_id, phone, password, confirm_password } = req.body;
 
     if (isEmpty(name) || isEmpty(email_id) || isEmpty(phone) || isEmpty(password) || isEmpty(confirm_password)) {
-        return res.status(401).json(ApiError(401, "All fields are required"))
+        return res.status(200).json(ApiError(401, "All fields are required"))
     }
 
     if (password !== confirm_password) {
-        return res.status(401).json(ApiError(401, "Password do not match"))
+        return res.status(200).json(ApiError(401, "Password do not match"))
     }
 
     console.log("yaha tak aa gye")
     const user = await User.findOne({ $or: [{ email_id }, { phone }] })
 
     if (user) {
-        return res.status(400).json(ApiError(400, "User already exists"))
+        return res.status(200).json(ApiError(400, "User already exists"))
     }
+
+    console.log("yaha tak aa gye 2")
 
     const otp = createOtp();
 
@@ -76,7 +78,7 @@ const signup = asyncHandler(async (req, res) => {
     )
 
     if (!createdUser) {
-        return res.status(500).json(ApiError(500, "Something might be up with the server"))
+        return res.status(200).json(ApiError(500, "Something might be up with the server"))
     }
 
     return res.status(201).json(

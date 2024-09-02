@@ -67,14 +67,20 @@ export default function Signup() {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(response.data);
+            console.log("response daa is",response);
+
             // Redirect to /account/verification with email_id
             console.log(signupData.email_id);
             setIsLoading(false);
-            toast.success("OTP sent successfully on your registered mail id!");
-            navigate('/account/verification', { state: { email_id: signupData.email_id } });
+            if (response.data.statusCode == 201) {
+                toast.success("OTP sent successfully on your registered mail id!");
+                navigate('/account/verification', { state: { email_id: signupData.email_id } });
+            }
+            else{
+                toast.error(response.data.message);            }
         } catch (error) {
-            console.error(error);
+            toast.error(error.message);
+            console.log(error.message)
             setIsLoading(false);
         }
     };
@@ -155,6 +161,7 @@ export default function Signup() {
                                 onChange={(e) => setSignupData({ ...signupData, email_id: e.target.value })}
                             />
                             <TextField
+                                type='number'
                                 margin="normal"
                                 required
                                 fullWidth
