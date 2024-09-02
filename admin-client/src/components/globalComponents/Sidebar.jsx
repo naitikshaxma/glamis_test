@@ -29,7 +29,7 @@ export default function Sidebar() {
     {
       name: 'Profile',
       icon: <UserCircleIcon className="h-5 w-5" />,
-      href: '/profile'
+      href: '/admin/dsahboard'
     },
     {
       name: "Review Board",

@@ -35,17 +35,17 @@ const Interviews = () => {
             const ongoingInterview = interviews.filter(interview => {
                 return new Date(interview.start_time) < new Date() && new Date(interview.end_time) > new Date();
             });
-            return <OngoingInterview ongoingInterview={ongoingInterview} />;
+            return <OngoingInterview ongoingInterview={ongoingInterview.reverse()} />;
         case 'Upcoming Interview':
             const upcomingInterview = interviews.filter(interview => {
                 return new Date(interview.start_time) > new Date();
             });
-            return <UpcomingInterview upcomingInterview={upcomingInterview} />;
+            return <UpcomingInterview upcomingInterview={upcomingInterview.reverse()} />;
         case 'Past Interview':
             const pastInterview = interviews.filter(interview => {
                 return new Date(interview.end_time) < new Date();
             });
-            return <PastInterview pastInterview={pastInterview} />;
+            return <PastInterview pastInterview={pastInterview.reverse()} />;
         default:
             return <OngoingInterview />;
     }

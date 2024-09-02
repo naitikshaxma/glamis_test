@@ -53,7 +53,7 @@ export default function CompanyInterview() {
     const [medium, setMedium] = useState("");
     const [hard, setHard] = useState("");
     const [jobDescription, setJobDescription] = useState("");
-    const [questions, setQuestions] = useState([{ question: "", difficulty: "Easy" }]);
+    const [questions, setQuestions] = useState([]);
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
@@ -69,6 +69,7 @@ export default function CompanyInterview() {
     const handleSubmit = async () => {
 
         try {
+            console.log(questions);
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/company/create`, {
                 name: interviewName,
                 company: companyName,
@@ -81,7 +82,7 @@ export default function CompanyInterview() {
                 medium_remaining: medium,
                 hard_remaining: hard,
                 job_description: jobDescription,
-                questions,
+                questions : questions,
                 students: emailObject,
                 type: "company"
             }, {
@@ -296,6 +297,7 @@ export default function CompanyInterview() {
                                         </div>
                                     ))}
                                     {questions.length < parseInt(noOfQuestions) && (
+                                        <>
                                         <Button
                                             size="sm"
                                             className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
@@ -303,6 +305,16 @@ export default function CompanyInterview() {
                                         >
                                             +
                                         </Button>
+
+                                        <Button
+                                            size="sm"
+                                            className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-300 ml-2"
+                                            onClick={() => setQuestions(questions.slice(0, -1))}
+                                        >
+                                            -
+                                        </Button>
+                                        </>
+
                                     )}
                                 </div>
                             </div>

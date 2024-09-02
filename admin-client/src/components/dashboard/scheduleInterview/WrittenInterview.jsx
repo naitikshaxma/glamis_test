@@ -291,6 +291,7 @@ export default function WrittenInterview() {
                                         </div>
                                     ))}
                                     {questions.length < parseInt(noOfQuestions) && (
+                                        <>
                                         <Button
                                             size="sm"
                                             className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
@@ -298,6 +299,15 @@ export default function WrittenInterview() {
                                         >
                                             +
                                         </Button>
+
+                                        <Button
+                                            size="sm"
+                                            className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-300 ml-2"
+                                            onClick={() => setQuestions(questions.slice(0, -1))}
+                                        >
+                                            -
+                                        </Button>
+                                        </>
                                     )}
                                 </div>
                             </div>
