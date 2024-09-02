@@ -229,13 +229,13 @@ const verifyEmail = asyncHandler(async (req, res) => {
     const { email, otp } = req.body;
 
     if (isEmpty(email) || isEmpty(otp)) {
-        return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
+        return res.status(401).json(ApiError(401, "Please Fill All the fields"))
     }
 
     const user = await User.findOne({ email_id: email })
 
     if (!user) {
-        return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
+        return res.status(404).json(ApiError(404, "User Doesn't Exists"))
     }
 
     const redisClient = await connectRedis()
@@ -245,7 +245,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
         return res.status(200).json(new ApiResponse(200, {}, "Email Verified Successfully"))
     }
     if (expectedOTP !== otp) {
-        return res.status(401).json(new ApiError(401, "Invalid OTP"))
+        return res.status(401).json(ApiError(401, "Invalid OTP"))
     }
     if (expectedOTP === otp) {
         await User.findByIdAndUpdate(user._id, {
@@ -260,7 +260,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
         return res.status(200).json(new ApiResponse(200, {}, "Email Verified Successfully"))
     }
     if (expectedOTP === null) {
-        return res.status(401).json(new ApiError(401, "OTP Expired"))
+        return res.status(401).json(ApiError(401, "OTP Expired"))
     }
 
 })
@@ -270,13 +270,13 @@ const resendOTP = asyncHandler(async (req, res) => {
     console.log(email)
 
     if (isEmpty(email)) {
-        return res.status(401).json(new ApiError(401, "Please Fill All the fields"))
+        return res.status(401).json(ApiError(401, "Please Fill All the fields"))
     }
 
     const user = await User.findOne({ email_id: email })
 
     if (!user) {
-        return res.status(404).json(new ApiError(404, "User Doesn't Exists"))
+        return res.status(404).json(ApiError(404, "User Doesn't Exists"))
     }
 
     const otp = createOtp();
@@ -338,7 +338,7 @@ const addStudent = asyncHandler(async (req, res) => {
     const user = await User.findById(user_id)
 
     if (!user) {
-        return res.status(404).json(new ApiError(404, "Student Doesn't Exists"))
+        return res.status(404).json(ApiError(404, "Student Doesn't Exists"))
     }
 
     const student = await Student.create({
@@ -364,7 +364,7 @@ const updateStudent = asyncHandler(async (req, res) => {
     const user = await User.findById(user_id)
 
     if (!user) {
-        return res.status(404).json(new ApiError(404, "Student Doesn't Exists"))
+        return res.status(404).json(ApiError(404, "Student Doesn't Exists"))
     }
 
     const student = await Student.findOneAndUpdate({ user: user_id }, req.body, {

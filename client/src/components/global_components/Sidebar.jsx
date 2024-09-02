@@ -63,7 +63,7 @@ export default function Sidebar() {
                         <Typography variant="h5" color="blue-gray">
                             GLAMIS
                         </Typography>
-                        <UisBars className="ml-20 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />
+                        <UisBars className="ml-20 cursor-pointer" />
                     </div>
                     <List>
                         {navItems.map((item, index) => (
