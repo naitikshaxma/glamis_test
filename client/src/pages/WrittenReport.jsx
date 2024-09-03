@@ -229,7 +229,7 @@ const WrittenReport = () => {
                 </div>
                 <div className="flex items-center">
                     <div className="flex flex-col mr-4">
-                        <div className="font-semibold text-lg text-right">Demo User</div>
+                        <div className="font-semibold text-lg text-right">{Cookies.get("fullName")}</div>
                         <div className="font-semibold text-sm text-right">2115000000</div>
                         <div className="font-semibold text-sm text-right">Data Structures and Algorithms</div>
                     </div>

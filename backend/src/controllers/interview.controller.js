@@ -300,10 +300,10 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     console.log("entered jd admin")
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
-    const [offset, setOffset] = useState(0);
+    // const [offset, setOffset] = useState(0);
     const noOfAttemptedQuestions = await InterviewQuestion.find({ interview: interviewId }).countDocuments();
 
-    questionNo += offset;
+    // questionNo += offset;
     
     console.log(req.body);
 
@@ -321,7 +321,16 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
-    setOffset(noOfAttemptedQuestions);
+    // setOffset(noOfAttemptedQuestions);
+    let historyPrompt = conversationHistory.map((interaction, index) => {
+        return `Q${index + 1}: ${interaction.jobTitle} - \nA${index + 1}: `;
+    }).join("\n");
+
+    const lastQuestion = await InterviewQuestion.find({ interview: interviewId });
+
+    historyPrompt += lastQuestion[lastQuestion.length - 1]?.question;
+
+
 
     const adminInterview = await AdminCompanyInterview.findById(adminInterviewId);
 
@@ -422,17 +431,32 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
             );
         }
     }
+console.log("______________________________\n" + jdDetails + "\n_______________________________________")
+    // let prompt = "";
+    // if (difficulty === "Easy") {
+    //     prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description keywords , they can be related to particular core cs subjects and not involve coding or complex scenarios.And concider the hole jd not the first line\n\nJob Description: ${jdDetails}`
+    // } else if (difficulty === "Medium") {
+    //     prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.\n\nJob Description: ${jdDetails}`
+    // } else {
+    //     prompt = `Based on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\nJob Description: ${jdDetails}`
+    // }
+
+    // prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
 
     let prompt = "";
-    if (difficulty === "Easy") {
-        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description keywords , they can be related to particular core cs subjects and not involve coding or complex scenarios.\n\nJob Description: ${jdDetails}`
-    } else if (difficulty === "Medium") {
-        prompt = `Based on the previous questions and answers, generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Provide a code snippet and ask the user to solve the problem or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.\n\nJob Description: ${jdDetails}`
-    } else {
-        prompt = `Based on the previous questions and answers, generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. The question should involve real-world tasks and challenges directly related to the job description and role.\n\nJob Description: ${jdDetails}`
-    }
+if (difficulty === "Easy") {
+    prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct from the previous one and covers topics that have not yet been addressed or have been underrepresented so far. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}`;
+} else if (difficulty === "Medium") {
+    prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Ensure this question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview. Provide a verbal coding challenge where the user is asked to solve the problem, identify errors, or explain the code. The challenge should be appropriately complex and align with the job description.\n\nJob Description: ${jdDetails} \n and please do proper indentation and formatting of the code and question\n coding question should be like that user can answer verbally like predict output, approach, error detection etc \n word limit of the question shoud be 50 and coding block word limit shoud be 70`;
+} else {
+    prompt = `Taking into account the previous questions and answers (${historyPrompt}), generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. Ensure that the scenario is different from previous ones, covering real-world tasks and challenges directly related to the job description and role. Address any topics or areas that have not been fully explored in previous questions. The scenario should be practical, relevant to the job description, and should be between 30 to 70 words in length.\n\nJob Description: ${jdDetails}`;
+}
 
-    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
+// Instruction to only generate and send the question
+prompt += " Only generate and send the question text. Do not include the answer or any additional information.";
+
+    
+
 
     const completion = await openai.chat.completions.create({
         messages: [
@@ -1053,6 +1077,10 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
+    const historyPrompt = conversationHistory.map((interaction, index) => {
+        return `Q${index + 1}: ${interaction.subject}`;
+    }).join("\n");
+
 
     const adminInterview = await AdminSubjectInterview.findById(adminInterviewId);
 
@@ -1155,15 +1183,17 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     }
 
     let prompt = "";
-    if (difficulty === "Easy") {
-        prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to ${subject}. It should be a conceptual question.`
-    } else if (difficulty === "Medium") {
-        prompt = `Based on the previous questions and answers, generate a new coding question for ${subject} in the appropriate programming language. Provide a code snippet and ask the user to find error or make it more efficient or explain the code:\n\n\`\`\`java\n// Your code snippet here\n\`\`\`\n\nEnsure the question is relevant to the job description and appropriately challenging.`
-    } else {
-        prompt = `Based on the previous questions and answers, generate a scenario-based question for ${subject}. The question should involve real-world tasks and challenges directly related to the jsubject in hand.`
-    }
 
-    prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
+if (difficulty === "Easy") {
+    prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} generic question for DSA`;
+} else if (difficulty === "Medium") {
+    prompt = `${historyPrompt}\nBased on the previous questions and answers, provide user with a appropriately difficult code snippet. Ask the user to explain the code and predict the output:\n\n\`\`\`java\n# Your java code snippet here\n\`\`\``;
+} else {
+    prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a new ${difficulty} scenario-based question for DSA`;
+}
+
+prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
+
 
     const completion = await openai.chat.completions.create({
         messages: [

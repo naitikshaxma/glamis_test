@@ -251,7 +251,7 @@ const WrittenInterview = () => {
                             </div>
                             <div className="title-and-name ml-4">
                                 <p className="text-2xl font-semibold">Interview</p>
-                                <p className="text-lg text-gray-600 font-semibold">Demo User</p>
+                                <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                             </div>
                             <div className="timer">
                                 {timer > 0 && <Timer duration={timer} />}

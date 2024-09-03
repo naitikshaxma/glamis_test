@@ -1,11 +1,12 @@
 import React from 'react';
 import './Watermark.css';
+import Cookies from 'js-cookie';
 
 const Watermark = () => {
     return (
         // repreate this 100 times
         <div className="watermark-container">
-            <div className="watermark-text">Demo User</div>
+            <div className="watermark-text">{Cookies.get("fullName")}</div>
         </div>
         
     );
