@@ -8,12 +8,12 @@ const router = Router()
 
 
 router.route("/signup").post(signup)
-router.route("/login").post(RateLimiter15mins,login)
+router.route("/login").post(login)
 router.route("/verifyToken").post(verifyUser)
-router.route("/verify-email").post(RateLimiter15mins,verifyEmail)
-router.route("/resend-otp").post(RateLimiter15mins, resendOTP)
-router.route("/add-student").post(RateLimiter15mins, addStudent)
-router.route("/update-student").post(RateLimiter15mins, updateStudent)
+router.route("/verify-email").post(verifyEmail)
+router.route("/resend-otp").post( resendOTP)
+router.route("/add-student").post( addStudent)
+router.route("/update-student").post( updateStudent)
 
 // Authenticated Routes:
 
