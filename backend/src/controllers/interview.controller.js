@@ -14,6 +14,7 @@ import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestion
 import { AdminCompanyInterview, InterviewQuestionsByAdmin } from "../models/interview.models.js";
 import { json } from "express";
 
+
 const objectStorePath = path.resolve("../objectStore");
 
 export const createInterview = asyncHandler(async (req, res) => {
@@ -370,6 +371,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
             const dataToSend = {
                 question,
+                // gamma: noOfAttemptedQuestions,
                 audioFileName: audioFileName
             };
 
@@ -1578,6 +1580,3 @@ export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
         );
     }
 })
-
-
-

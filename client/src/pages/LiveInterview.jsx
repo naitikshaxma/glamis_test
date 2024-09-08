@@ -253,6 +253,7 @@ const LiveInterview = () => {
 
             setQuestion(response.data.data.question);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
+            // setCurrentQuestion(response.data.data.gamma + currentQuestion);
             setIsAudioPlaying(true);
             setTimer(100);
 
@@ -293,6 +294,38 @@ const LiveInterview = () => {
             setCurrentQuestion((prev) => prev + 1);
         }
     };
+
+    const handleSkipQuestion = async () => {
+        setLoading(true);
+        console.log("Skipping to next question...");
+
+        try {
+            const defaultAudioPath = '../../public/not-available.mp3'; // Path to default audio file
+            const response = await fetch(defaultAudioPath);
+            const audioBlob = await response.blob(); // Convert the default audio file to a Blob
+
+            const formData = new FormData();
+            formData.append('question', question);
+            formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
+            formData.append('interviewId', await Cookies.get('interviewId'));
+            console.log('Form data for skipped question:', formData);
+
+            const apiResponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+                },
+            });
+            console.log('Question skipped successfully');
+
+            setCurrentQuestion((prev) => prev + 1);
+        } catch (error) {
+            console.error('Error uploading default audio:', error);
+        }
+
+        setLoading(false);
+    };
+
 
     const handleClose = () => {
         setOpen(false);
@@ -416,7 +449,8 @@ const LiveInterview = () => {
                                         <canvas ref={canvasRef} width="640" height="200" />
                                     </div>
                                     <div className="actions w-full flex justify-between mt-4">
-                                        <Button color="blue" ripple="light" size="lg" className="w-1/3">Skip</Button>
+                                        <Button color="blue" ripple="light" size="lg" className="w-1/3"
+                                            onClick={handleSkipQuestion}>Skip</Button>
                                         <Button
                                             color={isRecording ? "red" : "blue"}
                                             ripple="light"
