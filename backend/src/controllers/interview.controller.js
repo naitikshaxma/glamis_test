@@ -1334,9 +1334,6 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
         console.log(typeof feedback);
 
-        const session = await mongoose.startSession();
-        session.startTransaction();
-
         await InterviewQuestion.create({
             question: question,
             answer: feedback.userAnswer,
@@ -1351,8 +1348,6 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
             grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
         });
 
-        await session.commitTransaction();
-
         console.log("answer added successfully ####");
 
         return res.status(200).json(
@@ -1360,13 +1355,9 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
         );
     }
     catch (err) {
-        await session.abortTransaction();
         return res.status(500).json(
             ApiError(500, err.message || "Internal Server Error")
         );
-    }
-    finally{
-        session.endSession();
     }
 });
 
@@ -1442,10 +1433,6 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
 
     const completionData = JSON.parse(completion.choices[0].message.content);
 
-    const session = await mongoose.startSession();
-
-    session.startTransaction();
-
     await InterviewQuestion.create({
         question: question,
         answer: answer,
@@ -1460,18 +1447,13 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
         expectedAnswer: completionData.expectedResponse
     });
 
-    await session.commitTransaction();
 
     res.status(200).send(completion.choices[0].message.content);
 }
 catch(err){
-    await session.abortTransaction();
     return res.status(500).json(
         ApiError(500, err.message || "Internal Server Error")
     );
-}
-finally{
-    session.endSession();
 }
 });
 
