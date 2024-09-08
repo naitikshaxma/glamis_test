@@ -17,7 +17,7 @@ const Timer = (props) => {
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={props.duration || 100}
+            duration={100}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[100, 70, 40, 10]}
         >
@@ -285,6 +285,7 @@ const LiveInterview = () => {
     const handleNextQuestion = async () => {
         if (isRecording) {
             console.log("Break 01")
+            setQuestion('');    // Clear the question
             stopRecording();
             console.log("Break 09")
 
@@ -296,11 +297,14 @@ const LiveInterview = () => {
     };
 
     const handleSkipQuestion = async () => {
+        setIsAudioPlaying(false);
         setLoading(true);
         console.log("Skipping to next question...");
-
+        
         try {
-            const defaultAudioPath = '../../public/not-available.mp3'; // Path to default audio file
+            setCurrentQuestion((prev) => prev + 1);
+            setQuestion('');    // Clear the question
+            const defaultAudioPath = '/not-available.webm'; // Path to default audio file
             const response = await fetch(defaultAudioPath);
             const audioBlob = await response.blob(); // Convert the default audio file to a Blob
 
@@ -310,7 +314,7 @@ const LiveInterview = () => {
             formData.append('interviewId', await Cookies.get('interviewId'));
             console.log('Form data for skipped question:', formData);
 
-            const apiResponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${Cookies.get('accessToken')}`,
@@ -318,7 +322,6 @@ const LiveInterview = () => {
             });
             console.log('Question skipped successfully');
 
-            setCurrentQuestion((prev) => prev + 1);
         } catch (error) {
             console.error('Error uploading default audio:', error);
         }
