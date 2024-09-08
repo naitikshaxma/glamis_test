@@ -510,6 +510,10 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
+    const historyPrompt = conversationHistory.map((interaction, index) => {
+        return `Q${index + 1}: ${interaction.subject}`;
+    }).join("\n");
+
     const adminInterview = await AdminVerbalInterview.findById(adminInterviewId);
 
     if (adminInterview === null) {
@@ -654,26 +658,27 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     let prompt = "";
 
     if (difficulty === "Easy") {
-        prompt = `Based on the candidate's previous response "${answer}", generate a simple and straightforward question related to their personal background. Examples include:
-    - "Can you introduce yourself?"
-    - "What are your greatest strengths?"
-    - "What are your hobbies and interests?"
-    Ensure the question encourages the candidate to share more about themselves in a comfortable manner.`;
+        prompt = `Based on the previous questions and answers (${historyPrompt}), generate a simple and straightforward question related to the candidate's personal background. Examples include:
+        - "Can you introduce yourself?"
+        - "What are your greatest strengths?"
+        - "What are your hobbies and interests?"
+        Ensure that the question encourages the candidate to share more about themselves in a comfortable manner. The new question should be distinct from the previous ones and flow naturally from the conversation.`;
     } else if (difficulty === "Medium") {
-        prompt = `Considering the candidate's previous response "${answer}", formulate a question that delves into their past experiences. Focus on eliciting detailed responses about:
-    - "Can you describe a challenging situation you faced and how you overcame it?"
-    - "What is one of your most significant accomplishments?"
-    - "Tell me about a time you had to deal with failure and what you learned from it."
-    The question should prompt the candidate to reflect on and articulate their experiences comprehensively.`;
+        prompt = `Considering the previous questions and answers (${historyPrompt}), formulate a question that delves into the candidate's past experiences. Focus on detailed responses to questions like:
+        - "Can you describe a challenging situation you faced and how you overcame it?"
+        - "What is one of your most significant accomplishments?"
+        - "Tell me about a time you had to deal with failure and what you learned from it."
+        Make sure the new question explores a different aspect of their experience that hasn't been addressed before and encourages the candidate to reflect comprehensively.`;
     } else if (difficulty === "Hard") {
-        prompt = `Building upon the candidate's response "${answer}", craft a thought-provoking question that explores their perspectives and critical thinking abilities. Topics can include:
-    - "What are your views on the current trends in our industry?"
-    - "How do you approach ethical dilemmas in the workplace?"
-    - "Can you discuss your opinion on the importance of lifelong learning in your profession?"
-    The question should challenge the candidate to provide insightful and well-reasoned answers demonstrating depth of thought.`;
+        prompt = `Taking into account the previous questions and answers (${historyPrompt}), craft a thought-provoking question that explores the candidate's perspectives and critical thinking. Topics can include:
+        - "What are your views on the current trends in our industry?"
+        - "How do you approach ethical dilemmas in the workplace?"
+        - "Can you discuss your opinion on the importance of lifelong learning in your profession?"
+        Ensure that the new question challenges the candidate to provide insightful and well-reasoned answers while covering areas that haven't been fully explored.`;
     } else {
         prompt = `Please specify a valid difficulty level: "Easy", "Medium", or "Hard".`;
     }
+    
 
     prompt += `Generate only the question text without any additional explanations or context. The question you generate must include sections from ${answer}`;
     console.log(answer)
@@ -1237,69 +1242,44 @@ async function evaluateAnswerWithPrompt(answer, question) {
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const prompt = `
-        You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
+    You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
 
-        Here is the question: "${question}"
-        Here is the answer: "${answer}"
+    Here is the question: "${question}"
+    Here is the answer: "${answer}"
 
-        Please evaluate the answer based on the following criteria:
-        1. Overall Score: An integer score out of 100 for the overall quality of the answer.
-        2. Grammar: An integer score out of 100 for the grammatical correctness of the answer.
-        3. Vocabulary: An integer score out of 100 for the vocabulary used in the answer.
-        4. technicalExplanation: Feedback on the technical aspects of the answer.
-        5. vocabularyExplanation: Feedback on the vocabulary used in the answer.
-        6. grammarExplanation: Feedback on the grammatical correctness of the answer.
+    Please evaluate the answer based on the following criteria:
+    1. Overall Score: An integer score out of 100 for the overall quality of the answer, taking into account all aspects (technical accuracy, clarity, grammar, etc.).
+    2. Grammar: An integer score out of 100 for the grammatical correctness of the answer. Focus on sentence structure, verb tense, and clarity.
+    3. Vocabulary: An integer score out of 100 for the vocabulary used in the answer, including spelling, word choice, and clarity of expression.
+    4. technicalExplanation: A detailed evaluation of the technical content of the answer. Provide feedback on the accuracy, depth, and relevance of the technical knowledge displayed. Only the first or second point in pros or cons should be included.
+    5. vocabularyExplanation: Detailed feedback on the vocabulary used in the answer. Analyze the choice of words, clarity, and appropriateness of vocabulary, with suggestions for improvement. Only the first or second point in pros or cons should be included.
+    6. grammarExplanation: Feedback on the grammatical correctness of the answer. Point out strengths as well as errors, providing corrections and suggestions for improvement. Only the first or second point in pros or cons should be included.
 
-        The response should be in JSON format and must follow this structure. Do not add any additional informational and ensure the keys are exactly as shown below, also ensure there are no symbols like tilde are added so that i can parse it as JSON:
-        {
-            "question": "The question text",
-            "userAnswer": "The user's answer text",
-            "overallScore": 90,
-            "vocabularyScore": 88,
-            "grammarScore": 85,
-            "technicalExplanation": {
-                "Pros": "In the context of a standard answer to this question, explain the strong points of the answer and suggest in points how it can be improved
-                        First Point\n
-                        Second Point\n
-                        and so on...\n
-                        Each point should have a max word limit of 10",
-                "Cons": "In the context of a standard answer to this question, explain the weak points of the answer and suggest in points how it can be improved
-                        First Point\n
-                        Second Point\n
-                        and so on...\n
-                        Each point should have a max word limit of 10"
-            },
-            "vocabularyExplanation": {
-                "Pros": "Explain the strong points of the vocabulary used
-                        First Point\n
-                        Second Point\n
-                        and so on...\n
-                        Each point should have a max word limit of 10",
-                "Cons": "Explain the weak points of the vocabulary used
-                        First Point\n
-                        Second Point\n
-                        and so on...\n
-                        Each point should have a max word limit of 10"
-            },
-            "grammarExplanation": {
-                "Pros": "Explain the strong points of the grammar used
-                        First Point\n
-                        Second Point\n
-                        and so on...\n
-                        Each point should have a max word limit of 10",
-                "Cons": "Explain the weak points of the grammar used and also suggest the corrections that can be made
-                        First Point\n
-                        Second Point\n
-                        and so on...\n
-                        Each point should have a max word limit of 10"
-            },
-            "expectedAnswer": "The expected answer to the question. The answer should be in 50 words."
-        }
+    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
+    {
+        "question": "The question text",
+        "userAnswer": "The user's answer text",
+        "overallScore": 90,
+        "vocabularyScore": 88,
+        "grammarScore": 85,
+        "technicalExplanation": {
+            "Pros": "Detailed explanation of the strong points of the technical content.\nFirst Point: Accurate and relevant technical knowledge.\nSecond Point: Clear and logical explanation of concepts.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of the weak points in the technical content and suggestions for improvement.\nFirst Point: Lack of depth in technical explanation.\nSecond Point: Incorrect interpretation of the key concept.\nThird Point: Detailed feedback\nand so on..."
+        },
+        "vocabularyExplanation": {
+            "Pros": "Detailed explanation of strong points related to vocabulary.\nFirst Point: Effective use of technical terminology.\nSecond Point: Clear and precise word choice.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of weak points in vocabulary and suggestions for improvement.\nFirst Point: Inappropriate word choice in certain contexts.\nSecond Point: Ambiguity in some word usage leading to confusion.\nThird Point: Detailed feedback\nand so on..."
+        },
+        "grammarExplanation": {
+            "Pros": "Detailed explanation of the strong points in grammar.\nFirst Point: Correct use of verb tense and sentence structure.\nSecond Point: Clear and concise sentence formation.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of grammatical errors and suggestions for improvement.\nFirst Point: Subject-verb agreement errors.\nSecond Point: Improper use of passive voice affecting clarity.\nThird Point: Detailed feedback\nand so on..."
+        },
+        "expectedAnswer": "The expected answer to the question. The answer should be in 50 words."
+    }
 
-        Ensure that in grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper.
-        Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", "technicalExplanation", "vocabularyExplanation" and "grammarExplanation". All scores should be integers.
-
-    `;
+    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. 
+    Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "vocabularyScore", "technicalExplanation", "vocabularyExplanation", and "grammarExplanation". All scores should be integers.
+`;
 
     const completion = await openai.chat.completions.create({
         messages: [
