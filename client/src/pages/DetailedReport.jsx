@@ -8,10 +8,13 @@ import { useRef } from 'react';
 import avatar from "../assets/avatar.jpeg"
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
 
 
 
 const DetailedReport = () => {
+    const navigate = useNavigate();
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
     const [activeTab, setActiveTab] = useState('technical');
@@ -34,6 +37,25 @@ const DetailedReport = () => {
             containerId: 'scroll-container'
         });
     };
+    // const reportTemplateRef = useRef(null);
+
+    // const handleGeneratePdf = () => {
+	// 	const doc = new jsPDF({
+	// 		format: 'a4',
+	// 		unit: 'px',
+	// 	});
+
+	// 	// Adding the fonts.
+	// 	doc.setFont('Inter-Regular', 'normal');
+
+	// 	doc.html(reportTemplateRef.current, {
+	// 		async callback(doc) {
+	// 			await doc.save('report.pdf');
+	// 		},
+	// 	});
+	// };
+
+
 
 
 
@@ -217,8 +239,22 @@ const DetailedReport = () => {
         }
     }
 
+    const downlowdReport = () => {
+        // ctrl + p -> save as pdf
+        
+    }
+
     return (
         <div className="w-[80%] mx-auto">
+            {/* two buttons 1 for home and 2 for downlowd report */}
+            <div className="flex justify-between my-4">
+                <button className="bg-green-500 text-white p-2 rounded-lg"
+                onClick={() => navigate('/dashboard')}
+                >Home</button>
+                <button className="bg-green-500 text-white p-2 rounded-lg"
+                onClick={downlowdReport}
+                >Download Report</button>
+            </div>
             <div className="header bg-green-100 w-full flex justify-between p-4 border-b-0 border-2 border-green-900">
                 <div className="flex">
                     <div className="avatar w-20">
@@ -238,7 +274,7 @@ const DetailedReport = () => {
                         <div className="font-semibold text-sm text-right">Mock Interview Results</div>
                     </div>
                     <div className="avatar w-20 border-2 border-green-900">
-                        <img src={avatar} alt="" />
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/000/439/863/small/Basic_Ui__28186_29.jpg" alt="" />
                     </div>
                 </div>
             </div>
