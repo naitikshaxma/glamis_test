@@ -514,7 +514,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
     const historyPrompt = conversationHistory.map((interaction, index) => {
-        return `Q${index + 1}: ${interaction.subject}`;
+        return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
     const adminInterview = await AdminVerbalInterview.findById(adminInterviewId);
@@ -659,6 +659,8 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     }
 
     let prompt = "";
+
+    console.log("History Prompt: ", historyPrompt);
 
     if (difficulty === "Easy") {
         prompt = `Based on the previous questions and answers (${historyPrompt}), generate a simple and straightforward question related to the candidate's personal background. Examples include:
@@ -1330,9 +1332,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
         feedback = JSON.parse(feedback);
 
-        console.log("feedback ####", feedback);
 
-        console.log(typeof feedback);
 
         await InterviewQuestion.create({
             question: question,
@@ -1340,7 +1340,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
             expectedAnswer: feedback.expectedAnswer,
             interview: interviewId,
             student: req.user._id,
-            overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallPerformance,
+            overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
             grammar: feedback.grammarScore,
             vocabulary: feedback.vocabularyScore,
             technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
