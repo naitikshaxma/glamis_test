@@ -13,6 +13,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 const Timer = (props) => {
+    // if remaining time is 0, then it will automatically submit the answer
     return (
         <CountdownCircleTimer
             size={100}
@@ -298,6 +299,13 @@ const LiveInterview = () => {
 
     const handleSkipQuestion = async () => {
         setIsAudioPlaying(false);
+        // stop the recording
+        if(isRecording){
+            setIsRecording(false);
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+            }
+        }
         setLoading(true);
         console.log("Skipping to next question...");
         
