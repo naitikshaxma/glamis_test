@@ -184,6 +184,18 @@ const LiveInterview = () => {
         }
     }, []);
 
+    useEffect(() => {
+        if (timer === 0) {
+            if (isRecording) {
+                // If recording is in progress, submit the answer and move to the next question
+                handleNextQuestion();
+            } else {
+                // If no recording, skip the question
+                handleSkipQuestion();
+            }
+        }
+    }, [timer, isRecording]);
+
 
 
     const fetchQuestion = async () => {
