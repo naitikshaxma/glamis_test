@@ -1494,7 +1494,7 @@ export const getInterviewHeld = asyncHandler(async (req, res) => {
         const student = await Student.findOne({ user: user._id });
         console.log("student ####", student);
         // take only latest 5 interview
-        const interview_taken = student?.interview_taken.slice(-5);
+        const interview_taken = student?.interview_taken.slice(-7);
         return res.status(200).json(
             new ApiResponse(200, interview_taken, "Interviews fetched successfully")
         )

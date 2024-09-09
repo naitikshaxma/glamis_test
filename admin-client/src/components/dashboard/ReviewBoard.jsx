@@ -1,6 +1,7 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import { Card, Typography } from "@material-tailwind/react";
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const TABLE_HEAD = ["S.no", "Company", "Date", "Slot", "Candidates", "Status"];
 
@@ -86,7 +87,37 @@ const TABLE_ROWS2 = [
 
 
 export default function ReviewBoard() {
-  return (
+  const [scheduledInterviews, setScheduledInterviews] = useState(0);
+  const [completedInterviews, setCompletedInterviews] = useState(0);
+  const [pendingInterviews, setPendingInterviews] = useState(0);
+  const [interviewDetails, setInterviewDetails] = useState([]);
+  const fetchInterviewStatusCount = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewStatusCount`,{},{
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setScheduledInterviews(res.data.totalInterviews);
+      setCompletedInterviews(res.data.endedInterview);
+      setPendingInterviews(res.data.pendingInterviews);
+
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewDetails`,{},{
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      setInterviewDetails(response.data.interviews);
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  useEffect(() => {
+    fetchInterviewStatusCount();
+  }, []);
+   return (
     <div>
       <div className="flex flex-col p-6 bg-white rounded-lg">
         <div className="flex  justify-between w-full border-b pb-2">
@@ -96,19 +127,19 @@ export default function ReviewBoard() {
           <div className="w-1/3">
             <div className='flex flex-col m-3 border p-3 rounded-lg bg-gray-100'>
               <p className='text-sm font-semibold'>Total Interview Scheduled</p>
-              <p className='text-2xl font-semibold text-green-900'>20</p>
+              <p className='text-2xl font-semibold text-green-900'>{scheduledInterviews}</p>
             </div>
           </div>
           <div className="w-1/3">
             <div className='flex flex-col m-3 border p-3 rounded-lg bg-gray-100'>
               <p className='text-sm font-semibold'>Total Interview Conducted</p>
-              <p className='text-2xl font-semibold text-yellow-900'>18</p>
+              <p className='text-2xl font-semibold text-yellow-900'>{completedInterviews}</p>
             </div>
           </div>
           <div className="w-1/3">
             <div className='flex flex-col m-3 border p-3 rounded-lg bg-gray-100'>
               <p className='text-sm font-semibold'>Total Interview Pending</p>
-              <p className='text-2xl font-semibold text-red-900'>2</p>
+              <p className='text-2xl font-semibold text-red-900'>{pendingInterviews}</p>
             </div>
           </div>
         </div>
@@ -148,8 +179,8 @@ export default function ReviewBoard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {TABLE_ROWS.map(({
-                      InterviewId, Company, Date, Slot, Candidates, Status, URL
+                    {interviewDetails.map(({
+                       company, date, slot, candidates, status, URL
                     }, index) => {
                       const isLast = index === TABLE_ROWS.length - 1;
                       const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
@@ -162,7 +193,7 @@ export default function ReviewBoard() {
                               color="blue-gray"
                               className="font-normal"
                             >
-                              {InterviewId}
+                              {index + 1}
                             </Typography>
                           </td>
                           <td className={classes}>
@@ -171,7 +202,7 @@ export default function ReviewBoard() {
                               color="blue-gray"
                               className="font-normal"
                             >
-                              <Link to="" className='text-blue-500'>{Company}</Link>
+                              <Link to="" className='text-blue-500'>{company}</Link>
                             </Typography>
                           </td>
                           <td className={classes}>
@@ -180,7 +211,7 @@ export default function ReviewBoard() {
                               color="blue-gray"
                               className="font-normal"
                             >
-                              {Date}
+                              {date.split('T')[0]}
                             </Typography>
                           </td>
                           <td className={classes}>
@@ -191,7 +222,7 @@ export default function ReviewBoard() {
                               color="blue-gray"
                               className="font-medium"
                             >
-                              {Slot}
+                              {slot}
                             </Typography>
                           </td>
                           <td className={classes}>
@@ -200,16 +231,16 @@ export default function ReviewBoard() {
                               color="blue-gray"
                               className="font-normal"
                             >
-                              {Candidates}
+                              {candidates}
                             </Typography>
                           </td>
                           <td className={classes}>
                             <Typography
                               variant="small"
-                              color={Status === "Scheduled" ? "green" : "orange"}
+                              color={status === "Ended" ? "red" : "orange"}
                               className="font-normal"
                             >
-                              {Status}
+                              {status}
                             </Typography>
                           </td>
                         </tr>

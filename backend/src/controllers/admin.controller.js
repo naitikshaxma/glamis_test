@@ -273,3 +273,106 @@ export const createWrittenInterview = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+export const fetchInterviewStatusCount = async (req, res) => {
+    try {
+        //add the count of all the interviews
+
+        const companyInterviews = await AdminCompanyInterview.find({});
+        const subjectInterviews = await AdminSubjectInterview.find({});
+        const verbalInterviews = await AdminVerbalInterview.find({});
+        const writtenInterviews = await AdminWrittenInterview.find({});
+        const totalInterviews = companyInterviews.length + subjectInterviews.length + verbalInterviews.length + writtenInterviews.length;
+
+        // check the count of all the interviews that have ended
+        let endedInterview = 0;
+
+        for (let i = 0; i < companyInterviews.length; i++) {
+            const interview = companyInterviews[i];
+            const currentTime = new Date();
+            const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
+            // console.log(endTime);
+            
+
+            if (currentTime > endTime) {
+                endedInterview++;
+            }
+        }
+
+        for (let i = 0; i < subjectInterviews.length; i++) {
+            const interview = subjectInterviews[i];
+            const currentTime = new Date();
+            const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
+            if (currentTime > endTime) {
+                endedInterview++;
+            }
+        }
+
+        for (let i = 0; i < verbalInterviews.length; i++) {
+            const interview = verbalInterviews[i];
+            const currentTime = new Date();
+            const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
+            if (currentTime > endTime) {
+                endedInterview++;
+            }
+        }
+
+        for (let i = 0; i < writtenInterviews.length; i++) {
+            const interview = writtenInterviews[i];
+            const currentTime = new Date();
+            const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
+            if (currentTime > endTime) {
+                endedInterview++;
+            }
+        }
+
+        let pendingInterviews = totalInterviews - endedInterview;
+
+        console.log(totalInterviews, endedInterview, pendingInterviews);
+
+        res.status(200).json({ totalInterviews, endedInterview, pendingInterviews });
+
+        
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+export const fetchInterviewDetails = async (req, res) => {
+    try {
+        // take all 4 interview types and sort it by latest date and time 
+
+        const companyInterviews = await AdminCompanyInterview.find({});
+        const subjectInterviews = await AdminSubjectInterview.find({});
+        const verbalInterviews = await AdminVerbalInterview.find({});
+        const writtenInterviews = await AdminWrittenInterview.find({});
+        const allInterviews = companyInterviews.concat(subjectInterviews, verbalInterviews, writtenInterviews);
+
+        allInterviews.sort((a, b) => {
+            const dateA = new Date((a.date + 'T' + a.from).replace(/T\d{2}:\d{2}/, ''));
+            const dateB = new Date((b.date + 'T' + b.from).replace(/T\d{2}:\d{2}/, ''));
+            return dateB - dateA;
+        });
+
+        // take only latest 10 interviews
+        const latestInterviews = allInterviews.slice(0, 10);
+        
+        const interviews = [];
+        for (let i=0; i<latestInterviews.length; i++){
+            const interview = latestInterviews[i];
+            
+            interviews.push({company: interview.company || interview.subject || interview.domain, name: interview.name
+                , date: interview.date, slot: `${interview.from} to ${interview.to}`, candidates: interview.students.length
+                , status: new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, '')) > new Date() ? "Pending" : "Ended"});
+        }
+
+        console.log(interviews);
+
+        res.status(200).json({ interviews });
+        
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
