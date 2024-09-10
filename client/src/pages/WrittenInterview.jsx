@@ -22,6 +22,20 @@ const Timer = (props) => {
     );
 }
 
+const Timer50 = (props) => {
+    return (
+        <CountdownCircleTimer
+            size={100}
+            isPlaying
+            duration={50}
+            colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+            colorsTime={[50 , 30 , 20 , 10]}
+        >
+            {({ remainingTime }) => remainingTime}
+        </CountdownCircleTimer>
+    );
+}
+
 const WrittenInterview = () => {
     const [open, setOpen] = useState(true);
 
@@ -35,7 +49,7 @@ const WrittenInterview = () => {
     const [question, setQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
-    const [timer, setTimer] = useState(120);
+    const [timer, setTimer] = useState(300);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = parseInt(Cookies.get("delta"), 10) || 10; // Default to 10 if not set
@@ -102,7 +116,6 @@ const WrittenInterview = () => {
             });
 
             setQuestion(response.data.data.question);
-            setTimer(300);
             setUserAnswer('');
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -135,9 +148,12 @@ const WrittenInterview = () => {
     };
 
     const handleSaveAnswer = async () => {
+        let answer = "";
         if (!userAnswer.trim()) {
-            alert('Please enter your answer before proceeding.');
-            return;
+            answer = "No answer provided.";
+        }
+        else {
+            answer = userAnswer;
         }
 
         setLoading(true);
@@ -145,7 +161,7 @@ const WrittenInterview = () => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionWritten`, {
                 question: question,
-                answer: userAnswer,
+                answer: answer,
                 interviewId: Cookies.get('interviewId'),
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
@@ -164,6 +180,8 @@ const WrittenInterview = () => {
                 answer: userAnswer,
                 score: response.data.contentScore,
             });
+
+            setTimer(50);
 
             setResults(prev => [...prev, response.data]);
             console.log(results);
@@ -210,6 +228,8 @@ const WrittenInterview = () => {
         }
     };
 
+    const [skipQuestion, setSkipQuestion] = useState(0);
+
     const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
 
     useEffect(() => {
@@ -254,7 +274,7 @@ const WrittenInterview = () => {
                                 <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                             </div>
                             <div className="timer">
-                                {timer > 0 && <Timer duration={timer} />}
+                                {timer && !loading && (currentQuestion === 0 ? <Timer duration={timer}/> : < Timer50 duration={timer}/>)}
                             </div>
                         </div>
 
@@ -290,8 +310,10 @@ const WrittenInterview = () => {
                                         size="lg"
                                         className="w-1/3"
                                         onClick={() => {
-                                            
-                                        }}
+                                            setUserAnswer('');
+                                            handleNextQuestion();
+                                        }
+                                    }
                                     >
                                         Skip
                                     </Button>
@@ -316,7 +338,7 @@ const WrittenInterview = () => {
                                 </div>
                                 <div className="flex justify-between w-full mt-2">
                                     <p className="text-lg">Total Answered</p>
-                                    <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{results.length}</span>
+                                    <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{currentQuestion}</span>
                                 </div>
                                 <div className="flex justify-between w-full mt-2">
                                     <p className="text-lg">Total Left</p>

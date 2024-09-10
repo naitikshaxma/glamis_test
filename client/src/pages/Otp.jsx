@@ -130,6 +130,7 @@ export default function Otp() {
                         <Typography component="h1" variant="h5" className='font-bold'>
                             Welcome to GLA Mock Interview System
                         </Typography>
+                        <p className='text-lg mt-2'>Please enter the OTP sent to your email address</p>
                         <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit}>
                             <Grid container spacing={2} justifyContent="center" sx={{ mt: 5, mb: 5 }}>
                                 {Array.from({ length: 6 }).map((_, index) => (
