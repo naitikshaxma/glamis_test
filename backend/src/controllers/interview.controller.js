@@ -1003,7 +1003,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     } else if (difficulty === "errorDetection") {
 
-        prompt = `Based on the previous questions and answers, generate a sentence with an error. The sentence should be related to the topic and should contain a grammatical or spelling error. Provide the user with a hint to help them identify and correct the error.`
+        prompt = `Based on the previous questions and answers, generate a sentence with an error. The sentence should be related to the topic and should contain a grammatical or spelling error. Provide the user with a hint to help them identify and correct the error. Please add "Identify the error" at the start of sentence.`
     }
 
     else if (difficulty === "fillInTheBlanks") {
@@ -1193,10 +1193,15 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     }
 
     let prompt = "";
+    // if (difficulty === "Easy") {
+    //     prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new ${difficulty} generic question for DSA,without asking for code implementation.`;
+    //     //prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and different ${difficulty} level question focused on fundamental concepts of Data Structures and Algorithms (DSA). Ensure the new question is distinct from any previous ones and challenges the user to explain a core concept or approach without asking for code implementation.`;
+    //} 
     if (difficulty === "Easy") {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new ${difficulty} generic question for DSA,without asking for code implementation.`;
-        //prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and different ${difficulty} level question focused on fundamental concepts of Data Structures and Algorithms (DSA). Ensure the new question is distinct from any previous ones and challenges the user to explain a core concept or approach without asking for code implementation.`;
-    } else if (difficulty === "Medium") {
+    prompt = `${historyPrompt}\nGenerate a new, entirely different ${difficulty} question covering a different DSA topic without repeating previous areas of ${historyPrompt}. Limit the question to 25 words.`;
+}
+
+    else if (difficulty === "Medium") {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``;
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and highly challenging ${difficulty} level scenario-based question in DSA. The scenario should require the user to think critically about advanced concepts like algorithm optimization or space-time complexity analysis, and it should be distinct from any previous questions.`;
