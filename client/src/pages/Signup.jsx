@@ -53,7 +53,8 @@ export default function Signup() {
 
         // email regexx
 
-        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        const emailRegex = /^[a-zA-Z0-9._-]+@gla\.ac\.in$/;
+
         if (!emailRegex.test(signupData.email_id)) {
             toast.error("Please enter a valid email");
             setIsLoading(false);
