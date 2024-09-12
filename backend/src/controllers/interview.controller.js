@@ -995,9 +995,10 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     if (difficulty === "essay") {
 
-        prompt = `Write an essay on the topic ${subject}. The essay should be at least 200 words long and should be well-structured and coherent. Ensure that the essay is free of grammatical errors and is written in a formal tone.`
-
-    } else if (difficulty === "jumbled") {
+        prompt =` Write an essay on the topic ${subject}. The essay should be at least 200 words long and should be well-structured and coherent. Ensure that the essay is free of grammatical errors and is written in a formal tone.`
+        
+}
+ else if (difficulty === "jumbled") {
 
         prompt = `Based on the previous questions and answers, generate a jumbled sentence. The sentence should be related to the topic and should be challenging to unscramble. Provide the user with a hint to help them unscramble the sentence.`
 

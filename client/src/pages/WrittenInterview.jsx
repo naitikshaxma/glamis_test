@@ -13,7 +13,7 @@ const Timer = (props) => {
         <CountdownCircleTimer
             size={100}
             isPlaying
-            duration={300}
+            duration={1200}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[300 , 200 , 100 , 30]}
         >
@@ -274,7 +274,7 @@ const WrittenInterview = () => {
                                 <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                             </div>
                             <div className="timer">
-                                {timer && !loading && (currentQuestion === 0 ? <Timer duration={timer}/> : < Timer50 duration={timer}/>)}
+                                {timer && !loading && (currentQuestion === 0? <Timer duration={timer}/> : < Timer50 duration={timer}/>)}
                             </div>
                         </div>
 
