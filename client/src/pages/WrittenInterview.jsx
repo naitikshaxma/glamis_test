@@ -49,7 +49,7 @@ const WrittenInterview = () => {
     const [question, setQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
-    const [timer, setTimer] = useState(300);
+    const [timer, setTimer] = useState(1200);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const totalQuestions = parseInt(Cookies.get("delta"), 10) || 10; // Default to 10 if not set
