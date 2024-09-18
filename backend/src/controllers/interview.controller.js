@@ -373,7 +373,8 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
             const dataToSend = {
                 question,
                 // gamma: noOfAttemptedQuestions,
-                audioFileName: audioFileName
+                audioFileName: audioFileName,
+                difficulty
             };
 
             return res.status(200).json(
@@ -400,7 +401,8 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
             const dataToSend = {
                 question,
-                audioFileName: audioFileName
+                audioFileName: audioFileName,
+                difficulty
             };
 
             return res.status(200).json(
@@ -426,7 +428,8 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
             const dataToSend = {
                 question,
-                audioFileName: audioFileName
+                audioFileName: audioFileName,
+                difficulty
             };
 
             return res.status(200).json(
@@ -450,8 +453,48 @@ console.log("______________________________\n" + jdDetails + "\n________________
 if (difficulty === "Easy") {
     prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct from the previous one and covers topics that have not yet been addressed or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}`;
 } else if (difficulty === "Medium") {
-    prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for a ${jobTitle} interview at ${selectedCompany}. Ensure this question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview. Provide a verbal coding challenge where the user is asked to solve the problem, identify errors, or explain the code. The challenge should be appropriately complex and align with the job description.Without asking the user to write code.\n\nJob Description: ${jdDetails} \n and please do proper indentation and formatting of the code and question\n coding question should be like that user can answer verbally like predict output, approach, error detection etc \n word limit of the question shoud be 50 and coding block word limit shoud be 70`;
-} else {
+    // Initialize the question counter within this block
+ //   let questionCount = 0;
+
+    // Randomly decide whether to generate a coding or a numerical question
+    //console.log(questionType);
+
+    if (questionNo >= 5 && questionNo < 7) {
+        // First two questions are coding questions
+        prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for ${jobTitle} at ${selectedCompany}. 
+        Ensure the coding question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
+        - **Coding**: Provide a verbal coding challenge where the user is asked to solve the problem, identify errors, or explain the code, without writing any code. 
+        The question should use pseudocode and be complex and tricky, allowing the user to answer verbally, such as predicting the output, explaining the approach, or detecting errors.
+        
+        \n\nJob Description: ${jdDetails}\nPlease do proper indentation and formatting of the question.
+        - The coding question should have a word limit of 50, and the pseudocode block should have a word limit of 70.`;
+
+        // Increment the question count after asking a coding question
+        //questionCount++;
+    } 
+    else if (questionNo >= 7 && questionNo < 9) {
+        // The next two questions are numerical
+        prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new numerical question for ${jobTitle} at ${selectedCompany}.
+        Ensure this numerical question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
+        - **Numerical**: Include a numerical question from relevant topics like Computer Networks, Operating Systems, or Database Management Systems. The numerical question should focus on the job description and be appropriately complex.
+        
+        \n\nJob Description: ${jdDetails}\nPlease ensure proper formatting of the numerical question.
+        - The numerical question should focus on OS, CN, or DBMS topics (e.g., SQL queries), and should not exceed 70 words.`;
+
+        // Increment the question count after asking a numerical question
+        //questionCount++;
+    } 
+    else {
+        // From the 5th question onward, ask DBMS query questions verbally
+        prompt = `Considering the previous questions and answers (${historyPrompt}), generate a verbal SQL query-related question for a ${jobTitle} interview at ${selectedCompany}, based on the job description ${jdDetails}.
+            The question should test knowledge of Database Management Systems and SQL, focusing on challenging scenarios like joins, subqueries, or optimizations.
+            - **DBMS Query (Verbal)**: Ask the candidate to verbally explain how they would approach or solve a particular SQL-related problem, without asking them to write the actual query. 
+            The question should focus on SQL concepts such as understanding joins, subqueries, or query optimization techniques, and should allow the candidate to explain their approach.
+            
+            \n\nJob Description: ${jdDetails}\nPlease ensure proper formatting and clarity. The verbal question should have a word limit of 70 words.`;
+    }    
+}
+else {
     prompt = `Taking into account the previous questions and answers (${historyPrompt}), generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. Ensure that the scenario is different from previous ones, covering real-world tasks and challenges directly related to the job description and role. Address any topics or areas that have not been fully explored in previous questions. The scenario should be practical, relevant to the job description, and should be between 30 to 70 words in length.Without asking the user to write code.\n\nJob Description: ${jdDetails}`;
 }
 
@@ -484,7 +527,8 @@ prompt += " Only generate and send the question text. Do not include the answer 
 
     const dataToSend = {
         question,
-        audioFileName: audioFileName
+        audioFileName: audioFileName,
+        difficulty
     };
 
     return res.status(200).json(

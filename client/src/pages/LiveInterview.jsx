@@ -17,8 +17,8 @@ const Timer = (props) => {
     return (
         <CountdownCircleTimer
             size={100}
-            isPlaying
-            duration={100}
+            // isPlaying
+            duration={props.timer}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[100, 70, 40, 10]}
         >
@@ -35,6 +35,7 @@ const LiveInterview = () => {
     const [questionAudio, setQuestionAudio] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    const [currentDiff, setCurrentDiff] = useState("");
     const audioCtxRef = useRef(null);
     const analyserRef = useRef(null);
     const dataArrayRef = useRef(null);
@@ -263,12 +264,18 @@ const LiveInterview = () => {
                     "Authorization": `Bearer ${Cookies.get('accessToken')}`
                 },
             });
+            console.log(response.data.data);
+            
 
             setQuestion(response.data.data.question);
+            setCurrentDiff(response.data.data.difficulty);
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName}`);
             // setCurrentQuestion(response.data.data.gamma + currentQuestion);
             setIsAudioPlaying(true);
-            setTimer(100);
+
+            if (response.data.data.difficulty === "Easy")
+                setTimer(60);
+            else setTimer(90);
 
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -457,7 +464,7 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && !loading && <Timer duration={timer} />}
+                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer} />}
                                 </div>
                             </div>
 
