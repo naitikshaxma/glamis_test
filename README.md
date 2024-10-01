@@ -39,8 +39,8 @@ To get started with the project, follow these steps:
 
 ### Clone the repository
 ```bash
-git clone https://github.com/your-username/ai-interviewer-gla.git
-cd ai-interviewer-gla
+git clone https://github.com/gouravbathla/GLAMIS.git
+cd GLAMIS
 ```
 
 ### Install Frontend Dependencies
