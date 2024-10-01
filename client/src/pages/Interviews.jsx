@@ -87,19 +87,23 @@ const Interviews = () => {
 };
 
 const OngoingInterview = (props) => {
-    return (
-
-        <div className="flex mb-6 w-[100vw] flex-wrap">
-            {props.ongoingInterview.map(interview => (
+    return <>
+        {props.ongoingInterview.length > 0 ?
+          <div className="flex mb-6 w-[100vw] flex-wrap">
+              {props.ongoingInterview.map(interview => (
                 <InterviewCard
-                    key={interview.id}
-                    props={interview}
-                    status={ "active now" }
+                  key={interview.id}
+                  props={interview}
+                  status={"active now"}
                 />
-            ))}
-        </div>
-
-    );
+              ))}
+          </div>
+          :
+          <div className="flex items-center flex-col justify-center w-full h-96">
+              <p className="text-xl text-gray-500 flex flex-wrap">Either you didn't Sign up before Interview
+                  Scheduling or you don't have any ongoing interviews</p>
+          </div>}
+    </>
 }
 
 const UpcomingInterview = (props) => {
