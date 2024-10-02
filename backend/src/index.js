@@ -4,12 +4,18 @@ import app from "./app.js";
 
 dotenv.config()
 
-connectDB()
-.then(()=>{
-    app.listen(process.env.PORT || 8000, ()=>{
-        console.log(`App is Running on PORT : ${process.env.PORT}`)
-    })
-})
-.catch((err)=>{
-    console.log(`Mongo DB connection FAILED !! ${err}`)
-})
+
+const start = async () => {
+    try {
+        await connectDB()
+        const port = process.env.PORT || 8000
+        const displayURL = `http://localhost:${port}`
+        app.listen(port, ()=>{
+            console.log(`Server is Running on ${displayURL}`)
+        })
+    } catch (error) {
+        console.log(`Mongo DB connection FAILED !! ${error}`)
+    }
+}
+
+start()
