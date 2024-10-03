@@ -89,7 +89,7 @@ export default function SignInSide() {
         }
         catch (error) {
             setIsLoading(false);
-            toast.error("something went wrong");
+            toast.error(error.response.data.message);
         }
     };
 
