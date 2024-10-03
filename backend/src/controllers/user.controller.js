@@ -43,8 +43,33 @@ const signup = asyncHandler(async (req, res) => {
     console.log("yaha tak aa gye")
     const user = await User.findOne({ $or: [{ email_id }, { phone }] })
     
-    if (user) {
+    if (user && user.is_email_verified) {
         return res.status(200).json(ApiError(400, "User already exists"))
+    }
+
+    if(user && !user.is_email_verified){
+        console.log("User already exists but email not verified");
+        user.name = name;
+        user.phone = phone;
+        user.password = password;
+        await user.save();
+        const otp = createOtp();
+        sendMail(email_id, "OTP Verification", OTPTemplate(otp))
+
+
+
+
+        // push otp to redis cache
+        let redisClient;
+        try {
+            redisClient = await connectRedis()
+            redisClient.set(email_id, otp);
+            redisClient.expire(email_id, 600);
+        } catch (error) {
+            console.log("Error while connecting to Redis", error)
+        }
+
+        return res.status(201).json(new ApiResponse(200, {}, "User details updated. Please verify your email to continue."));
     }
 
     console.log("yaha tak aa gye 2")
@@ -377,7 +402,65 @@ const updateStudent = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, student, "Student Updated Successfully"))
 });
 
+const forgotPassword = asyncHandler(async (req,res)=>{
+    const {email} = req.body;
+    if (isEmpty(email)) {
+        return res.status(401).json(ApiError(401, "Please Fill All the fields"))
+    }
+    const user = await User.findOne({ email_id: email })
+    if (!user) {
+        return res.status(404).json(ApiError(404, "User Doesn't Exists"))
+    }
+    if(user && !user.is_email_verified){
+        return res.status(401).json(ApiError(401, "Email is not verified"))
+    }
+    
+    const otp = createOtp();
 
+    sendMail(email, "Password Reset OTP", `You are receiving the otp because you requested for password reset OTP: ${otp}`)
+
+    // push otp to redis cache
+    let redisClient;
+    try {
+        redisClient = await connectRedis()
+        redisClient.set(email, otp);
+        redisClient.expire(email, 600);
+    } catch (error) {
+        console.log("Error while connecting to Redis", error)
+    }
+    return res.status(200).json(new ApiResponse(200, {}, "Password Reset OTP Send Successfully"));
+})
+
+const resetPassword = asyncHandler(async (req,res)=>{
+    const { email, otp, newPassword,confirmPassword } = req.body;
+
+    if (isEmpty(email) || isEmpty(otp) || isEmpty(newPassword) || isEmpty(confirmPassword)) {
+        return res.status(401).json(ApiError(401, "Please Fill All the fields"))
+    }
+
+    const user = await User.findOne({ email_id: email })
+
+    if (!user) {
+        return res.status(404).json(ApiError(404, "User Doesn't Exists"))
+    }
+
+    const redisClient = await connectRedis()
+
+    const expectedOTP = await redisClient.get(email)
+
+    if (expectedOTP!== otp) {
+        return res.status(401).json(ApiError(401, "Invalid OTP"))
+    }
+
+    if (expectedOTP === null) {
+        return res.status(401).json(ApiError(401, "OTP Expired"))
+    }
+    if(expectedOTP === otp){
+        user.password = newPassword;
+        await user.save();
+    }
+    return res.status(200).json(new ApiResponse(200,{},"Password reset Successfully"))
+})
 
 export {
     signup,
@@ -388,5 +471,7 @@ export {
     resendOTP,
     addStudent,
     updateStudent,
-    verifyUser
+    verifyUser,
+    forgotPassword,
+    resetPassword
 }
