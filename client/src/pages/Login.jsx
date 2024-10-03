@@ -89,7 +89,7 @@ export default function SignInSide() {
         }
         catch (error) {
             setIsLoading(false);
-            toast.error("something went wrong");
+            toast.error(error.response.data.message);
         }
     };
 
@@ -195,7 +195,7 @@ export default function SignInSide() {
                             </Button>
                             <Grid container className='flex justify-between items-center'>
                                 <Grid item>
-                                    <Link href="#">
+                                    <Link href="/forgot">
                                         Forgot password?
                                     </Link>
                                 </Grid>
