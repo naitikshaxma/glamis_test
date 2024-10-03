@@ -1,5 +1,13 @@
-import { Router } from "express";
-import { createCompanyInterview, createSubjectInterview,createVerbalInterview, fetchAdminInterviewbyinterviewId, createWrittenInterview , fetchInterviewStatusCount, fetchInterviewDetails} from "../controllers/admin.controller.js";
+import {Router} from "express";
+import {
+  createCompanyInterview,
+  createSubjectInterview,
+  createVerbalInterview,
+  fetchAdminInterviewbyinterviewId,
+  createWrittenInterview,
+  fetchInterviewStatusCount,
+  fetchInterviewDetails, downloadAttendance
+} from "../controllers/admin.controller.js";
 
 const router = Router();
 
@@ -10,5 +18,6 @@ router.post("/interview/fetch", fetchAdminInterviewbyinterviewId);
 router.post("/interview/verbal/create", createVerbalInterview);
 router.post("/interview/fetchInterviewStatusCount", fetchInterviewStatusCount);
 router.post("/interview/fetchInterviewDetails", fetchInterviewDetails);
+router.get("/interview/downloadAttendance", downloadAttendance);
 
 export default router;

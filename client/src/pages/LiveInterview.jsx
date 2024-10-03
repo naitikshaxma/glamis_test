@@ -265,7 +265,7 @@ const LiveInterview = () => {
                 },
             });
             console.log(response.data.data);
-            
+
 
             setQuestion(response.data.data.question);
             setCurrentDiff(response.data.data.difficulty);
@@ -327,7 +327,7 @@ const LiveInterview = () => {
         }
         setLoading(true);
         console.log("Skipping to next question...");
-        
+
         try {
             setCurrentQuestion((prev) => prev + 1);
             setQuestion('');    // Clear the question
@@ -536,7 +536,7 @@ const LiveInterview = () => {
                                     color='red'
                                     size='lg'
                                     disabled={currentQuestion < totalQuestions - 1}
-                                    onClick={handleNextQuestion}
+                                    onClick={handleSkipQuestion}
                                     className='w-full mx-3'
                                 >
                                     End Interview
