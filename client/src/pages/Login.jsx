@@ -195,7 +195,7 @@ export default function SignInSide() {
                             </Button>
                             <Grid container className='flex justify-between items-center'>
                                 <Grid item>
-                                    <Link href="#">
+                                    <Link href="/forgot">
                                         Forgot password?
                                     </Link>
                                 </Grid>

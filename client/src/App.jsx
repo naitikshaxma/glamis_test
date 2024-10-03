@@ -23,6 +23,8 @@ import WrittenReport from "./pages/WrittenReport";
 import Feedback from "./pages/Feedback";
 import Cookies from 'js-cookie';
 import ProtectedRoute from "./pages/Protectedroute";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const response = {
     statusCode: 200,
@@ -85,6 +87,8 @@ const App = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/" element={<Signup />} />
                 <Route path="/account/verification" element={<Otp />} />
+                <Route path="/forgot" element={<ForgotPassword />} />
+                <Route path="/reset" element={<ResetPassword />} />
                 <Route
                     path="/dashboard"
                     element={ <ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>}
