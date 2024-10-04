@@ -420,7 +420,7 @@ export const fetchInterviewStatusCount = async (req, res) => {
 
     let pendingInterviews = totalInterviews - endedInterview;
 
-    console.log(totalInterviews, endedInterview, pendingInterviews);
+    // console.log(totalInterviews, endedInterview, pendingInterviews);
 
     res.status(200).json({totalInterviews, endedInterview, pendingInterviews});
 
@@ -433,7 +433,7 @@ export const fetchInterviewStatusCount = async (req, res) => {
 export const fetchInterviewDetails = async (req, res) => {
   try {
     // take all 4 interview types and sort it by latest date and time
-
+    const {page, limit} = req.body;
     const companyInterviews = await AdminCompanyInterview.find({});
     const subjectInterviews = await AdminSubjectInterview.find({});
     const verbalInterviews = await AdminVerbalInterview.find({});
@@ -447,7 +447,13 @@ export const fetchInterviewDetails = async (req, res) => {
     });
 
     // take only latest 10 interviews
-    const latestInterviews = allInterviews.slice(0, 10);
+    let latestInterviews = allInterviews.slice(0, 10);
+    if (page && limit) {
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+      latestInterviews = allInterviews.slice(startIndex, endIndex);
+    }
+
 
     const interviews = [];
     for (let i = 0; i < latestInterviews.length; i++) {
@@ -455,6 +461,7 @@ export const fetchInterviewDetails = async (req, res) => {
 
       interviews.push({
         company: interview.company || interview.subject || interview.domain,
+        _id: interview._id,
         name: interview.name,
         date: interview.date,
         slot: `${interview.from} to ${interview.to}`,
@@ -463,7 +470,7 @@ export const fetchInterviewDetails = async (req, res) => {
       });
     }
 
-    console.log(interviews);
+    // console.log(interviews);
 
     res.status(200).json({interviews});
 
