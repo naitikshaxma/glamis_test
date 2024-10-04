@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react'
-import { Card, Typography } from "@material-tailwind/react";
-import { Link } from 'react-router-dom';
+import {Card, Typography} from "@material-tailwind/react";
+import {Link, useSearchParams} from 'react-router-dom';
 import axios from 'axios';
 
-const TABLE_HEAD = ["S.no", "Company", "Date", "Slot", "Candidates", "Status"];
+const TABLE_HEAD = ["S.no", "Company", "Date", "Slot", "Candidates", "Status", "Action"];
 
 const TABLE_ROWS = [
   {
@@ -85,15 +85,15 @@ const TABLE_ROWS2 = [
 ];
 
 
-
 export default function ReviewBoard() {
+  const [search, setSearch] = useSearchParams();
   const [scheduledInterviews, setScheduledInterviews] = useState(0);
   const [completedInterviews, setCompletedInterviews] = useState(0);
   const [pendingInterviews, setPendingInterviews] = useState(0);
   const [interviewDetails, setInterviewDetails] = useState([]);
   const fetchInterviewStatusCount = async () => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewStatusCount`,{},{
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewStatusCount`, {}, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -102,7 +102,11 @@ export default function ReviewBoard() {
       setCompletedInterviews(res.data.endedInterview);
       setPendingInterviews(res.data.pendingInterviews);
 
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewDetails`,{},{
+      const data = {
+        page: search.get('page') || 1,
+        limit: search.get('limit') || 10,
+      }
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewDetails`, data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -116,8 +120,11 @@ export default function ReviewBoard() {
   }
   useEffect(() => {
     fetchInterviewStatusCount();
+  }, [search.get('page'), search.get('limit')]);
+  useEffect(() => {
+    fetchInterviewStatusCount();
   }, []);
-   return (
+  return (
     <div>
       <div className="flex flex-col p-6 bg-white rounded-lg">
         <div className="flex  justify-between w-full border-b pb-2">
@@ -147,105 +154,149 @@ export default function ReviewBoard() {
           <div className='w-2/3'>
             <div className="flex flex-col m-3 border p-3 rounded-lg bg-gray-100">
               {/* a table with a filter feature */}
-              <div className="flex justify-between">
-                <h1 className="text-lg font-semibold">Interview Scheduled</h1>
-                <div className="flex gap-2">
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-2">
+                  <h1 className="text-lg font-semibold">Interview Scheduled</h1>
 
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 my-2 cursor-pointer">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                  </svg>
+                  {/*  limit */}
+                  <div className={'flex items-center gap-2'}>
+                    <label htmlFor="limit">Limit</label>
+                    <select name="limit" id="limit" className="border border-gray-200 p-2 rounded-lg"
+                            onChange={(e) => setSearch(params => {
+                              params.set('limit', e.target.value);
+                              params.set('page', 1);
+                              return params;
+                            })} value={search.get('limit')}>
+                      <option value="10">10</option>
+                      <option value="50">50</option>
+                      <option value="80">80</option>
+                      <option value="100">100</option>
+                    </select>
+                  </div>
 
-                  <input type="text" placeholder="Search" className="border border-gray-200 p-2 rounded-lg" />
+                  {/*  page */}
+                  <div className={'flex items-center gap-2'}>
+                    <label htmlFor="page">Page</label>
+                    <select name="page" id="page" className="border border-gray-200 p-2 rounded-lg"
+                            onChange={(e) => setSearch(params => {
+                              params.set('page', e.target.value);
+                              return params;
+                            })} value={search.get('page')}>
+                      {Array.from({length: Math.ceil(scheduledInterviews / (search.get('limit') || 10))}, (_, i) => i + 1).map((page) => (
+                        <option key={page} value={page}>{page}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className={'flex flex-col'}>
+                  <div className="flex gap-2">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                         stroke="currentColor" className="size-6 my-2 cursor-pointer">
+                      <path strokeLinecap="round" strokeLinejoin="round"
+                            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/>
+                    </svg>
+
+                    <input type="text" placeholder="Search" className="border border-gray-200 p-2 rounded-lg"/>
+                  </div>
+                    {/* download attendance button with multiple selection */}
+
                 </div>
               </div>
               <Card className="h-full w-full overflow-scroll my-3">
                 <table className="w-full min-w-max table-auto text-left">
                   <thead>
-                    <tr>
-                      {TABLE_HEAD.map((head) => (
-                        <th
-                          key={head}
-                          className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                  <tr>
+                    {TABLE_HEAD.map((head) => (
+                      <th
+                        key={head}
+                        className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                      >
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal leading-none opacity-70"
                         >
+                          {head}
+                        </Typography>
+                      </th>
+                    ))}
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {interviewDetails.map(({
+                                           company, date, slot, candidates, status, URL, _id
+                                         }, index) => {
+                    const isLast = index === TABLE_ROWS.length - 1;
+                    const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+
+                    return (
+                      <tr key={name}>
+                        <td className={classes}>
                           <Typography
                             variant="small"
                             color="blue-gray"
-                            className="font-normal leading-none opacity-70"
+                            className="font-normal"
                           >
-                            {head}
+                            {index + 1 + (search.get('page') - 1) * (search.get('limit') || 10)}
                           </Typography>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {interviewDetails.map(({
-                       company, date, slot, candidates, status, URL
-                    }, index) => {
-                      const isLast = index === TABLE_ROWS.length - 1;
-                      const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
-
-                      return (
-                        <tr key={name}>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {index + 1}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              <Link to="" className='text-blue-500'>{company}</Link>
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {date.split('T')[0]}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              as="a"
-                              href="#"
-                              variant="small"
-                              color="blue-gray"
-                              className="font-medium"
-                            >
-                              {slot}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {candidates}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color={status === "Ended" ? "red" : "orange"}
-                              className="font-normal"
-                            >
-                              {status}
-                            </Typography>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            <Link to="" className='text-blue-500'>{company}</Link>
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {date.split('T')[0]}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            as="a"
+                            href="#"
+                            variant="small"
+                            color="blue-gray"
+                            className="font-medium"
+                          >
+                            {slot}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {candidates}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color={status === "Ended" ? "red" : "orange"}
+                            className="font-normal"
+                          >
+                            {status}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <a target="_blank"
+                             href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/downloadAttendance/?interviewId=${_id}`}>
+                            <button className="bg-blue-500 text-white p-2 rounded-lg">Download<br/>Attendance</button>
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   </tbody>
                 </table>
               </Card>
@@ -256,77 +307,79 @@ export default function ReviewBoard() {
             <div className="flex flex-col m-3 border p-3 rounded-lg bg-gray-100">
               <div className="flex justify-between">
                 <h1 className="text-lg font-semibold">Top students leaderboard</h1>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 my-2 cursor-pointer">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                     stroke="currentColor" className="size-6 my-2 cursor-pointer">
+                  <path strokeLinecap="round" strokeLinejoin="round"
+                        d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/>
                 </svg>
               </div>
               <Card className="h-full w-full overflow-scroll my-3">
                 <table className="w-full min-w-max table-auto text-left">
                   < thead>
-                    <tr>
-                      {TABLE_HEAD2.map((head) => (
-                        <th
-                          key={head}
-                          className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                  <tr>
+                    {TABLE_HEAD2.map((head) => (
+                      <th
+                        key={head}
+                        className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                      >
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal leading-none opacity-70"
                         >
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal leading-none opacity-70"
-                          >
-                            {head}
-                          </Typography>
-                        </th>
-                      ))}
-                    </tr>
+                          {head}
+                        </Typography>
+                      </th>
+                    ))}
+                  </tr>
                   </thead>
 
                   <tbody>
-                    {TABLE_ROWS2.map(({ Rank, Name, Score, Company }, index) => {
-                      const isLast = index === TABLE_ROWS2.length - 1;
-                      const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+                  {TABLE_ROWS2.map(({Rank, Name, Score, Company}, index) => {
+                    const isLast = index === TABLE_ROWS2.length - 1;
+                    const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
 
-                      return (
+                    return (
                         <tr key={Name}>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {Rank}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {Name}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {Score}
-                            </Typography>
-                          </td>
-                          <td className={classes}>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {Company}
-                            </Typography>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {Rank}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {Name}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {Score}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {Company}
+                          </Typography>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   </tbody>
 
                 </table>
