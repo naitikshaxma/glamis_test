@@ -420,7 +420,7 @@ export const fetchInterviewStatusCount = async (req, res) => {
 
     let pendingInterviews = totalInterviews - endedInterview;
 
-    console.log(totalInterviews, endedInterview, pendingInterviews);
+    // console.log(totalInterviews, endedInterview, pendingInterviews);
 
     res.status(200).json({totalInterviews, endedInterview, pendingInterviews});
 
@@ -433,7 +433,7 @@ export const fetchInterviewStatusCount = async (req, res) => {
 export const fetchInterviewDetails = async (req, res) => {
   try {
     // take all 4 interview types and sort it by latest date and time
-
+    const {page, limit} = req.body;
     const companyInterviews = await AdminCompanyInterview.find({});
     const subjectInterviews = await AdminSubjectInterview.find({});
     const verbalInterviews = await AdminVerbalInterview.find({});
@@ -447,7 +447,13 @@ export const fetchInterviewDetails = async (req, res) => {
     });
 
     // take only latest 10 interviews
-    const latestInterviews = allInterviews.slice(0, 10);
+    let latestInterviews = allInterviews.slice(0, 10);
+    if (page && limit) {
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+      latestInterviews = allInterviews.slice(startIndex, endIndex);
+    }
+
 
     const interviews = [];
     for (let i = 0; i < latestInterviews.length; i++) {
@@ -455,6 +461,7 @@ export const fetchInterviewDetails = async (req, res) => {
 
       interviews.push({
         company: interview.company || interview.subject || interview.domain,
+        _id: interview._id,
         name: interview.name,
         date: interview.date,
         slot: `${interview.from} to ${interview.to}`,
@@ -463,7 +470,7 @@ export const fetchInterviewDetails = async (req, res) => {
       });
     }
 
-    console.log(interviews);
+    // console.log(interviews);
 
     res.status(200).json({interviews});
 
@@ -505,77 +512,82 @@ export const downloadAttendance = async (req, res) => {
     const pipeline = [
       // Stage 1: Match specific start_time and is_active false
       {
-        "$match": {
-          "_id": {"$in": interviews},
-          "is_active": false
+        $match: {
+          _id: {$in: interviews},
         }
       },
       // Stage 2: Project the _id field of the interviews
       {
-        "$project": {"_id": 1}
+        $project: {_id: 1, is_active: 1}
       },
       // Stage 3: Lookup in students collection using interview _id
       {
-        "$lookup": {
-          "from": "students",
-          "let": {"interviewId": "$_id"},
-          "pipeline": [
+        $lookup: {
+          from: "students",
+          let: {interviewId: "$_id"},
+          pipeline: [
             {
-              "$match": {
-                "$expr": {"$in": ["$$interviewId", "$interview_taken"]}
+              $match: {
+                $expr: {$in: ["$$interviewId", "$interview_taken"]}
               }
             }
           ],
-          "as": "matched_students"
+          as: "matched_students"
         }
       },
       // Stage 4: Unwind the matched_students array
       {
-        "$unwind": "$matched_students"
+        $unwind: "$matched_students"
       },
       // Stage 5: Project the user_id from matched students
       {
-        "$project": {
-          "user_id": "$matched_students.user"
+        $project: {
+          user_id: "$matched_students.user",
+          is_active: 1
         }
       },
       // Stage 6: Lookup in users collection using user_id
       {
-        "$lookup": {
-          "from": "users",
-          "localField": "user_id",
-          "foreignField": "_id",
-          "as": "user_data"
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user_data"
         }
       },
       // Stage 7: Unwind the user_data array
       {
-        "$unwind": "$user_data"
+        $unwind: "$user_data"
       },
       // Stage 8: Project the email, name, and _id from user_data
       {
-        "$project": {
-          "email": "$user_data.email_id",
-          "name": "$user_data.name",
-          "_id": "$user_data._id"
+        $project: {
+          email: "$user_data.email_id",
+          name: "$user_data.name",
+          _id: "$user_data._id",
+          is_active: 1
         }
       },
       // Stage 9: Group results and include count
       {
-        "$group": {
-          "_id": null,
-          "emails": {"$push": {"email": "$email", "name": "$name", "id": "$_id"}},
-          "total_count": {"$sum": 1}
+        $group: {
+          _id: null,
+          emails: {$push: {Email: "$email", Name: "$name", Id: "$_id", Present: {$not: "$is_active"}}},
+          total_count: {$sum: 1}
         }
       }
     ]
 
     const students = await Interview.aggregate(pipeline);
 
-    const fields = ['email', 'name', 'id'];
+    const fields = ['Email', 'Name', 'Id', 'Present'];
     const opts = {fields};
     const parser = new Parser(opts);
-    const csv = parser.parse(students[0].emails);
+    let arr = [];
+    if (students.length > 0) {
+      arr = students[0].emails;
+    }
+    const csv = parser.parse(arr);
     res.setHeader('Content-Type', 'text/csv');
     const filename = typeof interviewId === "string" ? `interview_${interviewId}.csv` : `interviews_${interviewId.join('-')}.csv`;
     res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
