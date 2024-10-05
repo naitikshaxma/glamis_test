@@ -9,12 +9,12 @@ const OurTeamPage = () => {
       </h1>
 
       <div className="flex flex-col gap-8 items-center">
-      
+
         <div className="bg-white rounded-2xl w-11/12 shadow-lg">
-          <h2 className="text-xl font-bold text-left m-5">_Our Core Team</h2>
+          <h2 className="text-xl font-bold text-left m-5">  Core Team</h2>
 
           <div className="flex flex-wrap p-8 gap-5">
-           
+
             <div className="relative flex flex-col items-center group">
               <img
                 src="Tanishq.jpg"
@@ -22,7 +22,7 @@ const OurTeamPage = () => {
                 className="rounded-full w-44 h-44 object-cover border-4 border-green-300 group-hover:brightness-50 transition duration-300"
               />
               <p className="mt-2 text-sm font-semibold">Tanishq Soni</p>
-           
+
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                 <a
                   href="https://www.linkedin.com/in/tanishqsoni?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
@@ -34,7 +34,7 @@ const OurTeamPage = () => {
               </div>
             </div>
 
-           
+
             <div className="relative flex flex-col items-center group">
               <img
                 src="shubh3.jpg"
@@ -53,7 +53,7 @@ const OurTeamPage = () => {
               </div>
             </div>
 
-           
+
             <div className="relative flex flex-col items-center group">
               <img
                 src="Anik3.jpg"
@@ -72,7 +72,7 @@ const OurTeamPage = () => {
               </div>
             </div>
 
-           
+
             <div className="relative flex flex-col items-center group">
               <img
                 src="vin3.jpg"
@@ -91,7 +91,7 @@ const OurTeamPage = () => {
               </div>
             </div>
 
-           
+
             <div className="relative flex flex-col items-center group">
               <img
                 src="bb.jpg"
@@ -112,12 +112,12 @@ const OurTeamPage = () => {
           </div>
         </div>
 
-       
+
         <div className="bg-white rounded-2xl w-11/12 shadow-lg">
-          <h2 className="text-xl font-bold text-left m-5">_Teachers</h2>
+          <h2 className="text-xl font-bold text-left m-5">Faculty Team</h2>
 
           <div className="flex flex-wrap p-8 gap-5">
-          
+
             <div className="relative flex flex-col items-center group">
               <img
                 src="b.jpg"
@@ -212,13 +212,13 @@ const OurTeamPage = () => {
             </div> */}
             </div>
 
-           
+
           </div>
         </div>
 
         <div className="bg-white rounded-2xl w-11/12 shadow-lg">
-  <h2 className="text-xl font-bold text-left m-5">_Our New Team</h2>
-  
+  <h2 className="text-xl font-bold text-left m-5">New Team</h2>
+
   <div className="flex flex-wrap justify-center p-8 gap-5">
     <div className="flex flex-wrap gap-5 w-full">
       <div className="relative flex flex-col items-center group">
@@ -352,7 +352,7 @@ const OurTeamPage = () => {
 </div>
 </div>
 
-        
+
   );
 };
 
