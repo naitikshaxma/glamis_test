@@ -100,8 +100,7 @@ const OngoingInterview = (props) => {
           </div>
           :
           <div className="flex items-center flex-col justify-center w-full h-96">
-              <p className="text-xl text-gray-500 flex flex-wrap">Either you didn't Sign up before Interview
-                  Scheduling or you don't have any ongoing interviews</p>
+              <p className="text-xl text-gray-500 flex flex-wrap">It looks like you missed the sign-up deadline, so your interview hasn't been scheduled yet.</p>
           </div>}
     </>
 }
