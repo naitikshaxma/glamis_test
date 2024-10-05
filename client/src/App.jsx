@@ -25,6 +25,8 @@ import Cookies from 'js-cookie';
 import ProtectedRoute from "./pages/Protectedroute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Team from "./pages/Team";
+
 
 const response = {
     statusCode: 200,
@@ -145,6 +147,11 @@ const App = () => {
                 <Route path="*" element={<div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
                     <h1>404 Not Found</h1>
                 </div>} />
+                <Route
+                    path="/team"
+                    element={ <ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
+                   
+                />
             </Routes>
             <ToastContainer />
         </Router>
