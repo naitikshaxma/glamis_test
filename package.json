@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"cd backend && npm i && npm run dev\" \"cd client && npm i && npm run dev\" \"cd admin-client && npm i && npm run dev\"",
-    "prod": "concurrently \"cd backend && npm i && npm start\" \"cd client && npm i && npm run build && npm run preview\" \"cd admin-client && npm i && npm run build && npm run preview\""
+    "dev": "concurrently -n server,client,admin-client -c yellow,blue,green \"cd backend && npm i && npm run dev\" \"cd client && npm i && npm run dev\" \"cd admin-client && npm i && npm run dev\"",
+    "prod": "concurrently -n server,client,admin-client -c yellow,blue,green \"cd backend && npm i && npm start\" \"cd client && npm i && npm run build && npm run preview\" \"cd admin-client && npm i && npm run build && npm run preview\""
   },
   "author": "",
   "license": "ISC",

@@ -87,19 +87,22 @@ const Interviews = () => {
 };
 
 const OngoingInterview = (props) => {
-    return (
-
-        <div className="flex mb-6 w-[100vw] flex-wrap">
-            {props.ongoingInterview.map(interview => (
+    return <>
+        {props.ongoingInterview.length > 0 ?
+          <div className="flex mb-6 w-[100vw] flex-wrap">
+              {props.ongoingInterview.map(interview => (
                 <InterviewCard
-                    key={interview.id}
-                    props={interview}
-                    status={ "active now" }
+                  key={interview.id}
+                  props={interview}
+                  status={"active now"}
                 />
-            ))}
-        </div>
-
-    );
+              ))}
+          </div>
+          :
+          <div className="flex items-center flex-col justify-center w-full h-96">
+              <p className="text-xl text-gray-500 flex flex-wrap">It looks like you missed the sign-up deadline, so your interview hasn't been scheduled yet.</p>
+          </div>}
+    </>
 }
 
 const UpcomingInterview = (props) => {

@@ -463,7 +463,7 @@ if (difficulty === "Easy") {
         // First two questions are coding questions
         prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for ${jobTitle} at ${selectedCompany}. 
         Ensure the coding question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
-        - **Coding**: Provide a verbal coding challenge where the user is asked to solve the problem, identify errors, or explain the code, without writing any code. 
+        - **Coding**: Provide a verbal coding challenge where the user is asked to solve the problem, identify errors, or explain the code, without writing any code. without asking user to write any code.
         The question should use pseudocode and be complex and tricky, allowing the user to answer verbally, such as predicting the output, explaining the approach, or detecting errors.
         
         \n\nJob Description: ${jdDetails}\nPlease do proper indentation and formatting of the question.
@@ -1247,7 +1247,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 }
 
     else if (difficulty === "Medium") {
-        prompt = `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``;
+        prompt = `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output.without asking user to write any code. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``;
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and highly challenging ${difficulty} level scenario-based question in DSA. The scenario should require the user to think critically about advanced concepts like algorithm optimization or space-time complexity analysis, and it should be distinct from any previous questions.`;
     }
