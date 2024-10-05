@@ -51,7 +51,12 @@ export default function Sidebar() {
         name: 'Feedback',
         icon: <CubeTransparentIcon className="h-5 w-5" />,
         href: '/feedback'
-    }
+    },
+    {
+        name: 'Our Team',
+        icon: <InboxIcon className="h-5 w-5" />,
+        href: '/team'
+    },
     ]
 
     return (
