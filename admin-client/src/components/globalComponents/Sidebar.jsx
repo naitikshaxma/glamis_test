@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UisBars } from '@iconscout/react-unicons-solid';
 import { ChevronDownIcon, ChevronRightIcon, PresentationChartBarIcon } from "@heroicons/react/24/outline";
 import { Accordion, AccordionBody, AccordionHeader } from "@material-tailwind/react";
+import { toast } from "react-hot-toast";
 
 import avatar from "../../assets/avatar.jpeg";
 import Cookies from "js-cookie";
@@ -187,15 +188,15 @@ export default function Sidebar() {
                 {/* show token 3 */}
               </div>
               <Button
-                color="#2b6030"
+                color="green"
                 className="w-full"
                 variant="outlined"
                 block={true}
                 ripple="light"
                 onClick={() => {
                   Cookies.remove("accessTokenAdmin");
+                  toast.success("Logout Successfully")
                   navigate("/admin/login");
-                  // toast.success("Logout Successfully")
                 }}
               >
                 Logout
