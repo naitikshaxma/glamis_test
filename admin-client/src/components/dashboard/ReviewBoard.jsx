@@ -121,7 +121,7 @@ export default function ReviewBoard() {
                                                     params.set('limit', e.target.value);
                                                     params.set('page', 1);
                                                     return params;
-                                                })} value={search.get('limit')}>
+                                                })} value={search.get('limit') || "10"}>
                                             <option value="10">10</option>
                                             <option value="50">50</option>
                                             <option value="80">80</option>
@@ -136,7 +136,7 @@ export default function ReviewBoard() {
                                                 onChange={(e) => setSearch(params => {
                                                     params.set('page', e.target.value);
                                                     return params;
-                                                })} value={search.get('page')}>
+                                                })} value={search.get('page') || "1"}>
                                             {Array.from({length: Math.ceil(scheduledInterviews / (search.get('limit') || 10))}, (_, i) => i + 1).map((page) => (
                                                 <option key={page} value={page}>{page}</option>
                                             ))}
@@ -223,7 +223,7 @@ export default function ReviewBoard() {
                                                 <td className={classes}>
                                                     <Typography variant="small" color="blue-gray"
                                                                 className="font-normal">
-                                                        {index + 1 + (search.get('page') - 1) * (search.get('limit') || 10)}
+                                                        {index + 1 + ((search.get('page') || 1) - 1) * (search.get('limit') || 10)}
                                                     </Typography>
                                                 </td>
                                                 <td className={classes}>
