@@ -123,6 +123,14 @@ export default function Sidebar() {
                       Verbal SKills
                     </ListItem>
                   </Link>
+                  <Link to="/admin/schedule/svar">
+                    <ListItem>
+                      <ListItemPrefix>
+                        <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                      </ListItemPrefix>
+                      Svar
+                    </ListItem>
+                  </Link>
                 </List>
               </AccordionBody>
             </Accordion>
