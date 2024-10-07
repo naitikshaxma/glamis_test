@@ -10,6 +10,7 @@ import SubjectInterview from "./components/dashboard/scheduleInterview/SubjectIn
 import WrittenInterview from "./components/dashboard/scheduleInterview/WrittenInterview";
 import VerbalInterview from "./components/dashboard/scheduleInterview/VerbalInterview";
 import ProtectedRoute from "./pages/Protectedroute";
+import SwarInterview from "./components/dashboard/scheduleInterview/SwarInterview";
 
 // Layout component that includes Sidebar
 const MainLayout = ({ children }) => (
@@ -35,6 +36,7 @@ const App = () => {
                 <Route path="/admin/schedule/written" element={<ProtectedRoute><MainLayout><WrittenInterview /></MainLayout></ProtectedRoute>} />
                 <Route path="/admin/schedule/subject" element={<ProtectedRoute><MainLayout><SubjectInterview /></MainLayout></ProtectedRoute>} />
                 <Route path="/admin/schedule/verbal" element={<ProtectedRoute><MainLayout><VerbalInterview /></MainLayout></ProtectedRoute>} />
+                <Route path="/admin/schedule/svar" element={<ProtectedRoute><MainLayout><SwarInterview /></MainLayout></ProtectedRoute>} />
                 <Route path="/admin/review-board" element={<ProtectedRoute><MainLayout><ReviewBoard /></MainLayout></ProtectedRoute>} />
                 <Route path="*" element={<div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
                     <h1>404 Not Found</h1>
