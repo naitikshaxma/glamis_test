@@ -55,7 +55,7 @@ export default function Sidebar() {
                 Admin
               </Typography>
             </div>
-            <UisBars className="ml-20 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />
+            {/*<UisBars className="ml-20 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />*/}
           </div>
           <List>
             {navItems.map((item, index) => (
@@ -192,7 +192,7 @@ export default function Sidebar() {
                 color="green"
                 className="w-full"
                 variant="outlined"
-                block={true}
+                block='true'
                 onClick={() => {
                   Cookies.remove("accessTokenAdmin");
                   toast.success("Logout Successfully")
@@ -205,9 +205,9 @@ export default function Sidebar() {
           </div>
         </Card>
       )}
-      {!isSidebarOpen && (
-        <UisBars className="ml-4 mt-4 cursor-pointer" onClick={() => setIsSidebarOpen(true)} />
-      )}
+      {/*{!isSidebarOpen && (*/}
+      {/*  <UisBars className="ml-4 mt-4 cursor-pointer" onClick={() => setIsSidebarOpen(true)} />*/}
+      {/*)}*/}
     </div>
   );
 }
