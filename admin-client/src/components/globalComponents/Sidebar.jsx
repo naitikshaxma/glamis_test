@@ -145,6 +145,7 @@ export default function Sidebar() {
               }
             >
               {/* Add content here if needed */}
+              {""}
             </Accordion>
           </List>
           <div className="mt-auto">
@@ -192,7 +193,6 @@ export default function Sidebar() {
                 className="w-full"
                 variant="outlined"
                 block={true}
-                ripple="light"
                 onClick={() => {
                   Cookies.remove("accessTokenAdmin");
                   toast.success("Logout Successfully")
