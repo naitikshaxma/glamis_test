@@ -1,39 +1,48 @@
 import fs from "fs";
 import OpenAI from "openai";
 import path from "path";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { AdminSubjectInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion } from "../models/interview.models.js"
-import { Student } from "../models/users.models.js"
+import {ApiResponse} from "../utils/ApiResponse.js";
+import {asyncHandler} from "../utils/asyncHandler.js";
+import {
+    AdminSubjectInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion
+} from "../models/interview.models.js"
+import {Student} from "../models/users.models.js"
 import "dotenv/config.js";
-import { ApiError } from "../utils/ApiError.js";
+import {ApiError} from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
 import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
-import { AdminCompanyInterview, InterviewQuestionsByAdmin } from "../models/interview.models.js";
-import { json } from "express";
+import {AdminCompanyInterview, InterviewQuestionsByAdmin} from "../models/interview.models.js";
+import {json} from "express";
 import mongoose from "mongoose";
 
 
 const objectStorePath = path.resolve("../objectStore");
 
+
+/*
+In use: reviewed by new interns that it is being used
+not explored yet: new interns have not explored this yet or not sure about its usage
+ */
+
+
+// ---------------------------- Create Interview ----------------------------
+
+// not explored yet
 export const createInterview = asyncHandler(async (req, res) => {
     try {
-        const { subject } = req.body;
+        const {subject} = req.body;
         console.log("subject ####", subject);
         const interview = await Interview.create({
-            start_time: new Date(),
-            is_active: true,
-            title: subject,
-            description: subject
+            start_time: new Date(), is_active: true, title: subject, description: subject
         })
 
         console.log("Interview created ####", interview);
 
         const currentUser = req.user;
         console.log("currentUser ####", currentUser);
-        const student = await Student.findOne({ user: currentUser._id });
+        const student = await Student.findOne({user: currentUser._id});
         console.log("student ####", student);
         student.interview_taken.push(interview._id);
         await student.save();
@@ -43,37 +52,29 @@ export const createInterview = asyncHandler(async (req, res) => {
             // redisClient.expire(email_id, 600);
         } catch (error) {
             console.log("Error while connecting to Redis", error)
-            return res.status(500).json(
-                ApiError(500, error.message || "Internal Server Error")
-            );
+            return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
         }
 
-        return res.status(200).json(
-            new ApiResponse(200, interview, "Interview created successfully")
-        );
-    }
-    catch (err) {
-        return res.status(500).json(
-            ApiError(500, err.message || "Internal Server Error")
-        );
+        return res.status(200).json(new ApiResponse(200, interview, "Interview created successfully"));
+    } catch (err) {
+        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
 });
 
+
+// not explored yet
 export const createInterviewByJD = asyncHandler(async (req, res) => {
     try {
-        const { selectedCompany, jobTitle } = req.body;
+        const {selectedCompany, jobTitle} = req.body;
         const interview = await Interview.create({
-            start_time: new Date(),
-            is_active: true,
-            title: jobTitle,
-            description: selectedCompany + " " + jobTitle,
+            start_time: new Date(), is_active: true, title: jobTitle, description: selectedCompany + " " + jobTitle,
         });
 
         console.log("Interview created ####", interview);
 
         const currentUser = req.user;
         console.log("currentUser ####", currentUser);
-        const student = await Student.findOne({ user: currentUser._id });
+        const student = await Student.findOne({user: currentUser._id});
         console.log("student ####", student);
         student.interview_taken.push(interview._id);
         await student.save();
@@ -83,26 +84,89 @@ export const createInterviewByJD = asyncHandler(async (req, res) => {
             await redisClient.set(String(interview._id), JSON.stringify([]));
         } catch (error) {
             console.log("Error while connecting to Redis", error);
-            return res.status(500).json(
-                ApiError(500, error.message || "Internal Server Error")
-            );
+            return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
         }
 
-        return res.status(200).json(
-            new ApiResponse(200, interview, "Interview created successfully")
-        );
+        return res.status(200).json(new ApiResponse(200, interview, "Interview created successfully"));
     } catch (err) {
-        return res.status(500).json(
-            ApiError(500, err.message || "Internal Server Error")
-        );
+        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
 });
+
+
+// in use
+export const createInterviewByVerbalAdmin = asyncHandler(async (req, res) => {
+    /*
+    Handle the creation of an interview when user clicks on "Join Interview" button in a Verbal interview card
+    */
+
+    const {interviewId} = req.body;
+    const interview = await Interview.findById(interviewId);
+    if (interview === null) {
+        return res.status(404).json(ApiError(404, "Interview not found"));
+    }
+    try {
+        let redisClient = await connectRedis();
+        await redisClient.set(String(interview._id), JSON.stringify([]));
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
+    }
+    return res.status(200).json(new ApiResponse(200, interview, "Interview created successfully"));
+});
+
+
+// in use
+export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
+    /*
+    Handle the creation of an interview when user clicks on "Join Interview" button in a JD interview card
+    */
+
+    try {
+        const {interviewId} = req.body;
+        let redisClient = await connectRedis();
+        await redisClient.set(String(interviewId), JSON.stringify([]));
+        return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
+    }
+
+})
+
+
+// in use
+export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
+    /*
+    Handle the creation of an interview when user clicks on "Join Interview" button in a Written interview card
+     */
+    try {
+        const {interviewId} = req.body;
+        const interview = await Interview.findById(interviewId);
+
+        if (interview === null) {
+            return res.status(404).json(ApiError(404, "Interview not found"));
+        }
+
+        let redisClient = await connectRedis();
+
+        await redisClient.set(String(interviewId), JSON.stringify([]));
+
+        return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
+    }
+})
+
+
+// ---------------------------- Generate Question ----------------------------
 
 export const generateQuestion = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
-    const { subject, answer, score, interviewId } = req.body;
+    const {subject, answer, score, interviewId} = req.body;
 
     let redisClient = await connectRedis()
 
@@ -113,13 +177,11 @@ export const generateQuestion = asyncHandler(async (req, res) => {
         console.log("conversationHistory ####", conversationHistory);
 
         conversationHistory.push({
-            answer: answer,
-            score: score
+            answer: answer, score: score
         })
         console.log("###########", conversationHistory);
-    }
-    else {
-        conversationHistory.push({ subject });
+    } else {
+        conversationHistory.push({subject});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
     console.log(conversationHistory + "????")
@@ -142,10 +204,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
 
     const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: prompt }
-        ],
+        messages: [{role: "system", content: "You are a helpful assistant."}, {role: "user", content: prompt}],
         model: "gpt-4o-mini",
         max_tokens: 1000,
     });
@@ -161,24 +220,21 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     await textToSpeech(cleanedQuestion, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
     }
 
     const dataToSend = {
-        question,
-        audioFileName: audioFileName
+        question, audioFileName: audioFileName
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 });
 
 export const generateQuestionForWritten = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
-    const { subject, interviewId } = req.body;
+    const {subject, interviewId} = req.body;
 
     let redisClient = await connectRedis();
 
@@ -189,7 +245,7 @@ export const generateQuestionForWritten = asyncHandler(async (req, res) => {
             subject
         });
     } else {
-        conversationHistory.push({ subject });
+        conversationHistory.push({subject});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -198,10 +254,7 @@ export const generateQuestionForWritten = asyncHandler(async (req, res) => {
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. Question should be under 100 words.";
 
     const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are an English professor." },
-            { role: "user", content: prompt }
-        ],
+        messages: [{role: "system", content: "You are an English professor."}, {role: "user", content: prompt}],
         model: "gpt-4o-mini",
         max_tokens: 1000,
     });
@@ -215,24 +268,21 @@ export const generateQuestionForWritten = asyncHandler(async (req, res) => {
     await textToSpeech(cleanedQuestion, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
     }
 
     const dataToSend = {
-        question,
-        audioFileName: audioFileName
+        question, audioFileName: audioFileName
     };
 
-    return res.status(200).json(
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 });
 
 export const generateQuestionForJD = asyncHandler(async (req, res) => {
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
-    const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId } = req.body; // difficulty
+    const {selectedCompany, jobTitle, jdDetails, answer, score, interviewId} = req.body; // difficulty
 
     let redisClient = await connectRedis();
 
@@ -240,11 +290,10 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
     let conversationHistory = JSON.parse(await redisClient.get(interviewId));
     if (conversationHistory.length > 0) {
         conversationHistory.push({
-            answer: answer,
-            score: score
+            answer: answer, score: score
         });
     } else {
-        conversationHistory.push({ selectedCompany, jobTitle, jdDetails });
+        conversationHistory.push({selectedCompany, jobTitle, jdDetails});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -266,10 +315,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
     prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent.";
 
     const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: prompt }
-        ],
+        messages: [{role: "system", content: "You are a helpful assistant."}, {role: "user", content: prompt}],
         model: "gpt-4o-mini",
         max_tokens: 1000,
     });
@@ -283,30 +329,27 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
     await textToSpeech(cleanedQuestion, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
     }
 
     const dataToSend = {
-        question,
-        audioFileName: audioFileName
+        question, audioFileName: audioFileName
     };
 
     console.log("Conversation History: ", conversationHistory)
-    return res.status(200).json(
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 });
 
 
 export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     console.log("entered jd admin")
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+    const {selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
     // const [offset, setOffset] = useState(0);
-    const noOfAttemptedQuestions = await InterviewQuestion.find({ interview: interviewId }).countDocuments();
+    const noOfAttemptedQuestions = await InterviewQuestion.find({interview: interviewId}).countDocuments();
 
     // questionNo += offset;
-    
+
     console.log(req.body);
 
     let redisClient = await connectRedis();
@@ -315,11 +358,10 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
     if (conversationHistory.length > 0) {
         conversationHistory.push({
-            answer: answer,
-            score: score
+            answer: answer, score: score
         });
     } else {
-        conversationHistory.push({ selectedCompany, jobTitle, jdDetails });
+        conversationHistory.push({selectedCompany, jobTitle, jdDetails});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -328,10 +370,9 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.jobTitle} - \nA${index + 1}: `;
     }).join("\n");
 
-    const lastQuestion = await InterviewQuestion.find({ interview: interviewId });
+    const lastQuestion = await InterviewQuestion.find({interview: interviewId});
 
     historyPrompt += lastQuestion[lastQuestion.length - 1]?.question;
-
 
 
     const adminInterview = await AdminCompanyInterview.findById(adminInterviewId);
@@ -351,10 +392,12 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
         difficulty = 'Hard';
     }
 
-    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db 
+    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
     if (difficulty === "Easy") {
-        const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
+        const easyQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Easy", _id: {$in: adminInterview.questions}
+        });
         if (questionNo < easyQuestions.length) {
             const question = easyQuestions[questionNo].question;
             console.log(question)
@@ -367,24 +410,22 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                // gamma: noOfAttemptedQuestions,
-                audioFileName: audioFileName,
-                difficulty
+                question, // gamma: noOfAttemptedQuestions,
+                audioFileName: audioFileName, difficulty
             };
 
-            return res.status(200).json(
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
 
     if (difficulty === "Medium") {
-        const mediumQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Medium", _id: { $in: adminInterview.questions } });
+        const mediumQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Medium", _id: {$in: adminInterview.questions}
+        });
         console.log("______________________________\n" + mediumQuestions + "\n_______________________________________")
         if (questionNo - adminInterview.easy_remaining < mediumQuestions.length) {
             const question = mediumQuestions[questionNo - adminInterview.easy_remaining].question;
@@ -396,23 +437,21 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                audioFileName: audioFileName,
-                difficulty
+                question, audioFileName: audioFileName, difficulty
             };
 
-            return res.status(200).json(
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
 
     if (difficulty === "Hard") {
-        const hardQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Hard", _id: { $in: adminInterview.questions } });
+        const hardQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Hard", _id: {$in: adminInterview.questions}
+        });
         if (questionNo - (adminInterview.easy_remaining + adminInterview.medium_remaining) < hardQuestions.length) {
             const question = hardQuestions[questionNo - (adminInterview.easy_remaining + adminInterview.medium_remaining)].question;
 
@@ -423,21 +462,17 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                audioFileName: audioFileName,
-                difficulty
+                question, audioFileName: audioFileName, difficulty
             };
 
-            return res.status(200).json(
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
-console.log("______________________________\n" + jdDetails + "\n_______________________________________")
+    console.log("______________________________\n" + jdDetails + "\n_______________________________________")
     // let prompt = "";
     // if (difficulty === "Easy") {
     //     prompt = `Based on the previous questions and answers, generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. The question should be directly related to the job description keywords , they can be related to particular core cs subjects and not involve coding or complex scenarios.And concider the hole jd not the first line\n\nJob Description: ${jdDetails}`
@@ -450,18 +485,18 @@ console.log("______________________________\n" + jdDetails + "\n________________
     // prompt += "It is important that you do not send the answer to the question too. I just want the question. Only the question text should be sent. THe length of the question should be less than 100 words.";
 
     let prompt = "";
-if (difficulty === "Easy") {
-    prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct from the previous one and covers topics that have not yet been addressed or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}`;
-} else if (difficulty === "Medium") {
-    // Initialize the question counter within this block
- //   let questionCount = 0;
+    if (difficulty === "Easy") {
+        prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct from the previous one and covers topics that have not yet been addressed or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}`;
+    } else if (difficulty === "Medium") {
+        // Initialize the question counter within this block
+        //   let questionCount = 0;
 
-    // Randomly decide whether to generate a coding or a numerical question
-    //console.log(questionType);
+        // Randomly decide whether to generate a coding or a numerical question
+        //console.log(questionType);
 
-    if (questionNo >= 5 && questionNo < 7) {
-        // First two questions are coding questions
-        prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for ${jobTitle} at ${selectedCompany}. 
+        if (questionNo >= 5 && questionNo < 7) {
+            // First two questions are coding questions
+            prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for ${jobTitle} at ${selectedCompany}. 
         Ensure the coding question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
         - **Coding**: Provide a verbal coding challenge where the user is asked to solve the problem, identify errors, or explain the code, without writing any code. without asking user to write any code.
         The question should use pseudocode and be complex and tricky, allowing the user to answer verbally, such as predicting the output, explaining the approach, or detecting errors.
@@ -469,46 +504,38 @@ if (difficulty === "Easy") {
         \n\nJob Description: ${jdDetails}\nPlease do proper indentation and formatting of the question.
         - The coding question should have a word limit of 50, and the pseudocode block should have a word limit of 70.`;
 
-        // Increment the question count after asking a coding question
-        //questionCount++;
-    } 
-    else if (questionNo >= 7 && questionNo < 9) {
-        // The next two questions are numerical
-        prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new numerical question for ${jobTitle} at ${selectedCompany}.
+            // Increment the question count after asking a coding question
+            //questionCount++;
+        } else if (questionNo >= 7 && questionNo < 9) {
+            // The next two questions are numerical
+            prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new numerical question for ${jobTitle} at ${selectedCompany}.
         Ensure this numerical question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
         - **Numerical**: Include a numerical question from relevant topics like Computer Networks, Operating Systems, or Database Management Systems. The numerical question should focus on the job description and be appropriately complex.
         
         \n\nJob Description: ${jdDetails}\nPlease ensure proper formatting of the numerical question.
         - The numerical question should focus on OS, CN, or DBMS topics (e.g., SQL queries), and should not exceed 70 words.`;
 
-        // Increment the question count after asking a numerical question
-        //questionCount++;
-    } 
-    else {
-        // From the 5th question onward, ask DBMS query questions verbally
-        prompt = `Considering the previous questions and answers (${historyPrompt}), generate a verbal SQL query-related question for a ${jobTitle} interview at ${selectedCompany}, based on the job description ${jdDetails}.
+            // Increment the question count after asking a numerical question
+            //questionCount++;
+        } else {
+            // From the 5th question onward, ask DBMS query questions verbally
+            prompt = `Considering the previous questions and answers (${historyPrompt}), generate a verbal SQL query-related question for a ${jobTitle} interview at ${selectedCompany}, based on the job description ${jdDetails}.
             The question should test knowledge of Database Management Systems and SQL, focusing on challenging scenarios like joins, subqueries, or optimizations.
             - **DBMS Query (Verbal)**: Ask the candidate to verbally explain how they would approach or solve a particular SQL-related problem, without asking them to write the actual query. 
             The question should focus on SQL concepts such as understanding joins, subqueries, or query optimization techniques, and should allow the candidate to explain their approach.
             
             \n\nJob Description: ${jdDetails}\nPlease ensure proper formatting and clarity. The verbal question should have a word limit of 70 words.`;
-    }    
-}
-else {
-    prompt = `Taking into account the previous questions and answers (${historyPrompt}), generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. Ensure that the scenario is different from previous ones, covering real-world tasks and challenges directly related to the job description and role. Address any topics or areas that have not been fully explored in previous questions. The scenario should be practical, relevant to the job description, and should be between 30 to 70 words in length.Without asking the user to write code.\n\nJob Description: ${jdDetails}`;
-}
+        }
+    } else {
+        prompt = `Taking into account the previous questions and answers (${historyPrompt}), generate a scenario-based question for a ${jobTitle} interview at ${selectedCompany}. Ensure that the scenario is different from previous ones, covering real-world tasks and challenges directly related to the job description and role. Address any topics or areas that have not been fully explored in previous questions. The scenario should be practical, relevant to the job description, and should be between 30 to 70 words in length.Without asking the user to write code.\n\nJob Description: ${jdDetails}`;
+    }
 
 // Instruction to only generate and send the question
-prompt += " Only generate and send the question text. Do not include the answer or any additional information.";
-
-    
+    prompt += " Only generate and send the question text. Do not include the answer or any additional information.";
 
 
     const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: prompt }
-        ],
+        messages: [{role: "system", content: "You are a helpful assistant."}, {role: "user", content: prompt}],
         model: "gpt-4o-mini",
         max_tokens: 1000,
     });
@@ -522,24 +549,20 @@ prompt += " Only generate and send the question text. Do not include the answer 
     await textToSpeech(cleanedQuestion, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
     }
 
     const dataToSend = {
-        question,
-        audioFileName: audioFileName,
-        difficulty
+        question, audioFileName: audioFileName, difficulty
     };
 
-    return res.status(200).json(
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
 });
 
 export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const { answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+    const {answer, score, interviewId, questionNo, adminInterviewId} = req.body;
     console.log(req.body);
 
     let redisClient = await connectRedis();
@@ -548,12 +571,10 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
     if (conversationHistory.length > 0) {
         conversationHistory.push({
-            answer: answer,
-            score: score
+            answer: answer, score: score
         });
-    }
-    else {
-        conversationHistory.push({ verbal: true });
+    } else {
+        conversationHistory.push({verbal: true});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -589,7 +610,9 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
     if (difficulty === "Easy") {
 
-        const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
+        const easyQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Easy", _id: {$in: adminInterview.questions}
+        });
         console.log("Easy Questions: ", easyQuestions);
         if (questionNo < easyQuestions.length) {
             const question = easyQuestions[questionNo].question;
@@ -603,25 +626,22 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                audioFileName: audioFileName
+                question, audioFileName: audioFileName
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
         }
     }
 
     if (difficulty === "Medium") {
-        const mediumQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Medium", _id: { $in: adminInterview.questions } });
+        const mediumQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Medium", _id: {$in: adminInterview.questions}
+        });
 
         console.log("Medium Questions: ", mediumQuestions);
 
@@ -638,7 +658,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
             if (!fs.existsSync(audioFilePath)) {
 
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
 
             }
 
@@ -650,11 +670,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
         }
 
@@ -662,7 +678,9 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
     if (difficulty === "Hard") {
 
-        const hardQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Hard", _id: { $in: adminInterview.questions } });
+        const hardQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Hard", _id: {$in: adminInterview.questions}
+        });
 
         console.log("Hard Questions: ", hardQuestions);
 
@@ -680,7 +698,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
             if (!fs.existsSync(audioFilePath)) {
 
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
 
             }
 
@@ -692,11 +710,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
         }
 
@@ -727,7 +741,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     } else {
         prompt = `Please specify a valid difficulty level: "Easy", "Medium", or "Hard".`;
     }
-    
+
 
     prompt += `Generate only the question text without any additional explanations or context. The question you generate must include sections from ${answer}`;
     console.log(answer)
@@ -736,9 +750,9 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
         messages: [
 
-            { role: "system", content: "You are a helpful assistant." },
+            {role: "system", content: "You are a helpful assistant."},
 
-            { role: "user", content: prompt }
+            {role: "user", content: prompt}
 
         ],
 
@@ -760,7 +774,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
     if (!fs.existsSync(audioFilePath)) {
 
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
 
     }
 
@@ -772,40 +786,15 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
     };
 
-    return res.status(200).json(
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-
-    );
-
-});
-
-
-export const createInterviewByVerbalAdmin = asyncHandler(async (req, res) => {
-    const { interviewId } = req.body;
-    const interview = await Interview.findById(interviewId);
-    if (interview === null) {
-        return res.status(404).json(ApiError(404, "Interview not found"));
-    }
-    try {
-        let redisClient = await connectRedis();
-        await redisClient.set(String(interview._id), JSON.stringify([]));
-    } catch (error) {
-        console.log("Error while connecting to Redis", error);
-        return res.status(500).json(
-            ApiError(500, error.message || "Internal Server Error")
-        );
-    }
-    return res.status(200).json(
-        new ApiResponse(200, interview, "Interview created successfully")
-    );
 });
 
 
 export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => {
     console.log("entered written admin")
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const { subject, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+    const {subject, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
 
     let redisClient = await connectRedis();
     let conversationHistory = JSON.parse(await redisClient.get(interviewId));
@@ -813,11 +802,10 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     if (conversationHistory.length > 0) {
         conversationHistory.push({
-            answer: answer,
-            score: score
+            answer: answer, score: score
         });
     } else {
-        conversationHistory.push({ subject });
+        conversationHistory.push({subject});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -837,18 +825,18 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         difficulty = 'jumbled';
     } else if (adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'errorDetection';
-    }
-    else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
+    } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'fillInTheBlanks';
-    }
-    else {
+    } else {
         difficulty = 'synonymsAndAntonyms';
     }
 
     // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
     if (difficulty === "essay") {
-        const essayQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "essay", _id: { $in: adminInterview.questions } });
+        const essayQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "essay", _id: {$in: adminInterview.questions}
+        });
         if (questionNo < essayQuestions.length) {
             const question = essayQuestions[questionNo].question;
             console.log(question)
@@ -861,7 +849,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
@@ -872,18 +860,16 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
 
         }
     }
 
     if (difficulty === "jumbled") {
-        const jumbledQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "jumbled", _id: { $in: adminInterview.questions } });
+        const jumbledQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "jumbled", _id: {$in: adminInterview.questions}
+        });
         if (questionNo - adminInterview.essay < jumbledQuestions.length) {
             const question = jumbledQuestions[questionNo - adminInterview.essay].question;
 
@@ -896,7 +882,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             if (!fs.existsSync(audioFilePath)) {
 
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
 
             }
 
@@ -907,18 +893,16 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
         }
     }
 
     if (difficulty === "errorDetection") {
 
-        const errorDetectionQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "errorDetection", _id: { $in: adminInterview.questions } });
+        const errorDetectionQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "errorDetection", _id: {$in: adminInterview.questions}
+        });
 
         if (questionNo - (adminInterview.essay + adminInterview.jumbled) < errorDetectionQuestions.length) {
 
@@ -934,7 +918,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             if (!fs.existsSync(audioFilePath)) {
 
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
 
             }
 
@@ -946,11 +930,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
 
         }
@@ -958,7 +938,9 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     if (difficulty === "fillInTheBlanks") {
 
-        const fillInTheBlanksQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "fillInTheBlanks", _id: { $in: adminInterview.questions } });
+        const fillInTheBlanksQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "fillInTheBlanks", _id: {$in: adminInterview.questions}
+        });
 
         if (questionNo - (adminInterview.essay + adminInterview.jumbled + adminInterview.errorDetection) < fillInTheBlanksQuestions.length) {
 
@@ -974,7 +956,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             if (!fs.existsSync(audioFilePath)) {
 
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
 
             }
 
@@ -986,17 +968,15 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
 
     if (difficulty === "synonymsAndAntonyms") {
 
-        const synonymsAndAntonymsQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "synonymsAndAntonyms", _id: { $in: adminInterview.questions } });
+        const synonymsAndAntonymsQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "synonymsAndAntonyms", _id: {$in: adminInterview.questions}
+        });
 
         if (questionNo - (adminInterview.essay + adminInterview.jumbled + adminInterview.errorDetection + adminInterview.fillInTheBlanks) < synonymsAndAntonymsQuestions.length) {
 
@@ -1012,7 +992,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             if (!fs.existsSync(audioFilePath)) {
 
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
 
             }
 
@@ -1024,11 +1004,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
             };
 
-            return res.status(200).json(
-
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
         }
 
@@ -1039,24 +1015,19 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     if (difficulty === "essay") {
 
-        prompt =` Write an essay on the topic ${subject}. The essay should be at least 200 words long and should be well-structured and coherent. Ensure that the essay is free of grammatical errors and is written in a formal tone.`
-        
-}
- else if (difficulty === "jumbled") {
+        prompt = ` Write an essay on the topic ${subject}. The essay should be at least 200 words long and should be well-structured and coherent. Ensure that the essay is free of grammatical errors and is written in a formal tone.`
+
+    } else if (difficulty === "jumbled") {
 
         prompt = `Based on the previous questions and answers, generate a jumbled sentence. The sentence should be related to the topic and should be challenging to unscramble. Provide the user with a hint to help them unscramble the sentence.`
 
     } else if (difficulty === "errorDetection") {
 
         prompt = `Based on the previous questions and answers, generate a sentence with an error. The sentence should be related to the topic and should contain a grammatical or spelling error. Provide the user with a hint to help them identify and correct the error. Please add "Identify the error" at the start of sentence.`
-    }
-
-    else if (difficulty === "fillInTheBlanks") {
+    } else if (difficulty === "fillInTheBlanks") {
 
         prompt = `Based on the previous questions and answers, generate a sentence with a blank space. The sentence should be related to the topic and should have a missing word or phrase. Provide the user with a hint to help them fill in the blank space.`
-    }
-
-    else {
+    } else {
 
         prompt = `Based on the previous questions and answers, generate a sentence with a word that needs to be replaced with a synonym or antonym. The sentence should be related to the topic and should contain a word that can be replaced with a synonym or antonym. Provide the user with a hint to help them identify the correct word and its synonym or antonym.`
     }
@@ -1067,9 +1038,9 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
         messages: [
 
-            { role: "system", content: "You are an English professor." },
+            {role: "system", content: "You are an English professor."},
 
-            { role: "user", content: prompt }
+            {role: "user", content: prompt}
 
         ],
 
@@ -1091,7 +1062,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     if (!fs.existsSync(audioFilePath)) {
 
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
 
     }
 
@@ -1104,18 +1075,13 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     };
 
-    return res.status(200).json(
-
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-
-    );
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 });
-
 
 export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => {
     console.log("entered subject admin")
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const { subject, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+    const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+    const {subject, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
     console.log(req.body);
 
     let redisClient = await connectRedis();
@@ -1124,11 +1090,10 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
     if (conversationHistory.length > 0) {
         conversationHistory.push({
-            answer: answer,
-            score: score
+            answer: answer, score: score
         });
     } else {
-        conversationHistory.push({ subject });
+        conversationHistory.push({subject});
     }
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
@@ -1154,10 +1119,12 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
         difficulty = 'Hard';
     }
 
-    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db 
+    // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
     if (difficulty === "Easy") {
-        const easyQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Easy", _id: { $in: adminInterview.questions } });
+        const easyQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Easy", _id: {$in: adminInterview.questions}
+        });
         if (questionNo < easyQuestions.length) {
             const question = easyQuestions[questionNo].question;
             console.log(question)
@@ -1170,22 +1137,21 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                audioFileName: audioFileName
+                question, audioFileName: audioFileName
             };
 
-            return res.status(200).json(
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
 
     if (difficulty === "Medium") {
-        const mediumQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Medium", _id: { $in: adminInterview.questions } });
+        const mediumQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Medium", _id: {$in: adminInterview.questions}
+        });
         console.log("______________________________\n" + mediumQuestions + "\n_______________________________________")
         if (questionNo - adminInterview.easy < mediumQuestions.length) {
             const question = mediumQuestions[questionNo - adminInterview.easy].question;
@@ -1197,22 +1163,21 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                audioFileName: audioFileName
+                question, audioFileName: audioFileName
             };
 
-            return res.status(200).json(
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
 
     if (difficulty === "Hard") {
-        const hardQuestions = await InterviewQuestionsByAdmin.find({ difficulty: "Hard", _id: { $in: adminInterview.questions } });
+        const hardQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "Hard", _id: {$in: adminInterview.questions}
+        });
         if (questionNo - (adminInterview.easy + adminInterview.medium) < hardQuestions.length) {
             const question = hardQuestions[questionNo - (adminInterview.easy + adminInterview.medium)].question;
 
@@ -1223,17 +1188,14 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
             await textToSpeech(cleanedQuestion, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)) {
-                return res.status(500).json({ error: 'Failed to generate audio' });
+                return res.status(500).json({error: 'Failed to generate audio'});
             }
 
             const dataToSend = {
-                question,
-                audioFileName: audioFileName
+                question, audioFileName: audioFileName
             };
 
-            return res.status(200).json(
-                new ApiResponse(200, dataToSend, "Question generated successfully")
-            );
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
         }
     }
 
@@ -1241,26 +1203,21 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     // if (difficulty === "Easy") {
     //     prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new ${difficulty} generic question for DSA,without asking for code implementation.`;
     //     //prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and different ${difficulty} level question focused on fundamental concepts of Data Structures and Algorithms (DSA). Ensure the new question is distinct from any previous ones and challenges the user to explain a core concept or approach without asking for code implementation.`;
-    //} 
+    //}
     if (difficulty === "Easy") {
-    prompt = `${historyPrompt}\nGenerate a new, entirely different ${difficulty} question covering a different DSA topic without repeating previous areas of ${historyPrompt}. Limit the question to 25 words.`;
-}
-
-    else if (difficulty === "Medium") {
+        prompt = `${historyPrompt}\nGenerate a new, entirely different ${difficulty} question covering a different DSA topic without repeating previous areas of ${historyPrompt}. Limit the question to 25 words.`;
+    } else if (difficulty === "Medium") {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output.without asking user to write any code. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``;
     } else {
         prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and highly challenging ${difficulty} level scenario-based question in DSA. The scenario should require the user to think critically about advanced concepts like algorithm optimization or space-time complexity analysis, and it should be distinct from any previous questions.`;
     }
-    
 
-prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
+
+    prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
 
 
     const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: prompt }
-        ],
+        messages: [{role: "system", content: "You are a helpful assistant."}, {role: "user", content: prompt}],
         model: "gpt-4o-mini",
         max_tokens: 1000,
     });
@@ -1274,20 +1231,19 @@ prompt += " Please ensure that only the question text is provided, without inclu
     await textToSpeech(cleanedQuestion, audioFilePath);
 
     if (!fs.existsSync(audioFilePath)) {
-        return res.status(500).json({ error: 'Failed to generate audio' });
+        return res.status(500).json({error: 'Failed to generate audio'});
     }
 
     const dataToSend = {
-        question,
-        audioFileName: audioFileName
+        question, audioFileName: audioFileName
     };
 
-    return res.status(200).json(
-        new ApiResponse(200, dataToSend, "Question generated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
 });
 
+
+// ---------------------------- Helper Functions ----------------------------
 
 const generateUniqueKey = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -1338,15 +1294,13 @@ async function evaluateAnswerWithPrompt(answer, question) {
 `;
 
     const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are a strict but constructive interviewer." },
-            { role: "user", content: prompt }
-        ],
-        model: "gpt-4o-mini",
-        max_tokens: 1000,
+        messages: [{role: "system", content: "You are a strict but constructive interviewer."}, {
+            role: "user",
+            content: prompt
+        }], model: "gpt-4o-mini", max_tokens: 1000,
     });
 
-    //  
+    //
 
     console.log(completion.choices[0].message.content);
     return completion.choices[0].message.content;
@@ -1357,18 +1311,20 @@ async function textToSpeech(input, audioPath) {
         apiKey: process.env.OPENAI_API_KEY,
     });
     const mp3 = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: "onyx",
-        input: input,
+        model: "tts-1", voice: "onyx", input: input,
     });
 
     const buffer = Buffer.from(await mp3.arrayBuffer());
     await fs.promises.writeFile(audioPath, buffer);
 }
 
+
+// ---------------------------- Evaluation Functions ----------------------------
+
+
 export const evaluateAnswer = asyncHandler(async (req, res) => {
     try {
-        const { question, interviewId } = req.body;
+        const {question, interviewId} = req.body;
         let answer = req.extractedAnswer;
 
         if (answer === undefined) {
@@ -1382,7 +1338,6 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
         let feedback = await evaluateAnswerWithPrompt(answer, question);
 
         feedback = JSON.parse(feedback);
-
 
 
         await InterviewQuestion.create({
@@ -1401,29 +1356,24 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
         console.log("answer added successfully ####");
 
-        return res.status(200).json(
-            new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully")
-        );
-    }
-    catch (err) {
-        return res.status(500).json(
-            ApiError(500, err.message || "Internal Server Error")
-        );
+        return res.status(200).json(new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully"));
+    } catch (err) {
+        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
 });
 
 export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
-    try{
+    try {
 
-    
-    const { question, answer, interviewId } = req.body;
-    console.log("answer ####", answer);
-    console.log("question ####", question);
 
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
-    });
-    const prompt = `
+        const {question, answer, interviewId} = req.body;
+        console.log("answer ####", answer);
+        console.log("question ####", question);
+
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
+        });
+        const prompt = `
     You are an evaluator. I will provide you with a prompt and the corresponding response written by the user. Your task is to evaluate the response on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses of the response in each of the following areas.
 
     Here is the prompt: "${question}"
@@ -1472,46 +1422,42 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
 `;
 
 
+        const completion = await openai.chat.completions.create({
+            messages: [{role: "system", content: "You are a strict but constructive english professor."}, {
+                role: "user",
+                content: prompt
+            }], model: "gpt-4o-mini", max_tokens: 1000,
+        });
 
-    const completion = await openai.chat.completions.create({
-        messages: [
-            { role: "system", content: "You are a strict but constructive english professor." },
-            { role: "user", content: prompt }
-        ],
-        model: "gpt-4o-mini",
-        max_tokens: 1000,
-    });
+        const completionData = JSON.parse(completion.choices[0].message.content);
 
-    const completionData = JSON.parse(completion.choices[0].message.content);
-
-    await InterviewQuestion.create({
-        question: question,
-        answer: answer,
-        interview: interviewId,
-        student: req.user._id,
-        overallPerformance: completionData.overallScore <= 30 ? 0 : completionData.overallScore,
-        grammar: completionData.grammarScore,
-        vocabulary: completionData.vocabularyScore,
-        technicalExplanation: [completionData.contentStructureExplanation.Pros, completionData.contentStructureExplanation.Cons],
-        vocabularyExplanation: [completionData.vocabularyExplanation.Pros, completionData.vocabularyExplanation.Cons],
-        grammarExplanation: [completionData.grammarExplanation.Pros, completionData.grammarExplanation.Cons],
-        expectedAnswer: completionData.expectedResponse
-    });
+        await InterviewQuestion.create({
+            question: question,
+            answer: answer,
+            interview: interviewId,
+            student: req.user._id,
+            overallPerformance: completionData.overallScore <= 30 ? 0 : completionData.overallScore,
+            grammar: completionData.grammarScore,
+            vocabulary: completionData.vocabularyScore,
+            technicalExplanation: [completionData.contentStructureExplanation.Pros, completionData.contentStructureExplanation.Cons],
+            vocabularyExplanation: [completionData.vocabularyExplanation.Pros, completionData.vocabularyExplanation.Cons],
+            grammarExplanation: [completionData.grammarExplanation.Pros, completionData.grammarExplanation.Cons],
+            expectedAnswer: completionData.expectedResponse
+        });
 
 
-    res.status(200).send(completion.choices[0].message.content);
-}
-catch(err){
-    return res.status(500).json(
-        ApiError(500, err.message || "Internal Server Error")
-    );
-}
+        res.status(200).send(completion.choices[0].message.content);
+    } catch (err) {
+        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+    }
 });
 
 
+// ---------------------------- Extra Routes ----------------------------
+
 export const saveResultToDb = asyncHandler(async (req, res) => {
     try {
-        const { data, interviewId } = req.body
+        const {data, interviewId} = req.body
         console.log("data ####", data);
 
         const interview = await Interview.findById(interviewId);
@@ -1521,19 +1467,14 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
         await interview.save();
 
         const currentUser = req.user;
-        const student = await Student.findOne({ user: currentUser._id });
+        const student = await Student.findOne({user: currentUser._id});
         console.log("student ####", student);
 
 
-        return res.status(200).json(
-            new ApiResponse(200, {}, "Result saved successfully")
-        );
-    }
-    catch (err) {
+        return res.status(200).json(new ApiResponse(200, {}, "Result saved successfully"));
+    } catch (err) {
         console.log(err.message)
-        return res.status(500).json(
-            ApiError(500, err.message)
-        );
+        return res.status(500).json(ApiError(500, err.message));
     }
 })
 
@@ -1541,18 +1482,14 @@ export const getInterviewHeld = asyncHandler(async (req, res) => {
     try {
         console.log("req.user ####", req.user);
         const user = req.user;
-        const student = await Student.findOne({ user: user._id });
+        const student = await Student.findOne({user: user._id});
         console.log("student ####", student);
         // take only latest 5 interview
         const interview_taken = student?.interview_taken.slice(-7);
-        return res.status(200).json(
-            new ApiResponse(200, interview_taken, "Interviews fetched successfully")
-        )
+        return res.status(200).json(new ApiResponse(200, interview_taken, "Interviews fetched successfully"))
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json(
-            ApiError(500, error.message)
-        );
+        return res.status(500).json(ApiError(500, error.message));
     }
 })
 
@@ -1570,28 +1507,31 @@ export const getPartialDetailsByInterviewId = asyncHandler(async (req, res) => {
             description: interview.description,
             end_time: interview.end_time?.toString().split(" ")[4].slice(0, 5)
         }
-        return res.status(200).json(
-            new ApiResponse(200, interviewDetails, "Interview details fetched successfully")
-        );
+        return res.status(200).json(new ApiResponse(200, interviewDetails, "Interview details fetched successfully"));
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json(
-            ApiError(500, error.message)
-        );
+        return res.status(500).json(ApiError(500, error.message));
     }
 })
 
+
+// ---------------------------- fetch Interviews ----------------------------
+
+// in use
 export const fetchAllInterviews = asyncHandler(async (req, res) => {
+    /*
+     * Fetch all the interviews for the student dashboard
+     */
     try {
         console.log("req.user ####", req.user);
 
-        const student = await Student.findOne({ user: req.user._id })
+        const student = await Student.findOne({user: req.user._id})
         console.log("student ####", student);
         if (!student) {
             res.status(404).json(ApiError(404, "Student not found"))
         }
 
-        const interviews = await Interview.find({ _id: { $in: student.interview_taken } })
+        const interviews = await Interview.find({_id: {$in: student.interview_taken}})
 
         console.log(interviews)
 
@@ -1601,44 +1541,3 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
     }
 })
 
-export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
-
-    try {
-        const { interviewId } = req.body;
-        let redisClient = await connectRedis();
-        await redisClient.set(String(interviewId), JSON.stringify([]));
-        return res.status(200).json(
-            new ApiResponse(200, {}, "Interview created successfully")
-        );
-    } catch (error) {
-        console.log("Error while connecting to Redis", error);
-        return res.status(500).json(
-            ApiError(500, error.message || "Internal Server Error")
-        );
-    }
-
-})
-
-export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
-    try {
-        const { interviewId } = req.body;
-        const interview = await Interview.findById(interviewId);
-
-        if (interview === null) {
-            return res.status(404).json(ApiError(404, "Interview not found"));
-        }
-
-        let redisClient = await connectRedis();
-
-        await redisClient.set(String(interviewId), JSON.stringify([]));
-
-        return res.status(200).json(
-            new ApiResponse(200, {}, "Interview created successfully")
-        );
-    } catch (error) {
-        console.log("Error while connecting to Redis", error);
-        return res.status(500).json(
-            ApiError(500, error.message || "Internal Server Error")
-        );
-    }
-})
