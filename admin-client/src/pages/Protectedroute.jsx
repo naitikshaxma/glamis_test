@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {Navigate, Outlet} from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = () => {
   const [isVerified, setIsVerified] = useState(null); // Initialize state for verification status
   const accessToken = Cookies.get('accessTokenAdmin'); // Get the access token from the cookie
 
@@ -43,11 +43,11 @@ const ProtectedRoute = ({ children }) => {
 
   if (isVerified === false) {
     // If the token is not verified, redirect to the login page
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/admin/login" replace/>;
   }
 
   // If the token is verified, render the children
-  return children;
+  return <Outlet/>;
 };
 
 export default ProtectedRoute;

@@ -27,8 +27,6 @@ const interviewSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const Interview = mongoose.model('Interview', interviewSchema);
-
 const interviewQuestionSchema = new mongoose.Schema({
     question: {
         type: String,
@@ -47,10 +45,6 @@ const interviewQuestionSchema = new mongoose.Schema({
     student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Student'
-    },
-    interview: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Interview'
     },
     fluency: {
         type: Number
@@ -79,12 +73,7 @@ const interviewQuestionSchema = new mongoose.Schema({
     grammarExplanation: {
         type: [String]
     },
-    expectedAnswer: {
-        type: String
-    },
 }, { timestamps: true })
-
-const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);
 
 const interviewByJD = new mongoose.Schema({
     job_description: {
@@ -96,8 +85,6 @@ const interviewByJD = new mongoose.Schema({
         ref: 'Interview'
     }
 }, { timestamps: true })
-
-const InterviewByJD = mongoose.model('InterviewByJD', interviewByJD);
 
 
 const interviewByResume = new mongoose.Schema({
@@ -111,7 +98,6 @@ const interviewByResume = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const InterviewByResume = mongoose.model('InterviewByResume', interviewByResume);
 
 const interviewByCoreSubjects = new mongoose.Schema({
     subject: {
@@ -123,8 +109,6 @@ const interviewByCoreSubjects = new mongoose.Schema({
         ref: 'Interview'
     }
 }, { timestamps: true })
-
-const InterviewByCoreSubjects = mongoose.model('InterviewByCoreSubjects', interviewByCoreSubjects);
 
 
 const adminCompanyInterview = new mongoose.Schema({
@@ -198,8 +182,6 @@ const adminCompanyInterview = new mongoose.Schema({
     { timestamps: true }
 );
 
-const AdminCompanyInterview = mongoose.model('AdminCompanyInterview', adminCompanyInterview);
-
 const adminSubjectInterview = new mongoose.Schema({
     name: {
         type: String,
@@ -263,7 +245,7 @@ const adminSubjectInterview = new mongoose.Schema({
     { timestamps: true }
 );
 
-const AdminSubjectInterview = mongoose.model('AdminSubjectInterview', adminSubjectInterview);
+export const AdminSubjectInterview = mongoose.model('AdminSubjectInterview', adminSubjectInterview);
 
 const adminVerbalInterview = new mongoose.Schema({
     name: {
@@ -324,7 +306,6 @@ const adminVerbalInterview = new mongoose.Schema({
     { timestamps: true }
 );
 
-const AdminVerbalInterview = mongoose.model('AdminVerbalInterview', adminVerbalInterview);
 
 const adminWrittenInterview = new mongoose.Schema({
     name: {
@@ -393,11 +374,80 @@ const adminWrittenInterview = new mongoose.Schema({
         type: String,
         required: true
     }
+},{ timestamps: true });
+
+
+const adminSvarInterview = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    date: {
+        type: Date,
+        required: true
+    },
+    from: {
+        type: String,
+        required: true
+    },
+    to: {
+        type: String,
+        required: true
+    },
+    no_of_questions: {
+        type: Number,
+        required: true
+    },
+    reading: {
+        type: Number,
+        required: true
+    },
+    repeating: {
+        type: Number,
+        required: true
+    },
+    short: {
+        type: Number,
+        required: true
+    },
+    jumbled: {
+        type: Number,
+        required: true
+    },
+    comprehension: {
+        type: Number,
+        required: true
+    },
+    questions: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "InterviewQuestionByAdmin"
+    },
+    students: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Student"
+    },
+    type: {
+        type: String,
+        required: true
+    },
+    interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
+    },
+    is_active: {
+        type: Boolean,
+        default: true
+    },
+    link: {
+        type: String,
+        required: true
+    }
 },
     { timestamps: true }
 );
 
-const AdminWrittenInterview = mongoose.model('AdminWrittenInterview', adminWrittenInterview);
 
 
 const interviewQuestionByAdmin = new mongoose.Schema({
@@ -413,7 +463,14 @@ const interviewQuestionByAdmin = new mongoose.Schema({
     { timestamps: true }
 );
 
-const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 
-
-export { Interview,AdminWrittenInterview, AdminVerbalInterview, InterviewQuestion,AdminSubjectInterview, InterviewByJD, InterviewByResume, InterviewByCoreSubjects, AdminCompanyInterview, InterviewQuestionsByAdmin };
+export const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
+export const Interview = mongoose.model('Interview', interviewSchema);
+export const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);
+export const AdminCompanyInterview = mongoose.model('AdminCompanyInterview', adminCompanyInterview);
+export const AdminVerbalInterview = mongoose.model('AdminVerbalInterview', adminVerbalInterview);
+export const AdminSvarInterview = mongoose.model('AdminSvarInterview', adminSvarInterview);
+export const AdminWrittenInterview = mongoose.model('AdminWrittenInterview', adminWrittenInterview);
+export const InterviewByJD = mongoose.model('InterviewByJD', interviewByJD);
+export const InterviewByResume = mongoose.model('InterviewByResume', interviewByResume);
+export const InterviewByCoreSubjects = mongoose.model('InterviewByCoreSubjects', interviewByCoreSubjects);

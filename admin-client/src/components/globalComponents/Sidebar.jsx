@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UisBars } from '@iconscout/react-unicons-solid';
 import { ChevronDownIcon, ChevronRightIcon, PresentationChartBarIcon } from "@heroicons/react/24/outline";
 import { Accordion, AccordionBody, AccordionHeader } from "@material-tailwind/react";
+import { toast } from "react-hot-toast";
 
 import avatar from "../../assets/avatar.jpeg";
 import Cookies from "js-cookie";
@@ -54,7 +55,7 @@ export default function Sidebar() {
                 Admin
               </Typography>
             </div>
-            <UisBars className="ml-20 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />
+            {/*<UisBars className="ml-20 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />*/}
           </div>
           <List>
             {navItems.map((item, index) => (
@@ -123,6 +124,14 @@ export default function Sidebar() {
                       Verbal SKills
                     </ListItem>
                   </Link>
+                  <Link to="/admin/schedule/svar">
+                    <ListItem>
+                      <ListItemPrefix>
+                        <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                      </ListItemPrefix>
+                      Svar
+                    </ListItem>
+                  </Link>
                 </List>
               </AccordionBody>
             </Accordion>
@@ -136,6 +145,7 @@ export default function Sidebar() {
               }
             >
               {/* Add content here if needed */}
+              {""}
             </Accordion>
           </List>
           <div className="mt-auto">
@@ -179,15 +189,14 @@ export default function Sidebar() {
                 {/* show token 3 */}
               </div>
               <Button
-                color="#2b6030"
+                color="green"
                 className="w-full"
                 variant="outlined"
-                block={true}
-                ripple="light"
+                block='true'
                 onClick={() => {
                   Cookies.remove("accessTokenAdmin");
+                  toast.success("Logout Successfully")
                   navigate("/admin/login");
-                  // toast.success("Logout Successfully")
                 }}
               >
                 Logout
@@ -196,9 +205,9 @@ export default function Sidebar() {
           </div>
         </Card>
       )}
-      {!isSidebarOpen && (
-        <UisBars className="ml-4 mt-4 cursor-pointer" onClick={() => setIsSidebarOpen(true)} />
-      )}
+      {/*{!isSidebarOpen && (*/}
+      {/*  <UisBars className="ml-4 mt-4 cursor-pointer" onClick={() => setIsSidebarOpen(true)} />*/}
+      {/*)}*/}
     </div>
   );
 }

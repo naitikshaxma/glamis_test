@@ -1,6 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AdminSignup from "./pages/AdminSignup";
+import {createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ReviewBoard from "./components/dashboard/ReviewBoard";
@@ -10,38 +9,80 @@ import SubjectInterview from "./components/dashboard/scheduleInterview/SubjectIn
 import WrittenInterview from "./components/dashboard/scheduleInterview/WrittenInterview";
 import VerbalInterview from "./components/dashboard/scheduleInterview/VerbalInterview";
 import ProtectedRoute from "./pages/Protectedroute";
+import SwarInterview from "./components/dashboard/scheduleInterview/SwarInterview";
+import {Toaster} from 'react-hot-toast';
 
 // Layout component that includes Sidebar
-const MainLayout = ({ children }) => (
-    <div style={{ display: 'flex' }}>
-        <Sidebar />
-        <div style={{
-            flex: 1,
-            marginLeft: '20rem'
-        }}>
-            {children}
-        </div>
+const MainLayout = () => (
+  <div className='flex'>
+    <Sidebar/>
+    <div className='flex-1 ml-80'>
+      <Outlet/>
     </div>
+  </div>
 );
 
+// Define your routes using createBrowserRouter
+const router = createBrowserRouter([
+  {
+    path: "/admin/login",
+    element: <AdminLogin/>,
+  },
+  {
+    element: <ProtectedRoute/>,
+    children: [
+      {
+        element: <MainLayout/>,
+        children: [
+          {
+            path: "/admin/dashboard",
+            element: <AdminDashboard/>,
+          },
+          {
+            path: "/admin/schedule/company",
+            element: <CompanyInterview/>,
+          },
+          {
+            path: "/admin/schedule/written",
+            element: <WrittenInterview/>,
+          },
+          {
+            path: "/admin/schedule/subject",
+            element: <SubjectInterview/>,
+          },
+          {
+            path: "/admin/schedule/verbal",
+            element: <VerbalInterview/>,
+          },
+          {
+            path: "/admin/schedule/svar",
+            element: <SwarInterview/>,
+          },
+          {
+            path: "/admin/review-board",
+            element: <ReviewBoard/>,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: (
+      <div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
+        <h1>404 Not Found</h1>
+      </div>
+    ),
+  },
+]);
+
 const App = () => {
-    return (
-        <Router>
-            <Routes>
-                {/* <Route path="/admin" element={<AdminSignup />} /> */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<ProtectedRoute><MainLayout><AdminDashboard /></MainLayout></ProtectedRoute>} />
-                <Route path="/admin/schedule/company" element={<ProtectedRoute><MainLayout><CompanyInterview /></MainLayout></ProtectedRoute>} />
-                <Route path="/admin/schedule/written" element={<ProtectedRoute><MainLayout><WrittenInterview /></MainLayout></ProtectedRoute>} />
-                <Route path="/admin/schedule/subject" element={<ProtectedRoute><MainLayout><SubjectInterview /></MainLayout></ProtectedRoute>} />
-                <Route path="/admin/schedule/verbal" element={<ProtectedRoute><MainLayout><VerbalInterview /></MainLayout></ProtectedRoute>} />
-                <Route path="/admin/review-board" element={<ProtectedRoute><MainLayout><ReviewBoard /></MainLayout></ProtectedRoute>} />
-                <Route path="*" element={<div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
-                    <h1>404 Not Found</h1>
-                </div>} />
-            </Routes>
-        </Router>
-    );
+  return (
+    <>
+      <RouterProvider router={router}/>
+      <Toaster position={'top-right'}/>
+    </>
+  );
 };
 
 export default App;

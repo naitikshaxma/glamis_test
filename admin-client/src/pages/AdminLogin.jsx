@@ -16,6 +16,7 @@ import SidePic from '../assets/SidePic.png';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
+import {toast} from "react-hot-toast";
 // import { alert } from 'react-alertify';
 
 function Copyright(props) {
@@ -68,7 +69,7 @@ const AdminLogin = () => {
         return;
       }
       Cookies.set('accessTokenAdmin', response.data.data.accessToken);
-
+      toast.success('Login Successful');
       navigate('/admin/dashboard')
       return;
     }
