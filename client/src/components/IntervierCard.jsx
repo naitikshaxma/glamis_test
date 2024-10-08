@@ -6,7 +6,6 @@ import Cookies from 'js-cookie'
 import {useEffect, useState} from "react";
 import {bearerInstance as instance} from "../helpers/instance";
 import {toast} from "react-toastify";
-// import {toast} from "react-toastify";
 
 export default function InterviewCard({props, status}) {
   const navigate = useNavigate();

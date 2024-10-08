@@ -297,11 +297,11 @@ const OurTeamPage = () => {
                   alt="Abhisek Sharma"
                   className="rounded-full w-44 h-44 object-cover border-4 border-green-300 group-hover:brightness-50 transition duration-300"
                 />
-                <p className="mt-2 text-sm sm:text-base font-semibold">Abhisek Sharma</p>
+                <p className="mt-2 text-sm sm:text-base font-semibold">Abhishek Sharma</p>
                 <div
                   className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                   <a
-                    href="https://www.linkedin.com/in/abhisek-sharma-00b4a2225?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                    href="https://www.linkedin.com/in/abhishek-sharma-655182215/"
                     target="_blank" rel="noopener noreferrer">
                     <FaLinkedin className="text-white text-4xl"/>
                   </a>
