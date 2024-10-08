@@ -28,6 +28,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Team from "./pages/Team";
 
 
+
 const response = {
     statusCode: 200,
     data: {
@@ -152,6 +153,9 @@ const App = () => {
                     element={ <ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
                    
                 />
+               
+                
+                
             </Routes>
             <ToastContainer />
         </Router>

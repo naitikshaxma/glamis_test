@@ -32,7 +32,7 @@ export default function InterviewCard({props, status}) {
     if (props.type === 'company') {
       newCookies.jobTitle = props.title;
       newCookies.selectedCompany = company;
-      url = '/api/v1/interview/createInterviewByCompanyAdmin';
+      url = '/api/v1/interview//createInterviewByJDAdmin';
       redirect = '/live';
     }
 
