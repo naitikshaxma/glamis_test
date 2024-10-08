@@ -3,14 +3,14 @@ import Cookies from 'js-cookie'
 
 
 const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_BACKEND_URL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
 export const bearerInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_BACKEND_URL,
     headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Cookies.get('accessToken')}`,
