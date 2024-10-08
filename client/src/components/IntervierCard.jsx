@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 import Cookies from 'js-cookie'
 import {useEffect, useState} from "react";
 import {bearerInstance as instance} from "../helpers/instance";
+import {toast} from "react-toastify";
 // import {toast} from "react-toastify";
 
 export default function InterviewCard({props, status}) {
@@ -22,6 +23,8 @@ export default function InterviewCard({props, status}) {
 
     if (props.type === 'subject') {
       newCookies.subject = props.description;
+      url = '/api/v1/interview/createInterviewByJDAdmin';
+      redirect = '/live';
     }
 
     if (props.type === 'written') {
@@ -32,7 +35,7 @@ export default function InterviewCard({props, status}) {
     if (props.type === 'company') {
       newCookies.jobTitle = props.title;
       newCookies.selectedCompany = company;
-      url = '/api/v1/interview/createInterviewByCompanyAdmin';
+      url = '/api/v1/interview/createInterviewByJDAdmin';
       redirect = '/live';
     }
 
@@ -45,13 +48,15 @@ export default function InterviewCard({props, status}) {
     if (props.type === 'Svar') {
       url = '/api/v1/interview/createInterviewBySvarAdmin';
       redirect = '/live';
+    }
 
+    if (url === '') {
+      return toast.error('Interview type not found');
     }
 
     removeCookies.forEach(cookie => Cookies.remove(cookie));
     Object.entries(newCookies).forEach(([key, value]) => Cookies.set(key, value));
     localStorage.setItem('jd', props.description);
-
 
 
     await instance.post(url, {interviewId: props._id}); // todo: fix response NOT used
