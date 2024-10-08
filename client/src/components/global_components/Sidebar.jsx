@@ -57,6 +57,7 @@ export default function Sidebar() {
         icon: <InboxIcon className="h-5 w-5" />,
         href: '/team'
     },
+    
     ]
 
     return (
