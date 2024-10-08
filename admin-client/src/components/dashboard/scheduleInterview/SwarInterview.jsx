@@ -9,6 +9,7 @@ import {
 } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) => (
     <div className="flex flex-col mb-6">
@@ -43,7 +44,7 @@ export default function WrittenInterview() {
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
-        if (currentStep === 1 && interviewName && domainName && date && noOfQuestions) {
+        if (currentStep === 1 && interviewName && date && noOfQuestions) {
             setCurrentStep(2);
         }
     };
@@ -55,7 +56,7 @@ export default function WrittenInterview() {
     const handleSubmit = async () => {
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/written/create`, {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/svar/create`, {
                 name: interviewName,
                 date,
                 from: duration.from,
@@ -68,12 +69,14 @@ export default function WrittenInterview() {
                 comprehension,
                 questions,
                 students: emailObject,
-                type: "written"
+                type: "Svar"
             }, {
                 headers: { "Content-Type": "application/json" }
             });
             console.log("Form submitted successfully:", response.data);
-alert("Interview Created successfully");
+            toast.success("Interview scheduled successfully");
+            alert("Interview Created successfully");
+
         } catch (error) {
             console.error("Error submitting form:", error);
         }
@@ -143,7 +146,7 @@ alert("Interview Created successfully");
                                                         value={duration.from}
                                                         onChange={(e) => setDuration({ ...duration, from: e.target.value })}
                                                     />
-                                                   
+
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                                    <FormInput
@@ -187,7 +190,7 @@ alert("Interview Created successfully");
                                                         onChange={(e) => setJumbled(e.target.value)}
                                                     />
                                                 </div>
-                                              
+
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                                    <FormInput
                                                         label="No of Passage Comprehension"

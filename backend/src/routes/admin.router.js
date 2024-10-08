@@ -6,7 +6,9 @@ import {
   fetchAdminInterviewbyinterviewId,
   createWrittenInterview,
   fetchInterviewStatusCount,
-  fetchInterviewDetails, downloadAttendance
+  fetchInterviewDetails,
+  downloadAttendance,
+  createSvarInterview
 } from "../controllers/admin.controller.js";
 
 const router = Router();
@@ -14,8 +16,9 @@ const router = Router();
 router.post("/interview/company/create", createCompanyInterview);
 router.post("/interview/subject/create", createSubjectInterview);
 router.post("/interview/written/create", createWrittenInterview);
-router.post("/interview/fetch", fetchAdminInterviewbyinterviewId);
+router.post("/interview/svar/create", createSvarInterview);
 router.post("/interview/verbal/create", createVerbalInterview);
+router.post("/interview/fetch", fetchAdminInterviewbyinterviewId);
 router.post("/interview/fetchInterviewStatusCount", fetchInterviewStatusCount);
 router.post("/interview/fetchInterviewDetails", fetchInterviewDetails);
 router.get("/interview/downloadAttendance", downloadAttendance);

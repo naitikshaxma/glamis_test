@@ -1,6 +1,7 @@
 import {
   AdminCompanyInterview,
   AdminSubjectInterview,
+  AdminSvarInterview,
   AdminVerbalInterview,
   AdminWrittenInterview,
   Interview,
@@ -10,6 +11,11 @@ import {Student, User} from "../models/users.models.js";
 import sendMail from "../utils/sendMail.js";
 import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvitation.js";
 import {Parser} from "json2csv";
+
+const link = `https://glamis.in/myInterview/`;
+
+
+// ---------------------- Create Company Interview ----------------------
 
 export const createCompanyInterview = async (req, res) => {
   try {
@@ -30,7 +36,7 @@ export const createCompanyInterview = async (req, res) => {
       type
     } = req.body;
     // if not login then first login then redisect to this page
-    const link = `https://glamis.in/myInterviews/`;
+    // const link = `https://glamis.in/myInterviews/`;
     const studentEmails = students;
     const studentIds = [];
     const interviewIds = [];
@@ -110,7 +116,7 @@ export const createSubjectInterview = async (req, res) => {
   try {
     const {name, subject, date, from, to, no_of_questions, type, easy, medium, hard, questions, students} = req.body;
 
-    const link = `https://glamis.in/myInterviews/`;
+    // const link = `https://glamis.in/myInterviews/`;
     ;
     const studentEmails = students;
     const studentIds = [];
@@ -178,41 +184,11 @@ export const createSubjectInterview = async (req, res) => {
   }
 }
 
-
-export const fetchAdminInterviewbyinterviewId = async (req, res) => {
-  try {
-    const {interviewId} = req.body;
-
-    let admin = await AdminCompanyInterview.findOne({interview: {$in: interviewId}});
-
-    if (!admin) {
-      admin = await AdminSubjectInterview.findOne({interview: {$in: interviewId}});
-    }
-    if (!admin) {
-      admin = await AdminWrittenInterview.findOne({interview: {$in: interviewId}});
-    }
-
-    if (!admin) {
-      admin = await AdminVerbalInterview.findOne({interview: {$in: interviewId}});
-    }
-
-    console.log(admin);
-
-    res.status(200).json({
-      company: admin.company || admin.subject || admin.domain || "",
-      adminInterviewId: admin._id,
-      totalQuestions: admin.no_of_questions
-    });
-  } catch (error) {
-    res.status(500).json({message: error.message});
-  }
-}
-
 export const createVerbalInterview = async (req, res) => {
   try {
     const {name, date, from, to, no_of_questions, type, easy, medium, hard, questions, students} = req.body;
 
-    const link = `https://glamis.in/myInterviews/`;
+    // const link = `https://glamis.in/myInterviews/`;
     const studentEmails = students;
 
     const studentIds = [];
@@ -292,7 +268,7 @@ export const createWrittenInterview = async (req, res) => {
       name, domain, date, from, to, no_of_questions, fillInTheBlanks,
       synonymsAndAntonyms, type, essay, jumbled, errorDetection, questions, students
     } = req.body;
-    const link = `https://glamis.in/myInterviews/`;
+    // const link = `https://glamis.in/myInterviews/`;
 
     const studentEmails = students;
 
@@ -365,6 +341,132 @@ export const createWrittenInterview = async (req, res) => {
     res.status(500).json({message: error.message});
   }
 }
+
+export const createSvarInterview = async (req, res) => {
+
+  try {
+    const {
+      name,
+      date,
+      from,
+      to,
+      no_of_questions,
+      reading,
+      repeating,
+      short,
+      jumbled,
+      questions,
+      comprehension,
+      students,
+      type
+    } = req.body;
+    // const link = `https://glamis.in/myInterviews/`;
+
+    const studentEmails = students;
+
+    const studentIds = [];
+    const interviewIds = [];
+    for (let i = 0; i < studentEmails.length; i++) {
+      const user = await User.findOne({email_id: studentEmails[i]});
+      if (user) {
+        const student = await Student.findOne({user: user._id});
+        if (student) {
+          studentIds.push(student._id);
+          const interview = new Interview({
+            description: "Svar Interview",
+            start_time: date + 'T' + from,
+            end_time: date + 'T' + to,
+            title: `${name}`,
+            type: "Svar"
+          });
+          await interview.save();
+
+          student.interview_taken.push(interview._id);
+          student.save();
+          interviewIds.push(interview._id);
+          try {
+            await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, domain, link, date + ' at ' + from));
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+
+    }
+
+    // console.log(students);
+
+    const questionIds = [];
+    for (let i = 0; i < questions.length; i++) {
+      const newQuestion = new InterviewQuestionsByAdmin({
+        question: questions[i].question,
+        difficulty: questions[i].questionType
+      });
+      await newQuestion.save();
+      questionIds.push(newQuestion._id);
+    }
+
+    const newWrittenInterview = new AdminSvarInterview({
+      name,
+      domain: "Svar Interview",
+      date,
+      from,
+      to,
+      no_of_questions,
+      reading,
+      repeating,
+      short,
+      jumbled,
+      comprehension,
+      questions: questionIds,
+      students: studentIds,
+      interview: interviewIds,
+      link,
+      type: "Svar"
+    });
+
+    await newWrittenInterview.save();
+
+    res.status(200).json({message: "Written Interview Created Successfully", link: newWrittenInterview.link});
+
+  } catch (error) {
+    res.status(500).json({message: error.message});
+  }
+}
+
+
+// ---------------------- Fetch Interview by Interview ID ----------------------
+
+
+export const fetchAdminInterviewbyinterviewId = async (req, res) => {
+  try {
+    const {interviewId} = req.body;
+
+    let admin = await AdminCompanyInterview.findOne({interview: {$in: interviewId}});
+
+    if (!admin) {
+      admin = await AdminSubjectInterview.findOne({interview: {$in: interviewId}});
+    }
+    if (!admin) {
+      admin = await AdminWrittenInterview.findOne({interview: {$in: interviewId}});
+    }
+
+    if (!admin) {
+      admin = await AdminVerbalInterview.findOne({interview: {$in: interviewId}});
+    }
+
+    console.log(admin);
+
+    res.status(200).json({
+      company: admin.company || admin.subject || admin.domain || "",
+      adminInterviewId: admin._id,
+      totalQuestions: admin.no_of_questions
+    });
+  } catch (error) {
+    res.status(500).json({message: error.message});
+  }
+}
+
 
 export const fetchInterviewStatusCount = async (req, res) => {
   try {
@@ -479,13 +581,29 @@ export const fetchInterviewDetails = async (req, res) => {
   }
 }
 
+// ---------------------- CRUD Operations ----------------------
+
 async function getInterviewByID(interviewId) {
   const adminCompanyInterview = await AdminCompanyInterview.findById(interviewId);
   const adminSubjectInterview = await AdminSubjectInterview.findById(interviewId);
   const adminVerbalInterview = await AdminVerbalInterview.findById(interviewId);
   const adminWrittenInterview = await AdminWrittenInterview.findById(interviewId);
-  return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview;
+  const adminSvarInterview = await AdminSvarInterview.findById(interviewId);
+  return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview || adminSvarInterview;
 }
+
+
+export async function getAllInterviews() {
+  const adminCompanyInterview = await AdminCompanyInterview.find({});
+  const adminSubjectInterview = await AdminSubjectInterview.find({});
+  const adminVerbalInterview = await AdminVerbalInterview.find({});
+  const adminWrittenInterview = await AdminWrittenInterview.find({});
+  const adminSvarInterview = await AdminSvarInterview.find({});
+  return adminCompanyInterview.concat(adminSubjectInterview, adminVerbalInterview, adminWrittenInterview, adminSvarInterview);
+}
+
+
+// ---------------------- Download Attendance ----------------------
 
 export const downloadAttendance = async (req, res) => {
   try {
@@ -599,3 +717,5 @@ export const downloadAttendance = async (req, res) => {
   }
 
 }
+
+
