@@ -1467,7 +1467,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     }
 
     const dataToSend = {
-        question,difficulty, audioFileName: audioFileName
+        difficulty, audioFileName: audioFileName
     };
 
     return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
