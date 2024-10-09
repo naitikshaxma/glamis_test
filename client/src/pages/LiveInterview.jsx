@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button } from "@material-tailwind/react";
-import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+import React, {useEffect, useRef, useState} from 'react';
+import {Button} from "@material-tailwind/react";
+import {CountdownCircleTimer} from 'react-countdown-circle-timer';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
-import { Skeleton } from '@mui/material';
+import {Skeleton} from '@mui/material';
 import EvaluationResult from './EvaluationResult';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import {docco} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import Cookies from 'js-cookie';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
@@ -22,7 +22,7 @@ const Timer = (props) => {
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[100, 70, 40, 10]}
         >
-            {({ remainingTime }) => remainingTime}
+            {({remainingTime}) => remainingTime}
         </CountdownCircleTimer>
     );
 }
@@ -46,7 +46,7 @@ const LiveInterview = () => {
 
     const startRecording = async () => {
         setIsRecording(true);
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
         audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
         analyserRef.current = audioCtxRef.current.createAnalyser();
         sourceRef.current = audioCtxRef.current.createMediaStreamSource(stream);
@@ -73,7 +73,7 @@ const LiveInterview = () => {
             mediaRecorderRef.current.stop();
             console.log("Break 02.1")
             mediaRecorderRef.current.onstop = async () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                const audioBlob = new Blob(audioChunksRef.current, {type: 'audio/wav'});
                 audioChunksRef.current = [];
                 console.log('Break 03')
                 await handleSaveRecording(audioBlob);
@@ -198,7 +198,6 @@ const LiveInterview = () => {
     }, [timer, isRecording]);
 
 
-
     const fetchQuestion = async () => {
         setLoading(true);
 
@@ -206,6 +205,7 @@ const LiveInterview = () => {
         const jobTitle = Cookies.get('jobTitle');
         const selectedCompany = Cookies.get('selectedCompany');
         const verbal = Cookies.get('verbal');
+        const svar = Cookies.get('svar');
 
         let url;
         let data;
@@ -240,8 +240,7 @@ const LiveInterview = () => {
                 adminInterviewId: Cookies.get('adminInterviewId'),
                 questionNo: currentQuestion,
             }
-        }
-        else if (verbal && !subject && !jobTitle && !selectedCompany) {
+        } else if (verbal && !subject && !jobTitle && !selectedCompany) {
             url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForVerbalAdmin`;
             data = {
                 answer: ansMetaData.answer,
@@ -250,9 +249,8 @@ const LiveInterview = () => {
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
             };
-            
-        }
-        else if (verbal && !subject && !jobTitle && !selectedCompany) {
+
+        } else if (verbal && !subject && !jobTitle && !selectedCompany) {
             url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSvarAdmin`;
             data = {
                 answer: ansMetaData.answer,
@@ -261,9 +259,17 @@ const LiveInterview = () => {
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
             };
-            
-        }
-        else {
+
+        } else if (svar) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSvarAdmin`;
+            data = {
+                answer: ansMetaData.answer,
+                score: ansMetaData.score,
+                interviewId: Cookies.get('interviewId'),
+                questionNo: currentQuestion,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+            };
+        } else {
             console.error('Required cookies are missing.');
             setLoading(false);
             return;
@@ -304,7 +310,7 @@ const LiveInterview = () => {
     }, [currentQuestion]);
 
     useEffect(() => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        navigator.mediaDevices.getUserMedia({video: true, audio: true})
             .then((stream) => {
                 localVideoRef.current.srcObject = stream;
                 setLocalVideoTrack(window.URL.createObjectURL(stream));
@@ -331,7 +337,7 @@ const LiveInterview = () => {
     const handleSkipQuestion = async () => {
         setIsAudioPlaying(false);
         // stop the recording
-        if(isRecording){
+        if (isRecording) {
             setIsRecording(false);
             if (mediaRecorderRef.current) {
                 mediaRecorderRef.current.stop();
@@ -381,7 +387,8 @@ const LiveInterview = () => {
         if (question.includes('```')) {
             const parts = question.split('```');
             return (
-                <div className="question bg-gray-200 rounded-lg text-justify h-[50rem] overflow-hidden overflow-y-scroll">
+                <div
+                    className="question bg-gray-200 rounded-lg text-justify h-[50rem] overflow-hidden overflow-y-scroll">
                     {parts.map((part, index) => {
                         if (index % 2 === 1) {
                             // Code snippet part
@@ -412,8 +419,10 @@ const LiveInterview = () => {
                     {questionAudio && (
                         <>
                             <div className="flex justify-end">
-                                <Button className='w-fit bg-gray-200 text-black shadow-none' onClick={() => { setIsAudioPlaying(!isAudioPlaying) }}>
-                                    {isAudioPlaying ? <VolumeUpIcon /> : <VolumeOffIcon />}
+                                <Button className='w-fit bg-gray-200 text-black shadow-none' onClick={() => {
+                                    setIsAudioPlaying(!isAudioPlaying)
+                                }}>
+                                    {isAudioPlaying ? <VolumeUpIcon/> : <VolumeOffIcon/>}
                                 </Button>
                             </div>
                         </>
@@ -469,30 +478,32 @@ const LiveInterview = () => {
                         <div className="flex flex-col items-center w-3/4">
                             <div className="timer-tab w-full flex justify-between p-4 items-center">
                                 <div className="logo mr-4">
-                                    <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS" className="h-28" />
+                                    <img src="https://www.gla.ac.in/info/common/images/mobilelogo.png" alt="GLAMIS"
+                                         className="h-28"/>
                                 </div>
                                 <div className="title-and-name ml-4">
                                     <p className="text-2xl font-semibold">Interview</p>
                                     <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer} />}
+                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer}/>}
                                 </div>
                             </div>
 
                             <div className="quesion-and-action w-full mt-8">
                                 <div className="w-2/3 mx-auto h-[36rem] flex flex-col justify-between">
                                     {loading ? (
-                                        <Skeleton animation="wave" className='p-8 h-fit min-h-[20vh] rounded-lg max-h-[40vh]' />
+                                        <Skeleton animation="wave"
+                                                  className='p-8 h-fit min-h-[20vh] rounded-lg max-h-[40vh]'/>
                                     ) : (
                                         renderQuestion()
                                     )}
                                     <div className="audio-visualizer mt-4 flex justify-center">
-                                        <canvas ref={canvasRef} width="640" height="200" />
+                                        <canvas ref={canvasRef} width="640" height="200"/>
                                     </div>
                                     <div className="actions w-full flex justify-between mt-4">
                                         <Button color="blue" ripple="light" size="lg" className="w-1/3"
-                                            onClick={handleSkipQuestion}>Skip</Button>
+                                                onClick={handleSkipQuestion}>Skip</Button>
                                         <Button
                                             color={isRecording ? "red" : "blue"}
                                             ripple="light"
@@ -501,7 +512,7 @@ const LiveInterview = () => {
                                             onClick={isRecording ? handleNextQuestion : startRecording}
                                             title='Tap to Speak'
                                         >
-                                            {isRecording ? <StopIcon /> : <MicIcon />}
+                                            {isRecording ? <StopIcon/> : <MicIcon/>}
                                         </Button>
                                         <Button
                                             color="blue"
@@ -526,19 +537,23 @@ const LiveInterview = () => {
                                 <div className="flex flex-col items-center w-full mt-4">
                                     <div className="flex justify-between w-full">
                                         <p className="text-lg">Total Questions</p>
-                                        <span className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{totalQuestions}</span>
+                                        <span
+                                            className="text-lg bg-blue-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{totalQuestions}</span>
                                     </div>
                                     <div className="flex justify-between w-full mt-2">
                                         <p className="text-lg">Total Skipped</p>
-                                        <span className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{0}</span>
+                                        <span
+                                            className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{0}</span>
                                     </div>
                                     <div className="flex justify-between w-full mt-2">
                                         <p className="text-lg">Total Answered</p>
-                                        <span className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{currentQuestion}</span>
+                                        <span
+                                            className="text-lg bg-green-700 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{currentQuestion}</span>
                                     </div>
                                     <div className="flex justify-between w-full mt-2">
                                         <p className="text-lg">Total Left</p>
-                                        <span className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{totalQuestions - currentQuestion}</span>
+                                        <span
+                                            className="text-lg bg-red-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{totalQuestions - currentQuestion}</span>
                                     </div>
                                 </div>
                             </div>
@@ -562,7 +577,7 @@ const LiveInterview = () => {
                     // close camera and audio
                     localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
                     return null;
-                }) && (<EvaluationResult data={results} />))
+                }) && (<EvaluationResult data={results}/>))
             )}
         </>
     );

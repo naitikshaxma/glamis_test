@@ -1273,7 +1273,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     let redisClient = await connectRedis();
     let conversationHistory = JSON.parse(await redisClient.get(interviewId));
 
-    if(conversationHistory.length > 0){
+    if (conversationHistory.length > 0) {
         conversationHistory.push({
             answer, score
         })
@@ -1289,9 +1289,20 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.svar}`;
     }).join("\n");
 
-    const adminInterview = await AdminSvarInterview.findById(adminInterviewId);
+    // const adminInterview = await AdminSvarInterview.findById(adminInterviewId);
+    /* get the admin interview by Interview table's interviewId
+     * where adminInterview's interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
+    },
+     */
+    const adminInterview = await AdminSvarInterview.findOne({interview: interviewId}).populate('interview');
+    // console.log(adminInterview);
+    // return res.status(500).json({error: 'Failed to generate audio'});
 
-    if(adminInterview == null){
+
+    if (adminInterview == null) {
         res.status(404).json(ApiError(404, "Interview not found"));
     }
 
@@ -1304,16 +1315,15 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         difficulty = 'short'
     } else if (adminInterview.jumbled + adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
         difficulty = 'jumbled'
-    }
-    else {
+    } else {
         difficulty = 'comprehension';
     }
 
-    if(difficulty == 'reading') {
+    if (difficulty === 'reading') {
         const readingQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "reading", _id: {$in: adminInterview.questions}
         });
-        if(questionNo < readingQuestions.length){
+        if (questionNo < readingQuestions.length) {
             const question = readingQuestions[questionNo].question; // get the question from the admin questions
 
 
@@ -1324,12 +1334,12 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
         }
     }
-    if(difficulty == "repeating"){
+    if (difficulty === "repeating") {
         const repeatingQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "repeating", _id: {$in: adminInterview.questions}
         })
 
-        if((questionNo - adminInterview.reading) < repeatingQuestions.length){
+        if ((questionNo - adminInterview.reading) < repeatingQuestions.length) {
             const question = repeatingQuestions[questionNo - adminInterview.repeating].question;
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
@@ -1350,12 +1360,12 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         }
     }
 
-    if(difficulty == "short"){
+    if (difficulty === "short") {
         const shortQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "short", _id: {$in: adminInterview.questions}
         });
 
-        if(questionNo - (adminInterview.repeating + adminInterview.reading) < shortQuestions.length){
+        if (questionNo - (adminInterview.repeating + adminInterview.reading) < shortQuestions.length) {
             const question = shortQuestions[questionNo - (adminInterview.repeating + adminInterview.reading)].question;
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
@@ -1363,23 +1373,24 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
             await textToSpeech(question, audioFilePath);
 
-            if (!fs.existsSync(audioFilePath)){
+            if (!fs.existsSync(audioFilePath)) {
                 return res.status(500).json({error: "Failed to generate audio"})
-            };
+            }
+            ;
 
             const dataToSend = {
-              audioFileName: audioFileName
+                audioFileName: audioFileName
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
         }
     }
 
-    if(difficulty == "jumbled"){
+    if (difficulty === "jumbled") {
         const jumbledQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "jumbled", _id: {$in: adminInterview.questions}
         })
-        if(questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short) < jumbledQuestions.length){
+        if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short) < jumbledQuestions.length) {
             const question = jumbledQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short)].question;
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
@@ -1387,22 +1398,22 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
             await textToSpeech(question, audioFilePath);
 
-            if(!fs.existsSync(audioFilePath)){
+            if (!fs.existsSync(audioFilePath)) {
                 return res.status(500).json({error: "Failed to generate audio"});
             }
 
             const dataToSend = {
-            audioFileName: audioFileName
+                audioFileName: audioFileName
             }
         }
     }
 
-    if(difficulty == "comprehension"){
+    if (difficulty === "comprehension") {
         const comprehensionQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "comprehension", _id: {$in: adminInterview.questions}
         });
 
-        if(questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length){
+        if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length) {
             const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
 
             const dataToSend = {
@@ -1415,19 +1426,19 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     let prompt = "";
 
-    if(difficulty == "reading"){
-        prompt =  `
+    if (difficulty === "reading") {
+        prompt = `
         Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
         `;
-    } else if(difficulty == "repeating"){
+    } else if (difficulty === "repeating") {
         prompt = `
                 Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 20 words. Example format: "I had a flat tire while driving home from the office."
             `;
-    } else if(difficulty == "short"){
+    } else if (difficulty === "short") {
         prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Board of directors were neutral about the proposal: interested or indifferent?"`
-    } else if (difficulty == "jumbled"){
+    } else if (difficulty === "jumbled") {
         prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
-    } else if (difficulty == "comprehension"){
+    } else if (difficulty === "comprehension") {
         prompt = `Generate a passage of exactly 100 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
     }
 
@@ -1441,8 +1452,8 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     const question = completion.choices[0].message.content.trim();
 
-    if(difficulty == "reading" || difficulty == "comprehension"){
-        return res.status(200).json(new (ApiResponse200, {question}, "Quesetion Generated Successfully"));
+    if (difficulty === "reading" || difficulty === "comprehension") {
+        return res.status(200).json(new ApiResponse(200, {question}, "Quesetion Generated Successfully"));
     }
 
     const audioFileName = `question-${generateUniqueKey()}.mp3`;
@@ -1742,20 +1753,22 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
      * Fetch all the interviews for the student dashboard
      */
     try {
-        console.log("req.user ####", req.user);
+        // console.log("req.user ####", req.user);
 
         const student = await Student.findOne({user: req.user._id})
-        console.log("student ####", student);
+        // console.log("student ####", student);
         if (!student) {
             res.status(404).json(ApiError(404, "Student not found"))
         }
 
         const interviews = await Interview.find({_id: {$in: student.interview_taken}})
 
-        console.log(interviews)
+        // console.log(interviews)
 
-        res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
+        return res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
     } catch (error) {
+        console.log("HELLO........")
+        console.error(`${new Date().toISOString()} - ${error}`)
         res.status(500).json(ApiError(500, error.message || "Internal Server Error"))
     }
 })
