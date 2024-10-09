@@ -17,7 +17,8 @@ import {
     generateQuestionForWrittenAdmin,
     generateQuestionforSvarAdmin,
     createInterviewBySvarAdmin,
-    evaluateAnswerSvar
+    evaluateAnswerSvar,
+    fetchInterviewForSvar
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -38,6 +39,7 @@ router.route("/saveResultToDb").post( isAuthenticated, saveResultToDb);
 router.route("/getInterviewsHeld").get(isAuthenticated, getInterviewHeld);
 router.route("/getPartialDetailsByInterviewId").post(isAuthenticated, getPartialDetailsByInterviewId);
 router.route("/fetch").post(isAuthenticated, fetchAllInterviews);
+router.route("/fetchInterviewForSvar").post(isAuthenticated, fetchInterviewForSvar); 
 router.route("/createInterviewByJDAdmin").post(createInterviewByJDAdmin);
 router.route("/generateQuestionForJDAdmin").post(isAuthenticated, generateQuestionForJDAdmin);
 router.route("/generateQuestionForSubjectAdmin").post(isAuthenticated, generateQuestionForSubjectAdmin);

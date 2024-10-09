@@ -1863,3 +1863,20 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
     }
 })
 
+export const fetchInterviewForSvar = asyncHandler(async (req, res) => {
+    try{
+        const { interviewId } = req.body; 
+
+        if(!interviewId){
+            return res.status(400).json(ApiError(400, "Interview ID is required")); 
+        }
+
+        const interview = await Interview.findById(interviewId)
+        if(!interview){
+            return res.status(404).json(ApiError(404, "Interview does not exist")); 
+        }
+        return res.status(200).json(new ApiResponse(200, {interview}, "Interview fetched successfully"))
+    } catch(err) {
+        res.status(500).json(ApiError(500, err.message || "Internal Server Error")); 
+    }
+})
