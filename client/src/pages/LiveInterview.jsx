@@ -46,6 +46,7 @@ const LiveInterview = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const [currentDiff, setCurrentDiff] = useState("");
+    const [skipQuestionCount, setSkipQuestionCount] = useState(0)
     const audioCtxRef = useRef(null);
     const analyserRef = useRef(null);
     const dataArrayRef = useRef(null);
@@ -124,7 +125,7 @@ const LiveInterview = () => {
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
         formData.append('interviewId', Cookies.get('interviewId'));
-        const interviewId = Cookies.get('interviewId'); 
+        const interviewId = await Cookies.get('interviewId'); 
 
 
         // const svarCookie = Cookies.get('svar');
@@ -133,11 +134,11 @@ const LiveInterview = () => {
             console.log("Break 05");
             const fetchInterview = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/fetchInterviewForSvar`, {interviewId}, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json`',
                     'Authorization': `Bearer ${Cookies.get('accessToken')}`,
                 },
             }); 
-            if (fetchInterview.type === "Svar") {
+            if (fetchInterview.data.data.interview.type === "Svar") {
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionSvar`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -329,6 +330,7 @@ const LiveInterview = () => {
     // Handle Skip Question
     const handleSkipQuestion = async () => {
         setIsAudioPlaying(false);
+        setSkipQuestionCount(prevCount => prevCount+1); 
         // Stop the recording if in progress
         if (isRecording) {
             setIsRecording(false);
@@ -581,7 +583,7 @@ const LiveInterview = () => {
                                     <div className="flex justify-between w-full mt-2">
                                         <p className="text-lg">Total Skipped</p>
                                         <span
-                                            className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{0}</span>
+                                            className="text-lg bg-gray-500 text-white inline-block w-8 h-8 p-1 rounded-full text-center">{skipQuestionCount}</span>
                                     </div>
                                     <div className="flex justify-between w-full mt-2">
                                         <p className="text-lg">Total Answered</p>
