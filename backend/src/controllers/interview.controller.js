@@ -851,7 +851,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         difficulty = 'errorDetection';
     } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + admview.essay > questionNo) {
         difficulty = 'fillInTheBlanks';
-    } else {inInter
+    } else {
         difficulty = 'synonymsAndAntonyms';
     }
 
@@ -1270,7 +1270,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
     const {svar, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
 
-    let redisClient = await connectRedis(); 
+    let redisClient = await connectRedis();
     let conversationHistory = JSON.parse(await redisClient.get(interviewId));
 
     if(conversationHistory.length > 0){
@@ -1285,15 +1285,15 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
-    const historyPrompt = conversationHistory.map((interaction, index) => { // putting this in prompts ? 
+    const historyPrompt = conversationHistory.map((interaction, index) => { // putting this in prompts ?
         return `Q${index + 1}: ${interaction.svar}`;
     }).join("\n");
 
     const adminInterview = await AdminSvarInterview.findById(adminInterviewId);
 
     if(adminInterview == null){
-        res.status(404).json(ApiError(404, "Interview not found")); 
-    } 
+        res.status(404).json(ApiError(404, "Interview not found"));
+    }
 
     let difficulty = '';
     if (adminInterview.reading > questionNo) {
@@ -1304,7 +1304,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         difficulty = 'short'
     } else if (adminInterview.jumbled + adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
         difficulty = 'jumbled'
-    } 
+    }
     else {
         difficulty = 'comprehension';
     }
@@ -1314,7 +1314,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             difficulty: "reading", _id: {$in: adminInterview.questions}
         });
         if(questionNo < readingQuestions.length){
-            const question = readingQuestions[questionNo].question; // get the question from the admin questions 
+            const question = readingQuestions[questionNo].question; // get the question from the admin questions
 
 
             const dataToSend = {
@@ -1322,15 +1322,15 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
-        } 
+        }
     }
-    if(difficulty == "repeating"){ 
+    if(difficulty == "repeating"){
         const repeatingQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "repeating", _id: {$in: adminInterview.questions}
         })
 
         if((questionNo - adminInterview.reading) < repeatingQuestions.length){
-            const question = repeatingQuestions[questionNo - adminInterview.repeating].question; 
+            const question = repeatingQuestions[questionNo - adminInterview.repeating].question;
 
             const audioFileName = `question-${generateUniqueKey()}.mp3`;
             const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -1342,33 +1342,33 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             }
 
             const dataToSend = {
-                question, audioFileName: audioFileName 
-            } 
+                audioFileName: audioFileName
+            }
 
-            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully")); 
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 
         }
     }
 
     if(difficulty == "short"){
         const shortQuestions = await InterviewQuestionsByAdmin.find({
-            difficulty: "short", _id: {$in: adminInterview.questions} 
-        }); 
+            difficulty: "short", _id: {$in: adminInterview.questions}
+        });
 
-        if(questionNo - (adminInterview.repeating + adminInterview.reading) < shortQuestions.length){ 
-            const question = shortQuestions[questionNo - (adminInterview.repeating + adminInterview.reading)].question; 
+        if(questionNo - (adminInterview.repeating + adminInterview.reading) < shortQuestions.length){
+            const question = shortQuestions[questionNo - (adminInterview.repeating + adminInterview.reading)].question;
 
-            const audioFileName = `question-${generateUniqueKey()}.mp3`; 
-            const audioFilePath = path.join(objectStorePath, audioFileName); 
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
 
-            await textToSpeech(question, audioFilePath); 
+            await textToSpeech(question, audioFilePath);
 
             if (!fs.existsSync(audioFilePath)){
                 return res.status(500).json({error: "Failed to generate audio"})
-            }; 
+            };
 
             const dataToSend = {
-                question, audioFileName: audioFileName 
+              audioFileName: audioFileName
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
@@ -1377,22 +1377,22 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     if(difficulty == "jumbled"){
         const jumbledQuestions = await InterviewQuestionsByAdmin.find({
-            difficulty: "jumbled", _id: {$in: adminInterview.questions} 
+            difficulty: "jumbled", _id: {$in: adminInterview.questions}
         })
         if(questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short) < jumbledQuestions.length){
-            const question = jumbledQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short)].question; 
+            const question = jumbledQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short)].question;
 
-            const audioFileName = `question-${generateUniqueKey()}.mp3`; 
-            const audioFilePath = path.join(objectStorePath, audioFileName); 
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
 
-            await textToSpeech(question, audioFilePath); 
+            await textToSpeech(question, audioFilePath);
 
             if(!fs.existsSync(audioFilePath)){
-                return res.status(500).json({error: "Failed to generate audio"}); 
+                return res.status(500).json({error: "Failed to generate audio"});
             }
 
             const dataToSend = {
-                question, audioFileName: audioFileName
+            audioFileName: audioFileName
             }
         }
     }
@@ -1400,26 +1400,26 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     if(difficulty == "comprehension"){
         const comprehensionQuestions = await InterviewQuestionsByAdmin.find({
             difficulty: "comprehension", _id: {$in: adminInterview.questions}
-        }); 
+        });
 
         if(questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length){
-            const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question; 
+            const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
 
             const dataToSend = {
                 question
-            }; 
+            };
 
-            res.status(200).json(new ApiResponse(200, dataToSend, "Question Generated Successfully")); 
+            res.status(200).json(new ApiResponse(200, dataToSend, "Question Generated Successfully"));
         }
     }
 
-    let prompt = ""; 
-    
+    let prompt = "";
+
     if(difficulty == "reading"){
         prompt =  `
         Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
         `;
-    } else if(difficulty == "repeating"){ 
+    } else if(difficulty == "repeating"){
         prompt = `
                 Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 20 words. Example format: "I had a flat tire while driving home from the office."
             `;
@@ -1441,8 +1441,8 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     const question = completion.choices[0].message.content.trim();
 
-    if(difficulty == "repeating" || difficulty == "comprehension"){
-        return res.status(200).json(new ApiResponse(200, {question}, "Quesetion Generated Successfully")); 
+    if(difficulty == "reading" || difficulty == "comprehension"){
+        return res.status(200).json(new (ApiResponse200, {question}, "Quesetion Generated Successfully"));
     }
 
     const audioFileName = `question-${generateUniqueKey()}.mp3`;
