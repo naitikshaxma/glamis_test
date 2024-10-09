@@ -32,7 +32,7 @@ export default function InterviewCard({props, status}) {
     if (props.type === 'company') {
       newCookies.jobTitle = props.title;
       newCookies.selectedCompany = company;
-      url = '/api/v1/interview//createInterviewByJDAdmin';
+      url = '/api/v1/interview/createInterviewByJDAdmin';
       redirect = '/live';
     }
 
@@ -43,6 +43,7 @@ export default function InterviewCard({props, status}) {
     }
 
     if (props.type === 'Svar') {
+      newCookies.svar = props.description; 
       url = '/api/v1/interview/createInterviewBySvarAdmin';
       redirect = '/live';
 
