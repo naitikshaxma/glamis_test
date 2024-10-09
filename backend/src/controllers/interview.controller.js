@@ -1328,7 +1328,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
 
             const dataToSend = {
-                question    // only need to send the question since the audio file is not required for read and speak
+                question,difficulty    // only need to send the question since the audio file is not required for read and speak
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
@@ -1352,7 +1352,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             }
 
             const dataToSend = {
-                audioFileName: audioFileName
+                audioFileName: audioFileName,difficulty
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -1379,7 +1379,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             ;
 
             const dataToSend = {
-                audioFileName: audioFileName
+                audioFileName: audioFileName,difficulty
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
@@ -1403,7 +1403,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             }
 
             const dataToSend = {
-                audioFileName: audioFileName
+                audioFileName: audioFileName,difficulty
             }
         }
     }
@@ -1417,7 +1417,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
 
             const dataToSend = {
-                question
+                question,difficulty
             };
 
             res.status(200).json(new ApiResponse(200, dataToSend, "Question Generated Successfully"));
@@ -1453,7 +1453,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     const question = completion.choices[0].message.content.trim();
 
     if (difficulty === "reading" || difficulty === "comprehension") {
-        return res.status(200).json(new ApiResponse(200, {question}, "Quesetion Generated Successfully"));
+        return res.status(200).json(new ApiResponse(200, {question,difficulty}, "Quesetion Generated Successfully"));
     }
 
     const audioFileName = `question-${generateUniqueKey()}.mp3`;
@@ -1467,7 +1467,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     }
 
     const dataToSend = {
-        question, audioFileName: audioFileName
+        question,difficulty, audioFileName: audioFileName
     };
 
     return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))

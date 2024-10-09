@@ -16,3 +16,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </SidebarProvider>
   </ThemeProvider>
 );
+
+String.prototype.toTitleCase = function toTitleCase() {
+  return this.replace(
+    /\w\S*/g,
+    (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+  );
+};
+
+String.prototype.capitalize = function capitalize() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+};

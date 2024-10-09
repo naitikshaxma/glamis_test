@@ -403,18 +403,27 @@ const LiveInterview = () => {
                                 <p key={index} className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
                                     {part}
                                 </p>
+                                
                             );
                         }
                     })}
                 </div>
             );
+
         } else {
+            
+            
             return (
                 <>
                     <div className="question bg-gray-200 rounded-lg text-justify">
-                        <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                    <p className="text-2xl font-semibold mt-2 ml-4">
+                             {currentDiff.capitalize()}
+</p>
+                        
+                        <p className="text-lg font-semibold p-6 h-fit max-h-[40vh]">
                             {question}
                         </p>
+                       
                     </div>
                     {questionAudio && (
                         <>
