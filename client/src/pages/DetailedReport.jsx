@@ -79,6 +79,9 @@ const DetailedReport = () => {
         } else if (response.data.interviewType === 'written') {
             setVarTab1('Written Skills');
             setVarTab2('Content Information');
+        } else if (response.data.interviewType === 'Svar'){
+            setVarTab1('Svar')
+            setVarTab2('')
         }
     }
 
@@ -232,6 +235,51 @@ const DetailedReport = () => {
                     </div>
 
                 )
+                case 'Svar': 
+                    return( 
+                       
+                    <div className='w-full flex justify-around mb-5'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                            <div className="flex flex-col space-y-4">
+                            {
+                                result.interviewResults?.map((item, index) => (
+                                    <Link
+                                        key={index}
+                                        to={`question-${index}`}  // Updated: include '#' to match with the id
+                                        smooth={true}
+                                        duration={500}
+                                        className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                        onClick={() => handleQuestionClick(index)}
+                                    >
+                                        Q{index + 1}
+                                    </Link>
+                                ))
+                            }
+                        </div>
+                        <div
+                    className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                    id="scroll-container"
+                    ref={scrollContainerRef}
+                >
+                    {
+                        result.interviewResults.map((item, index) => (
+                            <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
+                                <SvarCard
+                                    qno={index}
+                                    question={item.prompt}
+                                    answer={item.userResponse}
+                                    
+                                    score={item.overallScore}
+                                    expectedAnswer={item.correctAnswer}
+                                />
+                            </div>
+                        ))
+                    }
+                </div>
+                    </div>
+                    </div>
+    
+                    )
             default:
                 return (
                     <>Technical</>
@@ -284,17 +332,36 @@ const DetailedReport = () => {
                         <span>Analysis</span>
                     </div>
                     <div className='flex w-full'>
-                        <Technical technicalScore={[
-                            { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
-                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
-                        ]} varTab1={varTab1}
-                        />
-                        <Verbal data={
-                            [
-                                { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
-                                { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
-                            ]
-                        } varTab2={varTab2} />
+                        {activeTab === 'Svar' ? 
+                        <Svar pronunciationScore={[
+                            { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.pronunciationScore, 0) / result.interviewResults.length },
+                            { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.pronunciationScore, 0) / result.interviewResults.length }
+                          ]} 
+                          grammarScore={[
+                              { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.grammarScore, 0) / result.interviewResults.length },
+                              { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.grammarScore, 0) / result.interviewResults.length }
+                            ]} 
+                            correctnessScore={[
+                              { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.correctnessScore, 0) / result.interviewResults.length },
+                              { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.correctnessScore, 0) / result.interviewResults.length }
+                            ]} 
+                          />
+                            :
+                            <>
+                                <Technical technicalScore={[
+                                    { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
+                                    { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
+                                ]} varTab1={varTab1}
+                                />
+                                <Verbal data={
+                                    [
+                                        { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
+                                        { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                                    ]
+                                } varTab2={varTab2} />
+                            </>
+                    }
+                        
                     </div>
                 </div>
                 <div className="report mt-4">

@@ -16,7 +16,8 @@ import {
     generateQuestionForVerbalAdmin,
     generateQuestionForWrittenAdmin,
     generateQuestionforSvarAdmin,
-    createInterviewBySvarAdmin
+    createInterviewBySvarAdmin,
+    evaluateAnswerSvar
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -29,6 +30,7 @@ router.route('/generateQuestionForJD').post( isAuthenticated, generateQuestionFo
 router.route('/generateQuestionForWritten').post( isAuthenticated, generateQuestionForWritten);
 router.route('/evaluateQuestion').post( isAuthenticated, extractAnswerAudio, handleAudioUpload, evaluateAnswer); // removed isAuthenticated middleware for testing purposes
 router.route('/evaluateQuestionWritten').post( isAuthenticated, evaluateAnswerWritten);
+router.route('/evaluateQuestionSvar').post( isAuthenticated, evaluateAnswerSvar); 
 router.route('/evaluateQuestion/sendText').post( isAuthenticated, evaluateAnswer);
 router.route('/createInterview').post( isAuthenticated, createInterview);
 router.route('/createInterviewByJD').post( isAuthenticated, createInterviewByJD);

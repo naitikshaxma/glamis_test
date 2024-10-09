@@ -58,6 +58,9 @@ const interviewQuestionSchema = new mongoose.Schema({
     pronounciation: {
         type: Number
     },
+    correctness: {
+        type: Number
+    },
     vocabulary: {
         type: Number
     },
@@ -68,6 +71,12 @@ const interviewQuestionSchema = new mongoose.Schema({
         type: [String]
     },
     vocabularyExplanation: {
+        type: [String]
+    },
+    pronunciationExplanation: {
+        type: [String]
+    },
+    correctnessExplanation: {
         type: [String]
     },
     grammarExplanation: {

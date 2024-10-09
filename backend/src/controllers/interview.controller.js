@@ -1536,119 +1536,172 @@ async function evaluateAnswerWithPrompt(answer, question) {
     return completion.choices[0].message.content;
 }
 
-async function textToSpeech(input, audioPath) {
+async function evaluateAnswerForSvar(answer, question) {
     const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
-    const mp3 = await openai.audio.speech.create({
-        model: "tts-1", voice: "onyx", input: input,
-    });
+    const prompt = `
+    You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
 
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-    await fs.promises.writeFile(audioPath, buffer);
-}
+    Here is the question: "${question}"
+    Here is the answer: "${answer}"
 
+    Please evaluate the answer based on the following criteria:
+    1. Overall Score: An integer score out of 100 for the overall quality of the answer, taking into account all aspects (pronunciation, clarity, grammar, etc.).
+    2. Grammar: An integer score out of 100 for the grammatical correctness of the answer. Focus on sentence structure, verb tense, and clarity.
+    3. Pronunciation: An integer score out of 100 for the pronunciation of the answer. Evaluate clarity, smoothness, and accuracy of pronunciation.
+    4. Correctness: An integer score out of 100 for the factual correctness of the answer. Evaluate the accuracy, depth of knowledge, and relevance of the information provided.
 
-// ---------------------------- Evaluation Functions ----------------------------
-
-
-export const evaluateAnswer = asyncHandler(async (req, res) => {
-    try {
-        const {question, interviewId} = req.body;
-        let answer = req.extractedAnswer;
-
-        if (answer === undefined) {
-            answer = req.body.answer;
-        }
-
-        console.log("answer ####", answer);
-        console.log("question ####", question);
-        console.log("interviewId ####", interviewId);
-
-        let feedback = await evaluateAnswerWithPrompt(answer, question);
-
-        feedback = JSON.parse(feedback);
-
-
-        await InterviewQuestion.create({
-            question: question,
-            answer: feedback.userAnswer,
-            expectedAnswer: feedback.expectedAnswer,
-            interview: interviewId,
-            student: req.user._id,
-            overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
-            grammar: feedback.grammarScore,
-            vocabulary: feedback.vocabularyScore,
-            technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
-            vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
-            grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
-        });
-
-        console.log("answer added successfully ####");
-
-        return res.status(200).json(new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully"));
-    } catch (err) {
-        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
-    }
-});
-
-export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
-    try {
-
-
-        const {question, answer, interviewId} = req.body;
-        console.log("answer ####", answer);
-        console.log("question ####", question);
-
-        const openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
-        });
-        const prompt = `
-    You are an evaluator. I will provide you with a prompt and the corresponding response written by the user. Your task is to evaluate the response on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses of the response in each of the following areas.
-
-    Here is the prompt: "${question}"
-    Here is the response: "${answer}"
-
-    Please evaluate the response based on the following criteria:
-
-    Overall Score: An integer score out of 100 for the overall quality of the response.
-    Grammar: An integer score out of 100 for the grammatical correctness of the response.
-    Vocabulary: An integer score out of 100 for the vocabulary used in the response, including spelling accuracy.
-    Content and Structure: An integer score out of 100 for the relevance, depth, originality, logical flow, and organization of the response.
-    
-    The report must be detailed, addressing both strengths and weaknesses in each category. Include suggestions for improvement where relevant. Be specific about what the user has done well and what can be improved, with clear examples if applicable.
-
-    contentStructureExplanation: Detailed feedback on the content, logical flow, and organization of the response. You must address both positive aspects (what was done well) and areas for improvement (what needs to be improved and how).
-
-    vocabularyExplanation: Detailed feedback on the vocabulary used in the response. You must mention the strength of word choices and variety, while also pointing out if certain words could be replaced for better clarity, tone, or precision.
-
-    grammarExplanation: Detailed feedback on the grammatical correctness of the response. You must point out both correct usage and any errors, including sentence structure, punctuation, or verb tense issues, along with suggestions for how to correct them.
-
-    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure there are no symbols like tilde so that I can parse it as JSON:
+    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
     {
-        "prompt": "The prompt",
-        "userResponse": "The user's response text",
+        "question": "The question text",
+        "userAnswer": "The user's answer text",
         "overallScore": 90,
         "grammarScore": 85,
-        "vocabularyScore": 88,
-        "contentStructureScore": 90,
-        "contentStructureExplanation": {
-            "Pros": "Detailed explanation of the strong points of the content and structure\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
-            "Cons": "Detailed explanation of the weak points of the content and structure and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
+        "pronunciationScore": 88,
+        "correctnessScore": 92,
+        "pronunciationExplanation": {
+            "Pros": "Detailed explanation of the strong points of pronunciation.\nFirst Point: Clear enunciation of technical terms.\nSecond Point: Consistent and smooth flow of speech.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of the weak points in pronunciation and suggestions for improvement.\nFirst Point: Pronunciation of key terminology was incorrect.\nSecond Point: Lack of variation in tone.\nThird Point: Detailed feedback\nand so on..."
         },
-        "vocabularyExplanation": {
-            "Pros": "Detailed explanation of the strong points of the vocabulary used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
-            "Cons": "Detailed explanation of the weak points of the vocabulary used and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Spelling error(s) detected, specific word(s) with mistakes and their corrections\nand so on..."
+        "correctnessExplanation": {
+            "Pros": "Detailed explanation of the strong points of correctness.\nFirst Point: Answer is factually accurate.\nSecond Point: Logical and relevant explanation of concepts.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of the weak points in correctness and suggestions for improvement.\nFirst Point: Misinterpretation of key concept.\nSecond Point: Lack of depth in explanation.\nThird Point: Detailed feedback\nand so on..."
         },
         "grammarExplanation": {
-            "Pros": "Detailed explanation of the strong points of the grammar used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
-            "Cons": "Detailed explanation of the weak points of the grammar used and suggestions for correction\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
-        },
-        "expectedResponse": "The expected response to the prompt. The response should be in 200 words."
+                "Pros": "Detailed explanation of the strong points in grammar.\nFirst Point: Correct use of verb tense and sentence structure.\nSecond Point: Clear and concise sentence formation.\nThird Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of grammatical errors and suggestions for improvement.\nFirst Point: Subject-verb agreement errors.\nSecond Point: Improper use of passive voice affecting clarity.\nThird Point: Detailed feedback\nand so on..."
+            },
+        "expectedAnswer": "The expected answer to the question. The answer should be in 50 words."
     }
 
-    Ensure the keys are exactly "prompt", "userResponse", "overallScore", "grammarScore", "vocabularyScore", "contentStructureScore", "contentStructureExplanation", "vocabularyExplanation", and "grammarExplanation". All scores should be integers.
-    If the question is fill-in-the-blank, antonyms, or synonyms, the expected response should be a single word. If the user provides the correct word, all scores should be 100.
+    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.`
+
+    const completion = await openai.chat.completions.create({
+        messages: [{role: "system", content: "You are a strict but constructive interviewer."}, {
+            role: "user",
+            content: prompt
+        }], model: "gpt-4o-mini", max_tokens: 1000,
+    });
+
+    //
+
+    console.log(completion.choices[0].message.content);
+    return completion.choices[0].message.content;
+}
+
+    async function textToSpeech(input, audioPath) {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+        const mp3 = await openai.audio.speech.create({
+            model: "tts-1", voice: "onyx", input: input,
+        });
+
+        const buffer = Buffer.from(await mp3.arrayBuffer());
+        await fs.promises.writeFile(audioPath, buffer);
+    }
+
+
+    // ---------------------------- Evaluation Functions ----------------------------
+
+
+    export const evaluateAnswer = asyncHandler(async (req, res) => {
+        try {
+            const {question, interviewId} = req.body;
+            let answer = req.extractedAnswer;
+
+            if (answer === undefined) {
+                answer = req.body.answer;
+            }
+
+            console.log("answer ####", answer);
+            console.log("question ####", question);
+            console.log("interviewId ####", interviewId);
+
+            let feedback = await evaluateAnswerWithPrompt(answer, question);
+
+            feedback = JSON.parse(feedback);
+
+
+            await InterviewQuestion.create({
+                question: question,
+                answer: feedback.userAnswer,
+                expectedAnswer: feedback.expectedAnswer,
+                interview: interviewId,
+                student: req.user._id,
+                overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
+                grammar: feedback.grammarScore,
+                vocabulary: feedback.vocabularyScore,
+                technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
+                vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
+                grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+            });
+
+            console.log("answer added successfully ####");
+
+            return res.status(200).json(new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully"));
+        } catch (err) {
+            return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+        }
+    });
+
+    export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
+        try {
+
+            const {question, answer, interviewId} = req.body;
+            console.log("answer ####", answer);
+            console.log("question ####", question);
+
+            const openai = new OpenAI({
+                apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
+            });
+            const prompt = `
+        You are an evaluator. I will provide you with a prompt and the corresponding response written by the user. Your task is to evaluate the response on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses of the response in each of the following areas.
+
+        Here is the prompt: "${question}"
+        Here is the response: "${answer}"
+
+        Please evaluate the response based on the following criteria:
+
+        Overall Score: An integer score out of 100 for the overall quality of the response.
+        Grammar: An integer score out of 100 for the grammatical correctness of the response.
+        Vocabulary: An integer score out of 100 for the vocabulary used in the response, including spelling accuracy.
+        Content and Structure: An integer score out of 100 for the relevance, depth, originality, logical flow, and organization of the response.
+        
+        The report must be detailed, addressing both strengths and weaknesses in each category. Include suggestions for improvement where relevant. Be specific about what the user has done well and what can be improved, with clear examples if applicable.
+
+        contentStructureExplanation: Detailed feedback on the content, logical flow, and organization of the response. You must address both positive aspects (what was done well) and areas for improvement (what needs to be improved and how).
+
+        vocabularyExplanation: Detailed feedback on the vocabulary used in the response. You must mention the strength of word choices and variety, while also pointing out if certain words could be replaced for better clarity, tone, or precision.
+
+        grammarExplanation: Detailed feedback on the grammatical correctness of the response. You must point out both correct usage and any errors, including sentence structure, punctuation, or verb tense issues, along with suggestions for how to correct them.
+
+        The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure there are no symbols like tilde so that I can parse it as JSON:
+        {
+            "prompt": "The prompt",
+            "userResponse": "The user's response text",
+            "overallScore": 90,
+            "grammarScore": 85,
+            "vocabularyScore": 88,
+            "contentStructureScore": 90,
+            "contentStructureExplanation": {
+                "Pros": "Detailed explanation of the strong points of the content and structure\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of the weak points of the content and structure and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
+            },
+            "vocabularyExplanation": {
+                "Pros": "Detailed explanation of the strong points of the vocabulary used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of the weak points of the vocabulary used and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Spelling error(s) detected, specific word(s) with mistakes and their corrections\nand so on..."
+            },
+            "grammarExplanation": {
+                "Pros": "Detailed explanation of the strong points of the grammar used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of the weak points of the grammar used and suggestions for correction\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
+            },
+            "expectedResponse": "The expected response to the prompt. The response should be in 200 words."
+        }
+
+        Ensure the keys are exactly "prompt", "userResponse", "overallScore", "grammarScore", "vocabularyScore", "contentStructureScore", "contentStructureExplanation", "vocabularyExplanation", and "grammarExplanation". All scores should be integers.
+        If the question is fill-in-the-blank, antonyms, or synonyms, the expected response should be a single word. If the user provides the correct word, all scores should be 100.
 `;
 
 
@@ -1681,6 +1734,43 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
         return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
 });
+
+    export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
+        try {
+            const {question, interviewId} = req.body
+            let answer = req.extractedAnswer
+
+            if (answer === undefined) {
+                answer = req.body.answer;
+            }
+
+            let evaluatePrompt = evaluateAnswerForSvar(answer, question); 
+
+            evaluatePrompt = JSON.parse(evaluateAnswerForSvar);
+
+            await InterviewQuestion.create({
+                question: question,
+                answer: evaluatePrompt.userAnswer,
+                expectedAnswer: evaluatePrompt.expectedAnswer,
+                interview: interviewId,
+                student: req.user._id,
+                overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : feedback.overallScore,
+                grammar: evaluatePrompt.grammarScore,
+                pronunciation: evaluatePrompt.pronunciationScore, 
+                pronunciationExplanation: [evaluatePrompt.pronunciationExplanation.Pros, evaluatePrompt.pronunciationExplanation.Cons],
+                correctnessExplanation: [evaluatePrompt.correctnessExplanation.Pros, evaluatePrompt.correctnessExplanation.Cons],
+                grammarExplanation: [evaluatePrompt.grammarExplanation.Pros, evaluatePrompt.grammarExplanation.Cons],
+            });
+
+            console.log("answer added successfully ####");
+
+            return res.status(200).json(new ApiResponse(200, JSON.parse(evaluatePrompt), "Answer evaluated successfully"));
+        } catch (err) {
+            return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+        }
+    });
+        
+
 
 
 // ---------------------------- Extra Routes ----------------------------
