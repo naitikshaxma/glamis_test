@@ -4,7 +4,7 @@ import path from "path";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {
-    AdminSubjectInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion
+    AdminSubjectInterview, AdminSvarInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion
 } from "../models/interview.models.js"
 import {Student} from "../models/users.models.js"
 import "dotenv/config.js";
@@ -14,7 +14,7 @@ import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import {AdminCompanyInterview, InterviewQuestionsByAdmin} from "../models/interview.models.js";
-import {json} from "express";
+import {json, text} from "express";
 import mongoose from "mongoose";
 
 
@@ -137,6 +137,30 @@ export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
 
 // in use
 export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
+    /*
+    Handle the creation of an interview when user clicks on "Join Interview" button in a Written interview card
+     */
+    try {
+        const {interviewId} = req.body;
+        const interview = await Interview.findById(interviewId);
+
+        if (interview === null) {
+            return res.status(404).json(ApiError(404, "Interview not found"));
+        }
+
+        let redisClient = await connectRedis();
+
+        await redisClient.set(String(interviewId), JSON.stringify([]));
+
+        return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
+    }
+})
+
+// in use
+export const createInterviewBySvarAdmin = asyncHandler(async (req, res) => {
     /*
     Handle the creation of an interview when user clicks on "Join Interview" button in a Written interview card
      */
@@ -825,9 +849,9 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         difficulty = 'jumbled';
     } else if (adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'errorDetection';
-    } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
+    } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + admview.essay > questionNo) {
         difficulty = 'fillInTheBlanks';
-    } else {
+    } else {inInter
         difficulty = 'synonymsAndAntonyms';
     }
 
@@ -1242,6 +1266,201 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 });
 
+export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
+    const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+    const {svar, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
+
+    let redisClient = await connectRedis(); 
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+
+    if(conversationHistory.length > 0){
+        conversationHistory.push({
+            answer, score
+        })
+    } else {
+        conversationHistory.push({
+            svar: svar
+        })
+    }
+
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+    const historyPrompt = conversationHistory.map((interaction, index) => { // putting this in prompts ? 
+        return `Q${index + 1}: ${interaction.svar}`;
+    }).join("\n");
+
+    const adminInterview = await AdminSvarInterview.findById(adminInterviewId);
+
+    if(adminInterview == null){
+        res.status(404).json(ApiError(404, "Interview not found")); 
+    } 
+
+    let difficulty = '';
+    if (adminInterview.reading > questionNo) {
+        difficulty = 'reading';
+    } else if (adminInterview.repeating + adminInterview.reading > questionNo) {
+        difficulty = 'repeating';
+    } else if (adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
+        difficulty = 'short'
+    } else if (adminInterview.jumbled + adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
+        difficulty = 'jumbled'
+    } 
+    else {
+        difficulty = 'comprehension';
+    }
+
+    if(difficulty == 'reading') {
+        const readingQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "reading", _id: {$in: adminInterview.questions}
+        });
+        if(questionNo < readingQuestions.length){
+            const question = readingQuestions[questionNo].question; // get the question from the admin questions 
+
+
+            const dataToSend = {
+                question    // only need to send the question since the audio file is not required for read and speak
+            }
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
+        } 
+    }
+    if(difficulty == "repeating"){ 
+        const repeatingQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "repeating", _id: {$in: adminInterview.questions}
+        })
+
+        if((questionNo - adminInterview.reading) < repeatingQuestions.length){
+            const question = repeatingQuestions[questionNo - adminInterview.repeating].question; 
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            await textToSpeech(question, audioFilePath); // directly convert the question since no coding questions will be here
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({error: 'Failed to generate audio'});
+            }
+
+            const dataToSend = {
+                question, audioFileName: audioFileName 
+            } 
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully")); 
+
+        }
+    }
+
+    if(difficulty == "short"){
+        const shortQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "short", _id: {$in: adminInterview.questions} 
+        }); 
+
+        if(questionNo - (adminInterview.repeating + adminInterview.reading) < shortQuestions.length){ 
+            const question = shortQuestions[questionNo - (adminInterview.repeating + adminInterview.reading)].question; 
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`; 
+            const audioFilePath = path.join(objectStorePath, audioFileName); 
+
+            await textToSpeech(question, audioFilePath); 
+
+            if (!fs.existsSync(audioFilePath)){
+                return res.status(500).json({error: "Failed to generate audio"})
+            }; 
+
+            const dataToSend = {
+                question, audioFileName: audioFileName 
+            }
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
+        }
+    }
+
+    if(difficulty == "jumbled"){
+        const jumbledQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "jumbled", _id: {$in: adminInterview.questions} 
+        })
+        if(questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short) < jumbledQuestions.length){
+            const question = jumbledQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short)].question; 
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`; 
+            const audioFilePath = path.join(objectStorePath, audioFileName); 
+
+            await textToSpeech(question, audioFilePath); 
+
+            if(!fs.existsSync(audioFilePath)){
+                return res.status(500).json({error: "Failed to generate audio"}); 
+            }
+
+            const dataToSend = {
+                question, audioFileName: audioFileName
+            }
+        }
+    }
+
+    if(difficulty == "comprehension"){
+        const comprehensionQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "comprehension", _id: {$in: adminInterview.questions}
+        }); 
+
+        if(questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length){
+            const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question; 
+
+            const dataToSend = {
+                question
+            }; 
+
+            res.status(200).json(new ApiResponse(200, dataToSend, "Question Generated Successfully")); 
+        }
+    }
+
+    let prompt = ""; 
+    
+    if(difficulty == "reading"){
+        prompt =  `
+        Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
+        `;
+    } else if(difficulty == "repeating"){ 
+        prompt = `
+                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 20 words. Example format: "I had a flat tire while driving home from the office."
+            `;
+    } else if(difficulty == "short"){
+        prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Board of directors were neutral about the proposal: interested or indifferent?"`
+    } else if (difficulty == "jumbled"){
+        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
+    } else if (difficulty == "comprehension"){
+        prompt = `Generate a passage of exactly 100 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
+    }
+
+    prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
+
+    const completion = await openai.chat.completions.create({
+        messages: [{role: "system", content: "You are a helpful assistant."}, {role: "user", content: prompt}],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    if(difficulty == "repeating" || difficulty == "comprehension"){
+        return res.status(200).json(new ApiResponse(200, {question}, "Quesetion Generated Successfully")); 
+    }
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    // const cleanedQuestion = question.replace(/```[\s\S]*?```/g, ''); // no need
+    await textToSpeech(question, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({error: 'Failed to generate audio'});
+    }
+
+    const dataToSend = {
+        question, audioFileName: audioFileName
+    };
+
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
+})
 
 // ---------------------------- Helper Functions ----------------------------
 

@@ -45,6 +45,7 @@ export default function InterviewCard({props, status}) {
     }
 
     if (props.type === 'Svar') {
+      newCookies.svar = props.description; 
       url = '/api/v1/interview/createInterviewBySvarAdmin';
       redirect = '/live';
     }
