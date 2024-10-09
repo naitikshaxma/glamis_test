@@ -250,6 +250,18 @@ const LiveInterview = () => {
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
             };
+            
+        }
+        else if (verbal && !subject && !jobTitle && !selectedCompany) {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSvarAdmin`;
+            data = {
+                answer: ansMetaData.answer,
+                score: ansMetaData.score,
+                interviewId: Cookies.get('interviewId'),
+                questionNo: currentQuestion,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+            };
+            
         }
         else {
             console.error('Required cookies are missing.');
