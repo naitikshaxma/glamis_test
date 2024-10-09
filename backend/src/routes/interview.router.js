@@ -43,8 +43,8 @@ router.route("/generateQuestionForWrittenAdmin").post(isAuthenticated, generateQ
 router.route("/createInterviewByWrittenAdmin").post(isAuthenticated, createInterviewByWrittenAdmin);
 router.route("/createInterviewByVerbalAdmin").post(isAuthenticated, createInterviewByVerbalAdmin);
 router.route("/generateQuestionForVerbalAdmin").post(isAuthenticated, generateQuestionForVerbalAdmin);
-router.route("/generateQuestionForSvarAdmin").post(isAuthenticated, generateQuestionforSvarAdmin); 
-router.route("createInterviewBySvarAdmin").post(isAuthenticated, createInterviewBySvarAdmin)
+router.route("/generateQuestionForSvarAdmin").post(isAuthenticated, generateQuestionforSvarAdmin);
+router.route("/createInterviewBySvarAdmin").post(isAuthenticated, createInterviewBySvarAdmin)
 
 export default router;
 
