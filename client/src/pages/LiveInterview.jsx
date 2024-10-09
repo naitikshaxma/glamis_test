@@ -96,10 +96,11 @@ const LiveInterview = () => {
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
         formData.append('interviewId', await Cookies.get('interviewId'));
+        const svarCookie = Cookies.get('svar')
         console.log('Form data:', formData);
         try {
             console.log("Break 05")
-            if(svar){
+            if(svarCookie){
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionSvar`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
