@@ -17,7 +17,7 @@ const DetailedReport = () => {
     const navigate = useNavigate();
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
-    const [activeTab, setActiveTab] = useState('technical');
+    const [activeTab, setActiveTab] = useState('Svar');
     const [varTab1, setVarTab1] = useState('Technical Skills');
     const [varTab2, setVarTab2] = useState('Verbal Skills');
 
@@ -80,6 +80,7 @@ const DetailedReport = () => {
             setVarTab1('Written Skills');
             setVarTab2('Content Information');
         } else if (response.data.interviewType === 'Svar'){
+            setActiveTab('Svar')
             setVarTab1('Svar')
             setVarTab2('')
         }
@@ -245,7 +246,7 @@ const DetailedReport = () => {
                                 result.interviewResults?.map((item, index) => (
                                     <Link
                                         key={index}
-                                        to={`question-${index}`}  // Updated: include '#' to match with the id
+                                        to={`#question-${index}`}  // Updated: include '#' to match with the id
                                         smooth={true}
                                         duration={500}
                                         className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
@@ -268,7 +269,19 @@ const DetailedReport = () => {
                                     qno={index}
                                     question={item.prompt}
                                     answer={item.userResponse}
-                                    
+                                    feedback={{
+                                        pronunciation: {
+                                            good: [item.pronunciationExplanation[0]],
+                                            improvement: [item.pronunciationExplanation[1]]
+                                        },
+                                        correctness: {
+                                            good: [item.correctnessExplanation[0]],
+                                            improvement: [item.correctnessExplanation[1]]
+                                        },
+                                        grammar: {
+                                            good: [item.grammarExplanation[0]],
+                                            improvement: [item.grammarExplanation[1]]
+                                        }}}
                                     score={item.overallScore}
                                     expectedAnswer={item.correctAnswer}
                                 />
@@ -333,9 +346,9 @@ const DetailedReport = () => {
                     </div>
                     <div className='flex w-full'>
                         {activeTab === 'Svar' ? 
-                        <Svar pronunciationScore={[
-                            { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.pronunciationScore, 0) / result.interviewResults.length },
-                            { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.pronunciationScore, 0) / result.interviewResults.length }
+                        <Svar pronounciationScore={[
+                            { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.pronounciationScore, 0) / result.interviewResults.length },
+                            { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.pronounciationScore, 0) / result.interviewResults.length }
                           ]} 
                           grammarScore={[
                               { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.grammarScore, 0) / result.interviewResults.length },

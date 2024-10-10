@@ -50,7 +50,7 @@ const Svar = (props) => {
                 <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
                         <Pie 
-                            data={props.pronunciationScore} 
+                            data={props.pronounciationScore} 
                             cx="50%" 
                             cy="50%" 
                             innerRadius={60} 
@@ -59,7 +59,7 @@ const Svar = (props) => {
                             paddingAngle={5} 
                             dataKey="value"
                         >
-                            {props.pronunciationScore.map((entry, index) => (
+                            {props.pronounciationScore.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
@@ -67,7 +67,7 @@ const Svar = (props) => {
                 </ResponsiveContainer>
                 <Typography variant="body1" className="my-2 text-green-900 font-semibold">
                     Pronunciation: &nbsp;
-                    {Math.round(props.pronunciationScore[0].value)} / 100
+                    {Math.round(props.pronounciationScore[0].value)} / 100
                 </Typography>
             </div>
             <div className="flex flex-col items-center w-1/2">
@@ -90,7 +90,7 @@ const Svar = (props) => {
                     </PieChart>
                 </ResponsiveContainer>
                 <Typography variant="body1" className="my-2 text-green-900 font-semibold">
-                    Pronunciation: &nbsp;
+                    Grammar: &nbsp;
                     {Math.round(props.grammarScore[0].value)} / 100
                 </Typography>
             </div>
@@ -101,6 +101,43 @@ const Svar = (props) => {
 }
 
 export {Svar}; 
+
+const renderFeedbackSection = (feedbackCategory, title) => {
+    return (
+        <>
+            <div className="flex w-full justify-between">
+                <div className="flex flex-col space-y-2 w-1/3">{title} - What went well</div>
+                <div className="flex flex-col space-y-2 w-2/3">
+                    <ul className='list-disc'>
+                        {feedbackCategory.good.map((item, index) => (
+                            item.split('\n').map((line, i) => (
+                                <li key={`${index}-${i}`}>
+                                    {line}
+                                </li>
+                            ))
+                        ))}
+                    </ul>
+                </div>
+            </div>
+            <hr />
+            <div className="flex w-full justify-between">
+                <div className="flex flex-col space-y-2 w-1/3">{title} - Areas for improvement</div>
+                <div className="flex flex-col space-y-2 w-2/3">
+                    <ul className='list-disc'>
+                        {feedbackCategory.improvement.map((item, index) => (
+                            item.split('\n').map((line, i) => (
+                                <li key={`${index}-${i}`}>
+                                    {line}
+                                </li>
+                            ))
+                        ))}
+                    </ul>
+                </div>
+            </div>
+            <hr />
+        </>
+    );
+};
 
 export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswer }) => {
     const [showAnswer, setShowAnswer] = useState(false);
@@ -129,41 +166,16 @@ export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswe
                 <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
                     <div className="flex flex-col space-y-2 font-semibold">Feedback</div>
                     <hr />
-                    <div className='flex w-full justify-between font-semibold'>
-                        <div className="flex flex-col space-y-2 font-semibold w-1/3">Attributes</div>
-                        <div className="flex flex-col space-y-2 font-semibold w-2/3">Description</div>
+                      {/* Render Pronunciation Feedback */}
+                      {renderFeedbackSection(feedback.pronounciation, 'Pronunciation')}
+
+                      {/* Render Correctness Feedback */}
+                      {renderFeedbackSection(feedback.correctness, 'Correctness')}
+
+                      {/* Render Grammar Feedback */}
+                      {renderFeedbackSection(feedback.grammar, 'Grammar')}
                     </div>
                     <hr />
-                    {/* <div className="flex w-full justify-between">
-                        <div className="flex flex-col space-y-2 w-1/3">What went well</div>
-                        <div className="flex flex-col space-y-2 w-2/3">
-                            <ul className='list-disc'>
-                                {Object.values(feedback.good).map((item, index) => (
-                                    item.split('\n').map((line, i) => (
-                                        <li key={${index}-${i}}>
-                                            {line}
-                                        </li>
-                                    ))
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                    <hr />
-                    <div className="flex w-full justify-between">
-                        <div className="flex flex-col space-y-2 w-1/3">Areas for improvement</div>
-                        <div className="flex flex-col space-y-2 w-2/3">
-                            <ul className='list-disc'>
-                                {Object.values(feedback.improvement).map((item, index) => (
-                                    item.split('\n').map((line, i) => (
-                                        <li key={${index}-${i}}>
-                                            {line}
-                                        </li>
-                                    ))
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                    <hr /> */}
                     <div className="px-2">
                         <button
                             className="bg-black text-white rounded-lg p-2 shadow-lg px-4 font-semibold"
@@ -176,9 +188,9 @@ export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswe
                                 expectedAnswer
                             )}
                         </div>
+                        
                     </div>
                 </div>
             </div>
-        </div>
     );
 }

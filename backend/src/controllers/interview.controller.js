@@ -1405,6 +1405,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             const dataToSend = {
                 audioFileName: audioFileName,difficulty
             }
+            
         }
     }
 
