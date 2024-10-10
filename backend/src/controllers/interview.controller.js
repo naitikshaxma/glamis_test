@@ -1568,7 +1568,7 @@ async function evaluateAnswerForSvar(answer, question) {
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const prompt = `
-    You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
+    You are an interviewer. I will provide you with a question and its answer(it will be same as the question). Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
 
     Here is the question: "${question}"
     Here is the answer: "${answer}"
