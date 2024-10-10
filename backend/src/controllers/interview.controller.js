@@ -1440,30 +1440,20 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     if (difficulty === "reading") {
         prompt = `
-            Based on the following context: "${historyPrompt}", generate a single reading sentence for the user. The sentence should not be directly related to the previous questions but still keep the conversation flow smooth. The sentence should be no more than 20 words, simple, and clear for the user to read aloud.
-            Example format: "My neighbors often host loud gatherings on the weekends."
+        Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
         `;
     } else if (difficulty === "repeating") {
         prompt = `
-            Taking into account the context: "${historyPrompt}", generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 10 words. Ensure that it does not directly reference previous questions but keeps the overall conversational flow.
-            Example format: "I had a flat tire while driving home from the office."
-        `;
+                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 10 words. Example format: "I had a flat tire while driving home from the office."
+            `;
     } else if (difficulty === "short") {
-        prompt = `
-            Given the conversation history: "${historyPrompt}", generate a single short comprehension question with two answer choices. Ensure that the question does not directly rely on previous questions but stays in line with the flow of conversation.
-            Example format: "Board of directors were neutral about the proposal: interested or indifferent?"
-        `;
+        prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Board of directors were neutral about the proposal: interested or indifferent?"`
     } else if (difficulty === "jumbled") {
-        prompt = `
-            Using the context: "${historyPrompt}", generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 10 words and not be directly related to previous content but maintain conversation coherence.
-            Example format: "Honest politicians need our society" → "Our society needs honest politicians."
-        `;
+        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 10 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
     } else if (difficulty === "comprehension") {
-        prompt = `
-            Based on the conversation history: "${historyPrompt}", generate a passage of exactly 70 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. The new questions should avoid direct dependence on prior questions but ensure smooth flow.
-            Example question format: "What problem did Jason have when he woke up?"
-        `;
+        prompt = `Generate a passage of exactly 80 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
     }
+
     
 
     prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
@@ -1568,7 +1558,7 @@ async function evaluateAnswerForSvar(answer, question) {
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const prompt = `
-    You are an interviewer. I will provide you with a question and its answer(same as the question when it is repeating and reading). There are five different types of questions that may be presented: Reading, Repeating, Short Question Answer, Jumbled Words, and Comprehension. Your task is to evaluate the answer based on the question type, on a scale of 0 to 100, and provide a brief, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering brief analysis and examples where necessary.
+    You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
 
     Here is the question: "${question}"
     Here is the answer: "${answer}"
@@ -1587,7 +1577,7 @@ async function evaluateAnswerForSvar(answer, question) {
         "grammarScore": 85,
         "pronunciationScore": 88,
         "correctnessScore": 92,
-        "pronunciationExplanation": {
+       "pronunciationExplanation": {
             "Pros": "Brief explanation of the strong points of pronunciation.Not more than 10 words.",
             "Cons": "Brief explanation of the weak points in pronunciation and suggestions for improvement.Not more than 10 words."
         },
@@ -1601,9 +1591,7 @@ async function evaluateAnswerForSvar(answer, question) {
             },
         "expectedAnswer": "The expected answer to the question."
     }
-
     Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.`
-
     const completion = await openai.chat.completions.create({
         messages: [{role: "system", content: "You are a strict but constructive interviewer."}, {
             role: "user",
