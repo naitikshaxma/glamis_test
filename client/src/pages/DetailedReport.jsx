@@ -239,9 +239,9 @@ const DetailedReport = () => {
                 case 'Svar': 
                     return( 
                        
-                    <div className='w-full flex justify-around mb-5'>
-                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                            <div className="flex space-y-4">
+                    <div className='w-full flex justify-around mb-5 overflow-auto'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0  overflow-x">
+                            <div className="flex space-y-4 ">
                             <p className='hidden'>hello</p>
                             {
                                 
@@ -270,7 +270,7 @@ const DetailedReport = () => {
                                 <SvarCard
                                     qno={index}
                                     question={item.question}
-                                    answer={item.userResponse}
+                                    answer={item.answer}
                                     feedback={{
                                         pronounciation: {
                                             good: [item.pronunciationExplanation[0]],
@@ -286,6 +286,9 @@ const DetailedReport = () => {
                                         }}}
                                     score={item.overallPerformance}
                                     expectedAnswer={item.expectedAnswer}
+                                    grammar= {item.grammar}
+                                    correctness = {item.correctness}
+                                    pronounciation= {item.pronounciation}
                                 />
                             </div>
                         ))

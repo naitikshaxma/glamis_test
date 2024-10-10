@@ -281,10 +281,19 @@ const LiveInterview = () => {
             setIsAudioPlaying(true);
 
             // Set timer based on difficulty
-            if (response.data.data.difficulty === "Easy")
-                setTimer(60);
-            else
-                setTimer(90);
+            if (response.data.data.difficulty === "reading")
+                setTimer(30);
+            else if(response.data.data.difficulty === "repeating"){
+                setTimer(40)
+            }else if(response.data.data.difficulty === "short"){
+                setTimer(40)
+            }else if(response.data.data.difficulty === "jumbled"){
+                setTimer(40)
+            }else if(response.data.data.difficulty === "comprehension"){
+                setTimer(120)
+            }else{
+                setTimer(90)
+            }
 
         } catch (error) {
             console.error('Error fetching question:', error);

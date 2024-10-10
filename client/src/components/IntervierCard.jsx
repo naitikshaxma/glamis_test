@@ -9,7 +9,7 @@ import {toast} from "react-toastify";
 
 export default function InterviewCard({props, status}) {
     const navigate = useNavigate();
-    const [totalQuestions, setTotalQuestions] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState(15);
     const [company, setCompany] = useState();
     const [adminInterviewId, setAdminInterviewId] = useState();
 
@@ -18,10 +18,9 @@ export default function InterviewCard({props, status}) {
         let url = '';
         let redirect = '';
         const response = await instance.post("/api/v1/admin/interview/fetchSvarInterviewById", {interviewId: props._id})
-        const questions = response.data.interview.no_of_questions; 
-        setTotalQuestions(questions); 
+        const questions = response.data.data.no_of_questions; 
         const removeCookies = ['interviewId', 'subject', 'jobTitle', 'selectedCompany', 'adminInterviewId', 'delta', 'verbal'];
-        const newCookies = {interviewId: props._id, adminInterviewId, delta: totalQuestions};
+        const newCookies = {interviewId: props._id, adminInterviewId, delta: questions};
 
         if (props.type === 'subject') {
             newCookies.subject = props.description;

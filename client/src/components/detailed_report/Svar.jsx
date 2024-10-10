@@ -15,7 +15,7 @@ const COLORS = ['#529e5a', "#d63a3a"];
 const Svar = (props) => {
 
     return (
-        <div className="flex w-1/2 flex-col items-center m-3">
+        <div className="flex w-full flex-col items-center m-3">
             <Card className="w-full rounded-lg shadow-lg">
                 <div className="bg-lightBlue-500 rounded-t-lg p-4">
                     <Typography variant="h3">{props.varTab}</Typography>
@@ -139,7 +139,7 @@ const renderFeedbackSection = (feedbackCategory, title) => {
     );
 };
 
-export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswer }) => {
+export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswer, grammar,correctness,pronounciation }) => {
     const [showAnswer, setShowAnswer] = useState(false);
     const renderQuestion = () => {
         return (
@@ -158,6 +158,9 @@ export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswe
                 Question {qno + 1} : {renderQuestion()}
             </div>
             <p className="font-semibold my-2">Score : {score}/100</p>
+            <p className="font-semibold my-2">Grammar Score : {grammar}/100</p>
+            <p className="font-semibold my-2">Correctness Score : {correctness}/100</p>
+            <p className="font-semibold my-2">Pronunciation Score : {pronounciation}/100</p>
             <div className="flex flex-col space-y-2">
                 <div className="flex flex-col space-y-2">
                     <strong>Your Answer:</strong>
