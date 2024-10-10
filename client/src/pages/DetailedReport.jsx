@@ -10,6 +10,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
+import { Svar, SvarCard } from '../components/detailed_report/Svar';
 
 
 
