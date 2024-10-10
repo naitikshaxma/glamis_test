@@ -11,6 +11,8 @@ import {Student, User} from "../models/users.models.js";
 import sendMail from "../utils/sendMail.js";
 import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvitation.js";
 import {Parser} from "json2csv";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const link = `https://glamis.in/myInterview/`;
 
@@ -581,6 +583,29 @@ export const fetchInterviewDetails = async (req, res) => {
   }
 }
 
+export const fetchInterviewByID = async (req, res) => {
+  try{ 
+    const { interviewId } = req.body; 
+    
+    if (!interviewId) {
+      return res.status(400).json(ApiError(404, "Interview ID not sent"))
+    }
+
+    const interview = await AdminSvarInterview.findOne({
+      interview: interviewId
+    })
+
+    if(!interview){
+      return res.status(400).json(ApiError(400, "Interview not found!")); 
+    }
+
+    return res.status(200).json(new ApiResponse(200, interview, "Interview Fetched Successfully")); 
+  } catch(err) {
+    return res.status(500).json({
+      message: "Internal Server Error" || err.message
+    })
+  }
+}
 // ---------------------- CRUD Operations ----------------------
 
 async function getInterviewByID(interviewId) {

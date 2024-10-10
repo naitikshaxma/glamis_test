@@ -15,7 +15,7 @@ const COLORS = ['#529e5a', "#d63a3a"];
 const Svar = (props) => {
 
     return (
-        <div className="flex w-full flex-col items-center m-3">
+        <div className="flex w-1/2 flex-col items-center m-3">
             <Card className="w-full rounded-lg shadow-lg">
                 <div className="bg-lightBlue-500 rounded-t-lg p-4">
                     <Typography variant="h3">{props.varTab}</Typography>
