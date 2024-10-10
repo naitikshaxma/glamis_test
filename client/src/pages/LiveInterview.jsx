@@ -28,6 +28,7 @@ const Timer = (props) => {
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[100, 70, 40, 10]}
             onComplete={() => {
+                props.setNextQuestion((prev)=>prev+1)
                 props.setTimer(0); // Ensures timer is set to 0 when completed
                 return [false, 0]; // Do not repeat the timer
             }}
@@ -535,7 +536,7 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer} />}
+                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer}  setNextQuestion={setCurrentQuestion} />}
                                 </div>
                             </div>
 
