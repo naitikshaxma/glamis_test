@@ -4,7 +4,12 @@ import path from "path";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {
-    AdminSubjectInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion
+    AdminSubjectInterview,
+    AdminSvarInterview,
+    AdminVerbalInterview,
+    AdminWrittenInterview,
+    Interview,
+    InterviewQuestion,
 } from "../models/interview.models.js"
 import {Student} from "../models/users.models.js"
 import "dotenv/config.js";
@@ -14,8 +19,7 @@ import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import {AdminCompanyInterview, InterviewQuestionsByAdmin} from "../models/interview.models.js";
-import {json} from "express";
-import mongoose from "mongoose";
+import {getSessionQuestions, saveSessionQuestions} from "../utils/crud.js";
 
 
 const objectStorePath = path.resolve("../objectStore");
@@ -137,6 +141,30 @@ export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
 
 // in use
 export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
+    /*
+    Handle the creation of an interview when user clicks on "Join Interview" button in a Written interview card
+     */
+    try {
+        const {interviewId} = req.body;
+        const interview = await Interview.findById(interviewId);
+
+        if (interview === null) {
+            return res.status(404).json(ApiError(404, "Interview not found"));
+        }
+
+        let redisClient = await connectRedis();
+
+        await redisClient.set(String(interviewId), JSON.stringify([]));
+
+        return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
+    } catch (error) {
+        console.log("Error while connecting to Redis", error);
+        return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
+    }
+})
+
+// in use
+export const createInterviewBySvarAdmin = asyncHandler(async (req, res) => {
     /*
     Handle the creation of an interview when user clicks on "Join Interview" button in a Written interview card
      */
@@ -817,7 +845,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     console.log('wow')
 
-    let difficulty = '';
+    let difficulty;
 
     if (adminInterview.essay > questionNo) {
         difficulty = 'essay';
@@ -825,7 +853,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
         difficulty = 'jumbled';
     } else if (adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
         difficulty = 'errorDetection';
-    } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
+    } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + admview.essay > questionNo) {
         difficulty = 'fillInTheBlanks';
     } else {
         difficulty = 'synonymsAndAntonyms';
@@ -1011,7 +1039,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
     }
 
 
-    let prompt = "";
+    let prompt;
 
     if (difficulty === "essay") {
 
@@ -1110,7 +1138,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 
     console.log('wow')
-    let difficulty = '';
+    let difficulty;
     if (adminInterview.easy > questionNo) {
         difficulty = 'Easy';
     } else if (adminInterview.medium + adminInterview.easy > questionNo) {
@@ -1242,6 +1270,222 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 });
 
+export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
+    const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+    const {svar, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
+
+    let redisClient = await connectRedis();
+    let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+
+    if (conversationHistory.length > 0) {
+        conversationHistory.push({
+            answer, score
+        })
+    } else {
+        conversationHistory.push({
+            svar: svar
+        })
+    }
+
+    await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+    const historyPrompt = conversationHistory.map((interaction, index) => { // putting this in prompts ?
+        return `Q${index + 1}: ${interaction.svar}`;
+    }).join("\n");
+
+    // const adminInterview = await AdminSvarInterview.findById(adminInterviewId);
+    /* get the admin interview by Interview table's interviewId
+     * where adminInterview's interview: {
+        type: [mongoose.Schema.Types.ObjectId],
+        // required : true,
+        ref: "Interview"
+    },
+     */
+    const adminInterview = await AdminSvarInterview.findOne({interview: interviewId}).populate('interview');
+    // console.log(adminInterview);
+    // return res.status(500).json({error: 'Failed to generate audio'});
+
+
+    if (adminInterview == null) {
+        res.status(404).json(ApiError(404, "Interview not found"));
+    }
+
+    let difficulty = '';
+    if (adminInterview.reading > questionNo) {
+        difficulty = 'reading';
+    } else if (adminInterview.repeating + adminInterview.reading > questionNo) {
+        difficulty = 'repeating';
+    } else if (adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
+        difficulty = 'short'
+    } else if (adminInterview.jumbled + adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
+        difficulty = 'jumbled'
+    } else {
+        difficulty = 'comprehension';
+    }
+
+    if (difficulty === 'reading') {
+        const readingQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "reading", _id: {$in: adminInterview.questions}
+        });
+        if (questionNo < readingQuestions.length) {
+            const question = readingQuestions[questionNo].question; // get the question from the admin questions
+
+
+            const dataToSend = {
+                question,difficulty    // only need to send the question since the audio file is not required for read and speak
+            }
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
+        }
+    }
+    if (difficulty === "repeating") {
+        const repeatingQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "repeating", _id: {$in: adminInterview.questions}
+        })
+
+        if ((questionNo - adminInterview.reading) < repeatingQuestions.length) {
+            const question = repeatingQuestions[questionNo - adminInterview.repeating].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            await textToSpeech(question, audioFilePath); // directly convert the question since no coding questions will be here
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({error: 'Failed to generate audio'});
+            }
+                    await saveSessionQuestions(interviewId, question);
+
+
+            const dataToSend = {
+                audioFileName: audioFileName,
+                difficulty
+            }
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+
+        }
+    }
+
+    if (difficulty === "short") {
+        const shortQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "short", _id: {$in: adminInterview.questions}
+        });
+
+        if (questionNo - (adminInterview.repeating + adminInterview.reading) < shortQuestions.length) {
+            const question = shortQuestions[questionNo - (adminInterview.repeating + adminInterview.reading)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            await textToSpeech(question, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({error: "Failed to generate audio"})
+            };
+                    await saveSessionQuestions(interviewId, question);
+
+            const dataToSend = {
+                audioFileName: audioFileName,difficulty
+            }
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
+        }
+    }
+
+    if (difficulty === "jumbled") {
+        const jumbledQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "jumbled", _id: {$in: adminInterview.questions}
+        })
+        if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short) < jumbledQuestions.length) {
+            const question = jumbledQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.short)].question;
+
+            const audioFileName = `question-${generateUniqueKey()}.mp3`;
+            const audioFilePath = path.join(objectStorePath, audioFileName);
+
+            await textToSpeech(question, audioFilePath);
+
+            if (!fs.existsSync(audioFilePath)) {
+                return res.status(500).json({error: "Failed to generate audio"});
+            }
+                    await saveSessionQuestions(interviewId, question);
+
+            const dataToSend = {
+                audioFileName: audioFileName,difficulty
+            }
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+            
+        }
+    }
+
+    if (difficulty === "comprehension") {
+        const comprehensionQuestions = await InterviewQuestionsByAdmin.find({
+            difficulty: "comprehension", _id: {$in: adminInterview.questions}
+        });
+
+        if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length) {
+            const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
+                    await saveSessionQuestions(interviewId, question);
+
+            const dataToSend = {
+                question,difficulty
+            };
+
+            res.status(200).json(new ApiResponse(200, dataToSend, "Question Generated Successfully"));
+        }
+    }
+
+    let prompt = "";
+
+    if (difficulty === "reading") {
+        prompt = `
+        Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
+        `;
+    } else if (difficulty === "repeating") {
+        prompt = `
+                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 20 words. Example format: "I had a flat tire while driving home from the office."
+            `;
+    } else if (difficulty === "short") {
+        prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Board of directors were neutral about the proposal: interested or indifferent?"`
+    } else if (difficulty === "jumbled") {
+        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
+    } else if (difficulty === "comprehension") {
+        prompt = `Generate a passage of exactly 100 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
+    }
+
+    prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
+
+    const completion = await openai.chat.completions.create({
+        messages: [{role: "system", content: "You are a helpful assistant."}, {role: "user", content: prompt}],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+    });
+
+    const question = completion.choices[0].message.content.trim();
+
+    if (difficulty === "reading" || difficulty === "comprehension") {
+            await saveSessionQuestions(interviewId, question);
+        return res.status(200).json(new ApiResponse(200, {question,difficulty}, "Quesetion Generated Successfully"));
+    }
+
+    const audioFileName = `question-${generateUniqueKey()}.mp3`;
+    const audioFilePath = path.join(objectStorePath, audioFileName);
+
+    // const cleanedQuestion = question.replace(/```[\s\S]*?```/g, ''); // no need
+    await textToSpeech(question, audioFilePath);
+
+    if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({error: 'Failed to generate audio'});
+    }
+    await saveSessionQuestions(interviewId, question);
+
+    const dataToSend = {
+        difficulty, audioFileName: audioFileName
+    };
+
+    return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
+})
 
 // ---------------------------- Helper Functions ----------------------------
 
@@ -1306,119 +1550,205 @@ async function evaluateAnswerWithPrompt(answer, question) {
     return completion.choices[0].message.content;
 }
 
-async function textToSpeech(input, audioPath) {
+async function evaluateAnswerForSvar(answer, question) {
+    console.log("Inside the evaluate answer for svar")
     const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
-    const mp3 = await openai.audio.speech.create({
-        model: "tts-1", voice: "onyx", input: input,
-    });
+    const prompt = `
+    You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
 
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-    await fs.promises.writeFile(audioPath, buffer);
-}
+    Here is the question: "${question}"
+    Here is the answer: "${answer}"
 
+    Please evaluate the answer based on the following criteria:
+    1. Overall Score: An integer score out of 100 for the overall quality of the answer, taking into account all aspects (pronunciation, clarity, grammar, etc.).
+    2. Grammar: An integer score out of 100 for the grammatical correctness of the answer. Focus on sentence structure, verb tense, and clarity.
+    3. Pronunciation: An integer score out of 100 for the pronunciation of the answer. Evaluate clarity, smoothness, and accuracy of pronunciation.
+    4. Correctness: An integer score out of 100 for the factual correctness of the answer. Evaluate the accuracy, depth of knowledge, and relevance of the information provided.
 
-// ---------------------------- Evaluation Functions ----------------------------
-
-
-export const evaluateAnswer = asyncHandler(async (req, res) => {
-    try {
-        const {question, interviewId} = req.body;
-        let answer = req.extractedAnswer;
-
-        if (answer === undefined) {
-            answer = req.body.answer;
-        }
-
-        console.log("answer ####", answer);
-        console.log("question ####", question);
-        console.log("interviewId ####", interviewId);
-
-        let feedback = await evaluateAnswerWithPrompt(answer, question);
-
-        feedback = JSON.parse(feedback);
-
-
-        await InterviewQuestion.create({
-            question: question,
-            answer: feedback.userAnswer,
-            expectedAnswer: feedback.expectedAnswer,
-            interview: interviewId,
-            student: req.user._id,
-            overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
-            grammar: feedback.grammarScore,
-            vocabulary: feedback.vocabularyScore,
-            technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
-            vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
-            grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
-        });
-
-        console.log("answer added successfully ####");
-
-        return res.status(200).json(new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully"));
-    } catch (err) {
-        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
-    }
-});
-
-export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
-    try {
-
-
-        const {question, answer, interviewId} = req.body;
-        console.log("answer ####", answer);
-        console.log("question ####", question);
-
-        const openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
-        });
-        const prompt = `
-    You are an evaluator. I will provide you with a prompt and the corresponding response written by the user. Your task is to evaluate the response on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses of the response in each of the following areas.
-
-    Here is the prompt: "${question}"
-    Here is the response: "${answer}"
-
-    Please evaluate the response based on the following criteria:
-
-    Overall Score: An integer score out of 100 for the overall quality of the response.
-    Grammar: An integer score out of 100 for the grammatical correctness of the response.
-    Vocabulary: An integer score out of 100 for the vocabulary used in the response, including spelling accuracy.
-    Content and Structure: An integer score out of 100 for the relevance, depth, originality, logical flow, and organization of the response.
-    
-    The report must be detailed, addressing both strengths and weaknesses in each category. Include suggestions for improvement where relevant. Be specific about what the user has done well and what can be improved, with clear examples if applicable.
-
-    contentStructureExplanation: Detailed feedback on the content, logical flow, and organization of the response. You must address both positive aspects (what was done well) and areas for improvement (what needs to be improved and how).
-
-    vocabularyExplanation: Detailed feedback on the vocabulary used in the response. You must mention the strength of word choices and variety, while also pointing out if certain words could be replaced for better clarity, tone, or precision.
-
-    grammarExplanation: Detailed feedback on the grammatical correctness of the response. You must point out both correct usage and any errors, including sentence structure, punctuation, or verb tense issues, along with suggestions for how to correct them.
-
-    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure there are no symbols like tilde so that I can parse it as JSON:
+    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
     {
-        "prompt": "The prompt",
-        "userResponse": "The user's response text",
+        "question": "The question text",
+        "userAnswer": "The user's answer text",
         "overallScore": 90,
         "grammarScore": 85,
-        "vocabularyScore": 88,
-        "contentStructureScore": 90,
-        "contentStructureExplanation": {
-            "Pros": "Detailed explanation of the strong points of the content and structure\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
-            "Cons": "Detailed explanation of the weak points of the content and structure and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
+        "pronunciationScore": 88,
+        "correctnessScore": 92,
+        "pronunciationExplanation": {
+            "Pros": "Detailed explanation of the strong points of pronunciation.\nFirst Point: Clear enunciation of technical terms.\nSecond Point: Consistent and smooth flow of speech.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of the weak points in pronunciation and suggestions for improvement.\nFirst Point: Pronunciation of key terminology was incorrect.\nSecond Point: Lack of variation in tone.\nThird Point: Detailed feedback\nand so on..."
         },
-        "vocabularyExplanation": {
-            "Pros": "Detailed explanation of the strong points of the vocabulary used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
-            "Cons": "Detailed explanation of the weak points of the vocabulary used and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Spelling error(s) detected, specific word(s) with mistakes and their corrections\nand so on..."
+        "correctnessExplanation": {
+            "Pros": "Detailed explanation of the strong points of correctness.\nFirst Point: Answer is factually accurate.\nSecond Point: Logical and relevant explanation of concepts.\nThird Point: Detailed feedback\nand so on...",
+            "Cons": "Detailed explanation of the weak points in correctness and suggestions for improvement.\nFirst Point: Misinterpretation of key concept.\nSecond Point: Lack of depth in explanation.\nThird Point: Detailed feedback\nand so on..."
         },
         "grammarExplanation": {
-            "Pros": "Detailed explanation of the strong points of the grammar used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
-            "Cons": "Detailed explanation of the weak points of the grammar used and suggestions for correction\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
-        },
-        "expectedResponse": "The expected response to the prompt. The response should be in 200 words."
+                "Pros": "Detailed explanation of the strong points in grammar.\nFirst Point: Correct use of verb tense and sentence structure.\nSecond Point: Clear and concise sentence formation.\nThird Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of grammatical errors and suggestions for improvement.\nFirst Point: Subject-verb agreement errors.\nSecond Point: Improper use of passive voice affecting clarity.\nThird Point: Detailed feedback\nand so on..."
+            },
+        "expectedAnswer": "The expected answer to the question. The answer should be in 50 words."
     }
 
-    Ensure the keys are exactly "prompt", "userResponse", "overallScore", "grammarScore", "vocabularyScore", "contentStructureScore", "contentStructureExplanation", "vocabularyExplanation", and "grammarExplanation". All scores should be integers.
-    If the question is fill-in-the-blank, antonyms, or synonyms, the expected response should be a single word. If the user provides the correct word, all scores should be 100.
+    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.`
+
+    const completion = await openai.chat.completions.create({
+        messages: [{role: "system", content: "You are a strict but constructive interviewer."}, {
+            role: "user",
+            content: prompt
+        }], model: "gpt-4o-mini", max_tokens: 1000,
+    });
+
+    //
+
+    console.log(completion.choices[0].message.content);
+    return completion.choices[0].message.content;
+}
+
+    async function textToSpeech(input, audioPath) {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+        const mp3 = await openai.audio.speech.create({
+            model: "tts-1", voice: "onyx", input: input,
+        });
+
+        const buffer = Buffer.from(await mp3.arrayBuffer());
+        await fs.promises.writeFile(audioPath, buffer);
+    }
+
+
+    // ---------------------------- Evaluation Functions ----------------------------
+
+
+    export const evaluateAnswer = asyncHandler(async (req, res) => {
+        try {
+            let {question, interviewId} = req.body;
+            let answer = req.extractedAnswer;
+
+            if (answer === undefined) {
+                answer = req.body.answer;
+            }
+            if (!question) {
+                question = await getSessionQuestions(interviewId);
+            }
+
+            const interview = await Interview.findById(interviewId); //fetch
+
+            let feedback;
+            if(interview.type === "Svar"){
+                console.log("Svar me ghus gaye")
+                feedback = await evaluateAnswerForSvar(answer, question);
+            } else {
+                feedback = await evaluateAnswerWithPrompt(answer, question);
+            }
+
+            console.log("answer ####", answer);
+            console.log("question ####", question);
+            console.log("interviewId ####", interviewId);
+
+            // let feedback = await evaluateAnswerWithPrompt(answer, question);
+
+            feedback = JSON.parse(feedback);
+
+            if (interview.type === "Svar"){
+                console.log("svar ke liye create hone me ghus gaye")
+                await InterviewQuestion.create({
+                    question: question,
+                    answer: feedback.userAnswer,
+                    expectedAnswer: feedback.expectedAnswer,
+                    interview: interviewId,
+                    student: req.user._id,
+                    overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
+                    grammar: feedback.grammarScore,
+                    pronounciation: feedback.pronunciationScore,
+                    correctness: feedback.correctnessScore,
+                    grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+                    pronunciationExplanation: [feedback.pronunciationExplanation.Pros, feedback.pronunciationExplanation.Cons],
+                    correctnessExplanation: [feedback.correctnessExplanation.Pros, feedback.correctnessExplanation.Cons]
+                })
+            } else {
+                await InterviewQuestion.create({
+                    question: question,
+                    answer: feedback.userAnswer,
+                    expectedAnswer: feedback.expectedAnswer,
+                    interview: interviewId,
+                    student: req.user._id,
+                    overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
+                    grammar: feedback.grammarScore,
+                    vocabulary: feedback.vocabularyScore,
+                    technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
+                    vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
+                    grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+                });
+            }
+
+
+            console.log("answer added successfully ####");
+
+            return res.status(200).json(new ApiResponse(200, feedback, "Answer evaluated successfully"));
+        } catch (err) {
+            console.warn(err);
+            return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+        }
+    });
+
+    export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
+        try {
+
+            const {question, answer, interviewId} = req.body;
+            console.log("answer ####", answer);
+            console.log("question ####", question);
+
+            const openai = new OpenAI({
+                apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
+            });
+            const prompt = `
+        You are an evaluator. I will provide you with a prompt and the corresponding response written by the user. Your task is to evaluate the response on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses of the response in each of the following areas.
+
+        Here is the prompt: "${question}"
+        Here is the response: "${answer}"
+
+        Please evaluate the response based on the following criteria:
+
+        Overall Score: An integer score out of 100 for the overall quality of the response.
+        Grammar: An integer score out of 100 for the grammatical correctness of the response.
+        Vocabulary: An integer score out of 100 for the vocabulary used in the response, including spelling accuracy.
+        Content and Structure: An integer score out of 100 for the relevance, depth, originality, logical flow, and organization of the response.
+        
+        The report must be detailed, addressing both strengths and weaknesses in each category. Include suggestions for improvement where relevant. Be specific about what the user has done well and what can be improved, with clear examples if applicable.
+
+        contentStructureExplanation: Detailed feedback on the content, logical flow, and organization of the response. You must address both positive aspects (what was done well) and areas for improvement (what needs to be improved and how).
+
+        vocabularyExplanation: Detailed feedback on the vocabulary used in the response. You must mention the strength of word choices and variety, while also pointing out if certain words could be replaced for better clarity, tone, or precision.
+
+        grammarExplanation: Detailed feedback on the grammatical correctness of the response. You must point out both correct usage and any errors, including sentence structure, punctuation, or verb tense issues, along with suggestions for how to correct them.
+
+        The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure there are no symbols like tilde so that I can parse it as JSON:
+        {
+            "prompt": "The prompt",
+            "userResponse": "The user's response text",
+            "overallScore": 90,
+            "grammarScore": 85,
+            "vocabularyScore": 88,
+            "contentStructureScore": 90,
+            "contentStructureExplanation": {
+                "Pros": "Detailed explanation of the strong points of the content and structure\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of the weak points of the content and structure and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
+            },
+            "vocabularyExplanation": {
+                "Pros": "Detailed explanation of the strong points of the vocabulary used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of the weak points of the vocabulary used and suggestions for improvement\nFirst Point: Detailed feedback\nSecond Point: Spelling error(s) detected, specific word(s) with mistakes and their corrections\nand so on..."
+            },
+            "grammarExplanation": {
+                "Pros": "Detailed explanation of the strong points of the grammar used\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on...",
+                "Cons": "Detailed explanation of the weak points of the grammar used and suggestions for correction\nFirst Point: Detailed feedback\nSecond Point: Detailed feedback\nand so on..."
+            },
+            "expectedResponse": "The expected response to the prompt. The response should be in 200 words."
+        }
+
+        Ensure the keys are exactly "prompt", "userResponse", "overallScore", "grammarScore", "vocabularyScore", "contentStructureScore", "contentStructureExplanation", "vocabularyExplanation", and "grammarExplanation". All scores should be integers.
+        If the question is fill-in-the-blank, antonyms, or synonyms, the expected response should be a single word. If the user provides the correct word, all scores should be 100.
 `;
 
 
@@ -1451,6 +1781,43 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
         return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
 });
+
+    export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
+        try {
+            const {question, interviewId} = req.body
+            let answer = req.extractedAnswer
+
+            if (answer === undefined) {
+                answer = req.body.answer;
+            }
+
+            let evaluatePrompt = evaluateAnswerForSvar(answer, question);
+
+            evaluatePrompt = JSON.parse(evaluateAnswerForSvar);
+
+            await InterviewQuestion.create({
+                question: question,
+                answer: evaluatePrompt.userAnswer,
+                expectedAnswer: evaluatePrompt.expectedAnswer,
+                interview: interviewId,
+                student: req.user._id,
+                overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : feedback.overallScore,
+                grammar: evaluatePrompt.grammarScore,
+                pronunciation: evaluatePrompt.pronunciationScore,
+                pronunciationExplanation: [evaluatePrompt.pronunciationExplanation.Pros, evaluatePrompt.pronunciationExplanation.Cons],
+                correctnessExplanation: [evaluatePrompt.correctnessExplanation.Pros, evaluatePrompt.correctnessExplanation.Cons],
+                grammarExplanation: [evaluatePrompt.grammarExplanation.Pros, evaluatePrompt.grammarExplanation.Cons],
+            });
+
+            console.log("answer added successfully ####");
+
+            return res.status(200).json(new ApiResponse(200, JSON.parse(evaluatePrompt), "Answer evaluated successfully"));
+        } catch (err) {
+            return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+        }
+    });
+
+
 
 
 // ---------------------------- Extra Routes ----------------------------
@@ -1523,21 +1890,39 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
      * Fetch all the interviews for the student dashboard
      */
     try {
-        console.log("req.user ####", req.user);
+        // console.log("req.user ####", req.user);
 
         const student = await Student.findOne({user: req.user._id})
-        console.log("student ####", student);
+        // console.log("student ####", student);
         if (!student) {
             res.status(404).json(ApiError(404, "Student not found"))
         }
 
         const interviews = await Interview.find({_id: {$in: student.interview_taken}})
 
-        console.log(interviews)
+        // console.log(interviews)
 
-        res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
+        return res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
     } catch (error) {
+        console.error(`${new Date().toISOString()} - ${error}`)
         res.status(500).json(ApiError(500, error.message || "Internal Server Error"))
     }
 })
 
+export const fetchInterviewForSvar = asyncHandler(async (req, res) => {
+    try{
+        const { interviewId } = req.body;
+
+        if(!interviewId){
+            return res.status(400).json(ApiError(400, "Interview ID is required"));
+        }
+
+        const interview = await Interview.findById(interviewId)
+        if(!interview){
+            return res.status(404).json(ApiError(404, "Interview does not exist"));
+        }
+        return res.status(200).json(new ApiResponse(200, {interview}, "Interview fetched successfully"))
+    } catch(err) {
+        res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+    }
+})

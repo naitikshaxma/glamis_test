@@ -58,6 +58,9 @@ const interviewQuestionSchema = new mongoose.Schema({
     pronounciation: {
         type: Number
     },
+    correctness: {
+        type: Number
+    },
     vocabulary: {
         type: Number
     },
@@ -68,6 +71,12 @@ const interviewQuestionSchema = new mongoose.Schema({
         type: [String]
     },
     vocabularyExplanation: {
+        type: [String]
+    },
+    pronunciationExplanation: {
+        type: [String]
+    },
+    correctnessExplanation: {
         type: [String]
     },
     grammarExplanation: {
@@ -464,6 +473,18 @@ const interviewQuestionByAdmin = new mongoose.Schema({
 );
 
 
+const SessionQuestion = new mongoose.Schema({
+    question: {
+        type: String,
+        required: true
+    },
+    interview: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Interview'
+    },
+}, { timestamps: true });
+
+
 export const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 export const Interview = mongoose.model('Interview', interviewSchema);
 export const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);
@@ -471,6 +492,7 @@ export const AdminCompanyInterview = mongoose.model('AdminCompanyInterview', adm
 export const AdminVerbalInterview = mongoose.model('AdminVerbalInterview', adminVerbalInterview);
 export const AdminSvarInterview = mongoose.model('AdminSvarInterview', adminSvarInterview);
 export const AdminWrittenInterview = mongoose.model('AdminWrittenInterview', adminWrittenInterview);
+export const SessionQuestions = mongoose.model('SessionQuestions', SessionQuestion);
 export const InterviewByJD = mongoose.model('InterviewByJD', interviewByJD);
 export const InterviewByResume = mongoose.model('InterviewByResume', interviewByResume);
 export const InterviewByCoreSubjects = mongoose.model('InterviewByCoreSubjects', interviewByCoreSubjects);

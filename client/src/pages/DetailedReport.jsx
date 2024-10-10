@@ -10,6 +10,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
+import { Svar, SvarCard } from '../components/detailed_report/Svar';
 
 
 
@@ -17,7 +18,7 @@ const DetailedReport = () => {
     const navigate = useNavigate();
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
-    const [activeTab, setActiveTab] = useState('technical');
+    const [activeTab, setActiveTab] = useState('Svar');
     const [varTab1, setVarTab1] = useState('Technical Skills');
     const [varTab2, setVarTab2] = useState('Verbal Skills');
 
@@ -79,6 +80,9 @@ const DetailedReport = () => {
         } else if (response.data.interviewType === 'written') {
             setVarTab1('Written Skills');
             setVarTab2('Content Information');
+        } else if (response.data.interviewType === 'Svar'){
+            setVarTab1('Svar')
+            setVarTab2('')
         }
     }
 
@@ -232,6 +236,68 @@ const DetailedReport = () => {
                     </div>
 
                 )
+                case 'Svar': 
+                    return( 
+                       
+                    <div className='w-full flex justify-around mb-5 overflow-auto'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0  overflow-x">
+                            <div className="flex space-y-4 ">
+                            <p className='hidden'>hello</p>
+                            {
+                                
+                                result?.map((item, index) => (
+                                    <Link
+                                        key={index}
+                                        to={`question-${index}`}  // Updated: include '#' to match with the id
+                                        smooth={true}
+                                        duration={500}
+                                        className={`flex w-full justify-center items-center space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                        onClick={() => handleQuestionClick(index)}
+                                    >
+                                        Q {index + 1}
+                                    </Link>
+                                ))
+                            }
+                        </div>
+                        <div
+                    className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                    id="scroll-container"
+                    ref={scrollContainerRef}
+                >
+                    {
+                        result.map((item, index) => (
+                            <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
+                                <SvarCard
+                                    qno={index}
+                                    question={item.question}
+                                    answer={item.answer}
+                                    feedback={{
+                                        pronounciation: {
+                                            good: [item.pronunciationExplanation[0]],
+                                            improvement: [item.pronunciationExplanation[1]]
+                                        },
+                                        correctness: {
+                                            good: [item.correctnessExplanation[0]],
+                                            improvement: [item.correctnessExplanation[1]]
+                                        },
+                                        grammar: {
+                                            good: [item.grammarExplanation[0]],
+                                            improvement: [item.grammarExplanation[1]]
+                                        }}}
+                                    score={item.overallPerformance}
+                                    expectedAnswer={item.expectedAnswer}
+                                    grammar= {item.grammar}
+                                    correctness = {item.correctness}
+                                    pronounciation= {item.pronounciation}
+                                />
+                            </div>
+                        ))
+                    }
+                </div>
+                    </div>
+                    </div>
+    
+                    )
             default:
                 return (
                     <>Technical</>
@@ -284,17 +350,36 @@ const DetailedReport = () => {
                         <span>Analysis</span>
                     </div>
                     <div className='flex w-full'>
-                        <Technical technicalScore={[
-                            { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
-                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
-                        ]} varTab1={varTab1}
-                        />
-                        <Verbal data={
-                            [
-                                { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
-                                { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
-                            ]
-                        } varTab2={varTab2} />
+                        {activeTab === 'Svar' ? 
+                        <Svar pronounciationScore={[
+                            { name: 'Score', value: result.reduce((acc, item) => acc + item.pronounciation, 0) / result.length },
+                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.pronounciation, 0) / result.length }
+                          ]} 
+                          grammarScore={[
+                              { name: 'Score', value: result.reduce((acc, item) => acc + item.grammar, 0) / result.length },
+                              { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                            ]} 
+                            correctnessScore={[
+                              { name: 'Score', value: result.reduce((acc, item) => acc + item.correctness, 0) / result.length },
+                              { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.correctness, 0) / result.length }
+                            ]} 
+                          />
+                            :
+                            <>
+                                <Technical technicalScore={[
+                                    { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
+                                    { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
+                                ]} varTab1={varTab1}
+                                />
+                                <Verbal data={
+                                    [
+                                        { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
+                                        { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                                    ]
+                                } varTab2={varTab2} />
+                            </>
+                    }
+                        
                     </div>
                 </div>
                 <div className="report mt-4">
