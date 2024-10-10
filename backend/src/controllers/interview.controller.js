@@ -1537,6 +1537,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
 }
 
 async function evaluateAnswerForSvar(answer, question) {
+    console.log("Inside the evaluate answer for svar")
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
@@ -1619,6 +1620,7 @@ async function evaluateAnswerForSvar(answer, question) {
 
             let feedback = ""; 
             if(interview.type === "Svar"){
+                console.log("Svar me ghus gaye")
                 feedback = await evaluateAnswerForSvar(answer, question); 
             } else {
                 feedback = await evaluateAnswerWithPrompt(answer, question); 
@@ -1633,6 +1635,7 @@ async function evaluateAnswerForSvar(answer, question) {
             feedback = JSON.parse(feedback);
 
             if (interview.type === "Svar"){
+                console.log("svar ke liye create hone me ghus gaye")
                 await InterviewQuestion.create({
                     question: question, 
                     answer: feedback.userAnswer, 
@@ -1642,7 +1645,7 @@ async function evaluateAnswerForSvar(answer, question) {
                     overalPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore, 
                     grammar: feedback.grammarScore, 
                     pronunciation: feedback.pronunciationScore, 
-                    correctness: pronunciation.correctnessScore, 
+                    correctness: feedback.correctnessScore, 
                     grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons], 
                     pronunciationExplanation: [feedback.pronunciationExplanation.Pros, feedback.pronunciationExplanation.Cons], 
                     correctnessExplanation: [feedback.correctnessExplanation.Pros, feedback.correctnessExplanation.Cons]
@@ -1666,7 +1669,7 @@ async function evaluateAnswerForSvar(answer, question) {
 
             console.log("answer added successfully ####");
 
-            return res.status(200).json(new ApiResponse(200, JSON.parse(feedback), "Answer evaluated successfully"));
+            return res.status(200).json(new ApiResponse(200, feedback, "Answer evaluated successfully"));
         } catch (err) {
             return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
         }
