@@ -1615,28 +1615,54 @@ async function evaluateAnswerForSvar(answer, question) {
                 answer = req.body.answer;
             }
 
+            const interview = await Interview.findById(interviewId); //fetch 
+
+            let feedback = ""; 
+            if(interview.type === "Svar"){
+                feedback = await evaluateAnswerForSvar(answer, question); 
+            } else {
+                feedback = await evaluateAnswerWithPrompt(answer, question); 
+            }
+
             console.log("answer ####", answer);
             console.log("question ####", question);
             console.log("interviewId ####", interviewId);
 
-            let feedback = await evaluateAnswerWithPrompt(answer, question);
+            // let feedback = await evaluateAnswerWithPrompt(answer, question);
 
             feedback = JSON.parse(feedback);
 
-
-            await InterviewQuestion.create({
-                question: question,
-                answer: feedback.userAnswer,
-                expectedAnswer: feedback.expectedAnswer,
-                interview: interviewId,
-                student: req.user._id,
-                overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
-                grammar: feedback.grammarScore,
-                vocabulary: feedback.vocabularyScore,
-                technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
-                vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
-                grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
-            });
+            if (interview.type === "Svar"){
+                await InterviewQuestion.create({
+                    question: question, 
+                    answer: feedback.userAnswer, 
+                    expectedAnswer: feedback.expectedAnswer, 
+                    interview: interviewId, 
+                    student: req.user._id,
+                    overalPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore, 
+                    grammar: feedback.grammarScore, 
+                    pronunciation: feedback.pronunciationScore, 
+                    correctness: pronunciation.correctnessScore, 
+                    grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons], 
+                    pronunciationExplanation: [feedback.pronunciationExplanation.Pros, feedback.pronunciationExplanation.Cons], 
+                    correctnessExplanation: [feedback.correctnessExplanation.Pros, feedback.correctnessExplanation.Cons]
+                })
+            } else {
+                await InterviewQuestion.create({
+                    question: question,
+                    answer: feedback.userAnswer,
+                    expectedAnswer: feedback.expectedAnswer,
+                    interview: interviewId,
+                    student: req.user._id,
+                    overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
+                    grammar: feedback.grammarScore,
+                    vocabulary: feedback.vocabularyScore,
+                    technicalExplanation: [feedback.technicalExplanation.Pros, feedback.technicalExplanation.Cons],
+                    vocabularyExplanation: [feedback.vocabularyExplanation.Pros, feedback.vocabularyExplanation.Cons],
+                    grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+                });
+            }
+            
 
             console.log("answer added successfully ####");
 

@@ -132,24 +132,24 @@ const LiveInterview = () => {
         console.log('Form data:', formData);
         try {
             console.log("Break 05");
-            const fetchInterview = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/fetchInterviewForSvar`, {interviewId}, {
-                headers: {
-                    'Content-Type': 'application/json`',
-                    'Authorization': `Bearer ${Cookies.get('accessToken')}`,
-                },
-            }); 
-            if (fetchInterview.data.data.interview.type === "Svar") {
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionSvar`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${Cookies.get('accessToken')}`,
-                    },
-                });
-                console.log('Break 06');
-                // Assuming you want to handle the response, e.g., update results
-                setResults(prev => [...prev, response.data.data]);
-                return;
-            } else { 
+            // const fetchInterview = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/fetchInterviewForSvar`, {interviewId}, {
+            //     headers: {
+            //         'Content-Type': 'application/json`',
+            //         'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+            //     },
+            // }); 
+            // if (fetchInterview.data.data.interview.type === "Svar") {
+            //     const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionSvar`, formData, {
+            //         headers: {
+            //             'Content-Type': 'multipart/form-data',
+            //             'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+            //         },
+            //     });
+            //     console.log('Break 06');
+            //     // Assuming you want to handle the response, e.g., update results
+            //     setResults(prev => [...prev, response.data.data]);
+            //     return;
+            // } else { 
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -160,7 +160,7 @@ const LiveInterview = () => {
                 // Assuming you want to handle the response, e.g., update results
                 setResults(prev => [...prev, response.data.data]);
                 return;
-            }
+            // }
         } catch (error) {
             console.error('Error uploading audio:', error);
         }
