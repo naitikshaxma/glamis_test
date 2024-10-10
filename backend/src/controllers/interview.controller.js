@@ -4,7 +4,12 @@ import path from "path";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {
-    AdminSubjectInterview, AdminSvarInterview, AdminVerbalInterview, AdminWrittenInterview, Interview, InterviewQuestion
+    AdminSubjectInterview,
+    AdminSvarInterview,
+    AdminVerbalInterview,
+    AdminWrittenInterview,
+    Interview,
+    InterviewQuestion,
 } from "../models/interview.models.js"
 import {Student} from "../models/users.models.js"
 import "dotenv/config.js";
@@ -14,8 +19,7 @@ import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import {AdminCompanyInterview, InterviewQuestionsByAdmin} from "../models/interview.models.js";
-import {json, text} from "express";
-import mongoose from "mongoose";
+import {getSessionQuestions, saveSessionQuestions} from "../utils/crud.js";
 
 
 const objectStorePath = path.resolve("../objectStore");
@@ -841,7 +845,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
     console.log('wow')
 
-    let difficulty = '';
+    let difficulty;
 
     if (adminInterview.essay > questionNo) {
         difficulty = 'essay';
@@ -1035,7 +1039,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
     }
 
 
-    let prompt = "";
+    let prompt;
 
     if (difficulty === "essay") {
 
@@ -1134,7 +1138,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 
     console.log('wow')
-    let difficulty = '';
+    let difficulty;
     if (adminInterview.easy > questionNo) {
         difficulty = 'Easy';
     } else if (adminInterview.medium + adminInterview.easy > questionNo) {
@@ -1350,9 +1354,12 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             if (!fs.existsSync(audioFilePath)) {
                 return res.status(500).json({error: 'Failed to generate audio'});
             }
+                    await saveSessionQuestions(interviewId, question);
+
 
             const dataToSend = {
-                audioFileName: audioFileName,difficulty
+                audioFileName: audioFileName,
+                difficulty
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -1375,8 +1382,8 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
             if (!fs.existsSync(audioFilePath)) {
                 return res.status(500).json({error: "Failed to generate audio"})
-            }
-            ;
+            };
+                    await saveSessionQuestions(interviewId, question);
 
             const dataToSend = {
                 audioFileName: audioFileName,difficulty
@@ -1401,11 +1408,17 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             if (!fs.existsSync(audioFilePath)) {
                 return res.status(500).json({error: "Failed to generate audio"});
             }
+                    await saveSessionQuestions(interviewId, question);
 
             const dataToSend = {
                 audioFileName: audioFileName,difficulty
             }
+<<<<<<< HEAD
             
+=======
+
+            return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+>>>>>>> c0861f0af4202a6c4531ab300557c34222c9a153
         }
     }
 
@@ -1416,6 +1429,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
         if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length) {
             const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
+                    await saveSessionQuestions(interviewId, question);
 
             const dataToSend = {
                 question,difficulty
@@ -1454,6 +1468,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     const question = completion.choices[0].message.content.trim();
 
     if (difficulty === "reading" || difficulty === "comprehension") {
+            await saveSessionQuestions(interviewId, question);
         return res.status(200).json(new ApiResponse(200, {question,difficulty}, "Quesetion Generated Successfully"));
     }
 
@@ -1466,6 +1481,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({error: 'Failed to generate audio'});
     }
+    await saveSessionQuestions(interviewId, question);
 
     const dataToSend = {
         difficulty, audioFileName: audioFileName
@@ -1610,21 +1626,24 @@ async function evaluateAnswerForSvar(answer, question) {
 
     export const evaluateAnswer = asyncHandler(async (req, res) => {
         try {
-            const {question, interviewId} = req.body;
+            let {question, interviewId} = req.body;
             let answer = req.extractedAnswer;
 
             if (answer === undefined) {
                 answer = req.body.answer;
             }
+            if (!question) {
+                question = await getSessionQuestions(interviewId);
+            }
 
-            const interview = await Interview.findById(interviewId); //fetch 
+            const interview = await Interview.findById(interviewId); //fetch
 
-            let feedback = ""; 
+            let feedback;
             if(interview.type === "Svar"){
                 console.log("Svar me ghus gaye")
-                feedback = await evaluateAnswerForSvar(answer, question); 
+                feedback = await evaluateAnswerForSvar(answer, question);
             } else {
-                feedback = await evaluateAnswerWithPrompt(answer, question); 
+                feedback = await evaluateAnswerWithPrompt(answer, question);
             }
 
             console.log("answer ####", answer);
@@ -1638,17 +1657,17 @@ async function evaluateAnswerForSvar(answer, question) {
             if (interview.type === "Svar"){
                 console.log("svar ke liye create hone me ghus gaye")
                 await InterviewQuestion.create({
-                    question: question, 
-                    answer: feedback.userAnswer, 
-                    expectedAnswer: feedback.expectedAnswer, 
-                    interview: interviewId, 
+                    question: question,
+                    answer: feedback.userAnswer,
+                    expectedAnswer: feedback.expectedAnswer,
+                    interview: interviewId,
                     student: req.user._id,
-                    overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore, 
-                    grammar: feedback.grammarScore, 
-                    pronounciation: feedback.pronunciationScore, 
-                    correctness: feedback.correctnessScore, 
-                    grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons], 
-                    pronunciationExplanation: [feedback.pronunciationExplanation.Pros, feedback.pronunciationExplanation.Cons], 
+                    overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
+                    grammar: feedback.grammarScore,
+                    pronounciation: feedback.pronunciationScore,
+                    correctness: feedback.correctnessScore,
+                    grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+                    pronunciationExplanation: [feedback.pronunciationExplanation.Pros, feedback.pronunciationExplanation.Cons],
                     correctnessExplanation: [feedback.correctnessExplanation.Pros, feedback.correctnessExplanation.Cons]
                 })
             } else {
@@ -1666,12 +1685,13 @@ async function evaluateAnswerForSvar(answer, question) {
                     grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
                 });
             }
-            
+
 
             console.log("answer added successfully ####");
 
             return res.status(200).json(new ApiResponse(200, feedback, "Answer evaluated successfully"));
         } catch (err) {
+            console.warn(err);
             return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
         }
     });
@@ -1774,7 +1794,7 @@ async function evaluateAnswerForSvar(answer, question) {
                 answer = req.body.answer;
             }
 
-            let evaluatePrompt = evaluateAnswerForSvar(answer, question); 
+            let evaluatePrompt = evaluateAnswerForSvar(answer, question);
 
             evaluatePrompt = JSON.parse(evaluateAnswerForSvar);
 
@@ -1786,7 +1806,7 @@ async function evaluateAnswerForSvar(answer, question) {
                 student: req.user._id,
                 overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : feedback.overallScore,
                 grammar: evaluatePrompt.grammarScore,
-                pronunciation: evaluatePrompt.pronunciationScore, 
+                pronunciation: evaluatePrompt.pronunciationScore,
                 pronunciationExplanation: [evaluatePrompt.pronunciationExplanation.Pros, evaluatePrompt.pronunciationExplanation.Cons],
                 correctnessExplanation: [evaluatePrompt.correctnessExplanation.Pros, evaluatePrompt.correctnessExplanation.Cons],
                 grammarExplanation: [evaluatePrompt.grammarExplanation.Pros, evaluatePrompt.grammarExplanation.Cons],
@@ -1799,7 +1819,7 @@ async function evaluateAnswerForSvar(answer, question) {
             return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
         }
     });
-        
+
 
 
 
@@ -1887,7 +1907,6 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
 
         return res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
     } catch (error) {
-        console.log("HELLO........")
         console.error(`${new Date().toISOString()} - ${error}`)
         res.status(500).json(ApiError(500, error.message || "Internal Server Error"))
     }
@@ -1895,18 +1914,18 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
 
 export const fetchInterviewForSvar = asyncHandler(async (req, res) => {
     try{
-        const { interviewId } = req.body; 
+        const { interviewId } = req.body;
 
         if(!interviewId){
-            return res.status(400).json(ApiError(400, "Interview ID is required")); 
+            return res.status(400).json(ApiError(400, "Interview ID is required"));
         }
 
         const interview = await Interview.findById(interviewId)
         if(!interview){
-            return res.status(404).json(ApiError(404, "Interview does not exist")); 
+            return res.status(404).json(ApiError(404, "Interview does not exist"));
         }
         return res.status(200).json(new ApiResponse(200, {interview}, "Interview fetched successfully"))
     } catch(err) {
-        res.status(500).json(ApiError(500, err.message || "Internal Server Error")); 
+        res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
 })
