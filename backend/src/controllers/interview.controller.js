@@ -1568,55 +1568,41 @@ async function evaluateAnswerForSvar(answer, question) {
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const prompt = `
-    You are an interviewer. I will provide you with a question and its answer. There are five different types of questions that may be presented: Reading, Repeating, Short Question Answer, Jumbled Words, and Comprehension. Your task is to evaluate the answer based on the question type, on a scale of 0 to 100, and provide a Brief, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering Brief analysis and examples where necessary.
+    You are an interviewer. I will provide you with a question and its answer(same as the question when it is repeating and reading). There are five different types of questions that may be presented: Reading, Repeating, Short Question Answer, Jumbled Words, and Comprehension. Your task is to evaluate the answer based on the question type, on a scale of 0 to 100, and provide a brief, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering brief analysis and examples where necessary.
 
-    Question Types:
-    - Reading: Evaluate how well the user reads the text aloud.
-    - Repeating: Check if the answer is exactly the same as the question, word-for-word.
-    - Short Question Answer: Evaluate the correctness, grammar, and clarity of the user's response.
-    - Jumbled Words: Evaluate how well the user arranges the jumbled words into a coherent sentence.
-    - Comprehension: Evaluate how well the user understands and responds to a comprehension question.
-
-    Evaluation Criteria:
-    - Overall Score: A score out of 100 that reflects the overall quality of the answer (clarity, correctness, grammar, pronunciation, etc.).
-    - Grammar: A score out of 100 for the grammatical correctness of the answer. Focus on sentence structure, verb tense, and clarity.
-    - Pronunciation: A score out of 100 for pronunciation. Evaluate clarity, smoothness, and accuracy of pronunciation (only for Reading and Repeating).
-    - Correctness: A score out of 100 for the factual correctness of the answer. Evaluate the accuracy, depth of knowledge, and relevance of the information provided.
-
-    Evaluation Focus:
-    - For Reading and Repeating, prioritize correctness and pronunciation.
-    - For Short Question Answer, focus on correctness, clarity, and grammar.
-    - For Jumbled Words, focus on sentence structure and grammar.
-    - For Comprehension, focus on understanding and relevance of the response.
-
-    Here is the question: "\${question}"
-    Here is the answer: "\${answer}"
+    Here is the question: "${question}"
+    Here is the answer: "${answer}"
 
     Please evaluate the answer based on the following criteria:
+    1. Overall Score: An integer score out of 100 for the overall quality of the answer, taking into account all aspects (pronunciation, clarity, grammar, etc.).
+    2. Grammar: An integer score out of 100 for the grammatical correctness of the answer. Focus on sentence structure, verb tense, and clarity.
+    3. Pronunciation: An integer score out of 100 for the pronunciation of the answer. Evaluate clarity, smoothness, and accuracy of pronunciation.
+    4. Correctness: An integer score out of 100 for the factual correctness of the answer. Evaluate the accuracy, depth of knowledge, and relevance of the information provided.
+
+    The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
     {
         "question": "The question text",
         "userAnswer": "The user's answer text",
         "overallScore": 90,
         "grammarScore": 85,
-        "pronunciationScore": 88, // Only include for Reading and Repeating
+        "pronunciationScore": 88,
         "correctnessScore": 92,
-        "pronunciationExplanation": { // Only include for Reading and Repeating
-            "Pros": "Brief explanation of the strong points of pronunciation. Not more than 10 words.",
-            "Cons": "Brief explanation of the weak points in pronunciation and suggestions for improvement. Not more than 10 words."
+        "pronunciationExplanation": {
+            "Pros": "Brief explanation of the strong points of pronunciation.Not more than 10 words.",
+            "Cons": "Brief explanation of the weak points in pronunciation and suggestions for improvement.Not more than 10 words."
         },
         "correctnessExplanation": {
-            "Pros": "Brief explanation of the strong points of correctness. Not more than 10 words.",
-            "Cons": "Brief explanation of the weak points in correctness and suggestions for improvement. Not more than 10 words."
+            "Pros": "Brief explanation of the strong points of correctness.Not more than 10 words.",
+            "Cons": "Brief explanation of the weak points in correctness and suggestions for improvement.Not more than 10 words."
         },
         "grammarExplanation": {
-            "Pros": "Brief explanation of the strong points in grammar. Not more than 10 words.",
-            "Cons": "Brief explanation of grammatical errors and suggestions for improvement. Not more than 10 words."
-        },
+                "Pros": "Brief explanation of the strong points in grammar.Not more than 10 words.",
+                "Cons": "Brief explanation of grammatical errors and suggestions for improvement.Not more than 10 words."
+            },
         "expectedAnswer": "The expected answer to the question."
     }
 
-    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.
-`;
+    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.`
 
     const completion = await openai.chat.completions.create({
         messages: [{role: "system", content: "You are a strict but constructive interviewer."}, {
