@@ -362,6 +362,7 @@ const LiveInterview = () => {
             formData.append('question', ''); // Since question is skipped, you might want to pass an empty string or a specific value
             formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
             formData.append('interviewId', Cookies.get('interviewId'));
+            formData.append('difficulty', currentDiff); 
             console.log('Form data for skipped question:', formData);
 
             await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {

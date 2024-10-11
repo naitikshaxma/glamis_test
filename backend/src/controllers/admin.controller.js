@@ -397,7 +397,7 @@ export const createSvarInterview = async (req, res) => {
     }
 
     // console.log(students);
-
+    console.log("came till here")
     const questionIds = [];
     for (let i = 0; i < questions.length; i++) {
       const newQuestion = new InterviewQuestionsByAdmin({
@@ -407,7 +407,7 @@ export const createSvarInterview = async (req, res) => {
       await newQuestion.save();
       questionIds.push(newQuestion._id);
     }
-
+    console.log("came till here")
     const newWrittenInterview = new AdminSvarInterview({
       name,
       domain: "Svar Interview",
