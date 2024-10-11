@@ -1446,12 +1446,12 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         `;
     } else if (difficulty === "repeating") {
         prompt = `
-                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 10 words. Example format: "I had a flat tire while driving home from the office."
+                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 15 words. Example format: "I had a flat tire while driving home from the office."
             `;
     } else if (difficulty === "short") {
         prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Adam was happy to hear the news. Was he glad or unhappy?", "What is the color of grass. Is it green or brown?"`
     } else if (difficulty === "jumbled") {
-        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 10 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
+        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
     } else if (difficulty === "comprehension") {
         prompt = `Generate a passage of exactly 80 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
     }
