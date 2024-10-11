@@ -744,5 +744,3 @@ export const downloadAttendance = async (req, res) => {
   }
 
 }
-
-
