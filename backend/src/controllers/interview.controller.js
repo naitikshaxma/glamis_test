@@ -19,7 +19,7 @@ import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import {AdminCompanyInterview, InterviewQuestionsByAdmin} from "../models/interview.models.js";
-import {getSessionQuestions, saveSessionQuestions} from "../utils/crud.js";
+import {getAdminInterview, getSessionQuestions, saveSessionQuestions} from "../utils/crud.js";
 
 
 const objectStorePath = path.resolve("../objectStore");
@@ -610,7 +610,8 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
         return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
     }).join("\n");
 
-    const adminInterview = await AdminVerbalInterview.findById(adminInterviewId);
+    const adminInterview = await AdminVerbalInterview.findOne({interview: interviewId}).populate('interview');
+
 
     if (adminInterview === null) {
         return res.status(404).json(ApiError(404, "Interview not found"));
@@ -1415,7 +1416,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             }
 
             return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
-            
+
         }
     }
 
@@ -1464,7 +1465,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
             Example question format: "What problem did Jason have when he woke up?"
         `;
     }
-    
+
 
     prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
 
@@ -1937,4 +1938,28 @@ export const fetchInterviewForSvar = asyncHandler(async (req, res) => {
     } catch(err) {
         res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
     }
+})
+
+export const interviewQuestionCount = asyncHandler(async (req, res) => {
+  try{
+    const { interviewId } = req.body;
+
+    if (!interviewId) {
+      return res.status(400).json(ApiError(404, "Interview ID not sent"))
+    }
+
+    const interview = await getAdminInterview({interview: interviewId});
+
+    if(!interview){
+      return res.status(400).json(ApiError(400, "Interview not found!"));
+    }
+
+    const count = interview.no_of_questions;
+
+    return res.status(200).json(new ApiResponse(200, {count}, "Interview Fetched Successfully"));
+  } catch(err) {
+    return res.status(500).json({
+      message: "Internal Server Error" || err.message
+    })
+  }
 })
