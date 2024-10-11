@@ -1446,12 +1446,12 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         `;
     } else if (difficulty === "repeating") {
         prompt = `
-                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 10 words. Example format: "I had a flat tire while driving home from the office."
+                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 15 words. Example format: "I had a flat tire while driving home from the office."
             `;
     } else if (difficulty === "short") {
         prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Adam was happy to hear the news. Was he glad or unhappy?", "What is the color of grass. Is it green or brown?"`
     } else if (difficulty === "jumbled") {
-        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 10 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
+        prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
     } else if (difficulty === "comprehension") {
         prompt = `Generate a passage of exactly 80 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
     }
@@ -1560,12 +1560,16 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
         apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in your environment variables
     });
     const prompt = `
-    You are an interviewer. I will provide you with a question and its answer(is same as question for reading, repeating). Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
+    You are an interviewer. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide a detailed, constructive report covering both the strengths and weaknesses in each of the following areas. Be specific and thorough in your feedback, offering detailed analysis and examples where necessary.
 
     Here is the question: "${question}"
     Here is the answer: "${answer}"
     Here is the difficulty : "${difficulty}"
-    expected answer  will be  same as question for when ${difficulty} == reading or ${difficulty} == repeating"
+
+    Expected answer logic:
+    - If difficulty is "reading" or "repeating", the expected answer is the same as the question.
+    - If difficulty is "jumbled", the expected answer is an unjumbled version of the question.
+    - If difficulty is "short" or "comprehension", the expected answer is the actual answer to the question.
 
     Please evaluate the answer based on the following criteria:
     1. Overall Score: An integer score out of 100 for the overall quality of the answer, taking into account all aspects (pronunciation, clarity, grammar, etc.).
@@ -1575,8 +1579,8 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
 
     The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
     {
-        "question": "The question text",
-        "userAnswer": "The user's answer text",
+        "question": "${question}",
+        "userAnswer": "${answer}",
         "overallScore": 90,
         "grammarScore": 85,
         "pronunciationScore": 88,
@@ -1593,10 +1597,13 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
                 "Pros": "Brief explanation of the strong points in grammar.Not more than 10 words.",
                 "Cons": "Brief explanation of grammatical errors and suggestions for improvement.Not more than 10 words."
             },
-        "expectedAnswer": "expected answer"
+        "expectedAnswer": "${difficulty === 'reading' || difficulty === 'repeating' ? question : 
+                          difficulty === 'jumbled' ? unjumble(question) : 
+                          difficulty === 'short' || difficulty === 'comprehension' ? 'expected answer to the question' : ''}"
     }
-    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.`
-    const completion = await openai.chat.completions.create({
+
+    Ensure that in the grammarExplanation you do not provide punctuation or capitalization errors as cons because the text is generated by Whisper. The feedback should focus on substantive grammar issues like sentence structure, verb tense, or clarity. Ensure the keys are exactly "question", "userAnswer", "overallScore", "grammarScore", "pronunciationScore", and "correctnessScore". All scores should be integers.
+`;  const completion = await openai.chat.completions.create({
         messages: [{role: "system", content: "You are a strict but constructive interviewer."}, {
             role: "user",
             content: prompt
