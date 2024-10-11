@@ -13,6 +13,7 @@ import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvita
 import {Parser} from "json2csv";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import {getAllAdminInterviews} from "../utils/crud.js";
 
 const link = `https://glamis.in/myInterview/`;
 
@@ -538,11 +539,7 @@ export const fetchInterviewDetails = async (req, res) => {
   try {
     // take all 4 interview types and sort it by latest date and time
     const {page, limit} = req.body;
-    const companyInterviews = await AdminCompanyInterview.find({});
-    const subjectInterviews = await AdminSubjectInterview.find({});
-    const verbalInterviews = await AdminVerbalInterview.find({});
-    const writtenInterviews = await AdminWrittenInterview.find({});
-    const allInterviews = companyInterviews.concat(subjectInterviews, verbalInterviews, writtenInterviews);
+    const allInterviews = await getAllAdminInterviews({});
 
     allInterviews.sort((a, b) => {
       const dateA = new Date((a.date + 'T' + a.from).replace(/T\d{2}:\d{2}/, ''));
@@ -618,17 +615,6 @@ export async function getInterviewByID(interviewId) {
   const adminSvarInterview = await AdminSvarInterview.findById(interviewId);
   return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview || adminSvarInterview;
 }
-
-
-export async function getAllInterviews() {
-  const adminCompanyInterview = await AdminCompanyInterview.find({});
-  const adminSubjectInterview = await AdminSubjectInterview.find({});
-  const adminVerbalInterview = await AdminVerbalInterview.find({});
-  const adminWrittenInterview = await AdminWrittenInterview.find({});
-  const adminSvarInterview = await AdminSvarInterview.find({});
-  return adminCompanyInterview.concat(adminSubjectInterview, adminVerbalInterview, adminWrittenInterview, adminSvarInterview);
-}
-
 
 // ---------------------- Download Attendance ----------------------
 
