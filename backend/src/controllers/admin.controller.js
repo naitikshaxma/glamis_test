@@ -13,6 +13,7 @@ import InterviewInvitationTemplate from "../utils/emailTemplates/interviewInvita
 import {Parser} from "json2csv";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import {getAllAdminInterviews} from "../utils/crud.js";
 
 const link = `https://glamis.in/myInterview/`;
 
@@ -387,7 +388,7 @@ export const createSvarInterview = async (req, res) => {
           student.save();
           interviewIds.push(interview._id);
           try {
-            await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, domain, link, date + ' at ' + from));
+            await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, "Svar", link, date + ' at ' + from));
           } catch (error) {
             console.log(error);
           }
@@ -538,11 +539,7 @@ export const fetchInterviewDetails = async (req, res) => {
   try {
     // take all 4 interview types and sort it by latest date and time
     const {page, limit} = req.body;
-    const companyInterviews = await AdminCompanyInterview.find({});
-    const subjectInterviews = await AdminSubjectInterview.find({});
-    const verbalInterviews = await AdminVerbalInterview.find({});
-    const writtenInterviews = await AdminWrittenInterview.find({});
-    const allInterviews = companyInterviews.concat(subjectInterviews, verbalInterviews, writtenInterviews);
+    const allInterviews = await getAllAdminInterviews({});
 
     allInterviews.sort((a, b) => {
       const dateA = new Date((a.date + 'T' + a.from).replace(/T\d{2}:\d{2}/, ''));
@@ -583,10 +580,12 @@ export const fetchInterviewDetails = async (req, res) => {
   }
 }
 
+
+// deprecated by krish
 export const fetchInterviewByID = async (req, res) => {
-  try{ 
-    const { interviewId } = req.body; 
-    
+  try{
+    const { interviewId } = req.body;
+
     if (!interviewId) {
       return res.status(400).json(ApiError(404, "Interview ID not sent"))
     }
@@ -596,10 +595,10 @@ export const fetchInterviewByID = async (req, res) => {
     })
 
     if(!interview){
-      return res.status(400).json(ApiError(400, "Interview not found!")); 
+      return res.status(400).json(ApiError(400, "Interview not found!"));
     }
 
-    return res.status(200).json(new ApiResponse(200, interview, "Interview Fetched Successfully")); 
+    return res.status(200).json(new ApiResponse(200, interview, "Interview Fetched Successfully"));
   } catch(err) {
     return res.status(500).json({
       message: "Internal Server Error" || err.message
@@ -608,7 +607,7 @@ export const fetchInterviewByID = async (req, res) => {
 }
 // ---------------------- CRUD Operations ----------------------
 
-async function getInterviewByID(interviewId) {
+export async function getInterviewByID(interviewId) {
   const adminCompanyInterview = await AdminCompanyInterview.findById(interviewId);
   const adminSubjectInterview = await AdminSubjectInterview.findById(interviewId);
   const adminVerbalInterview = await AdminVerbalInterview.findById(interviewId);
@@ -616,17 +615,6 @@ async function getInterviewByID(interviewId) {
   const adminSvarInterview = await AdminSvarInterview.findById(interviewId);
   return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview || adminSvarInterview;
 }
-
-
-export async function getAllInterviews() {
-  const adminCompanyInterview = await AdminCompanyInterview.find({});
-  const adminSubjectInterview = await AdminSubjectInterview.find({});
-  const adminVerbalInterview = await AdminVerbalInterview.find({});
-  const adminWrittenInterview = await AdminWrittenInterview.find({});
-  const adminSvarInterview = await AdminSvarInterview.find({});
-  return adminCompanyInterview.concat(adminSubjectInterview, adminVerbalInterview, adminWrittenInterview, adminSvarInterview);
-}
-
 
 // ---------------------- Download Attendance ----------------------
 
@@ -742,5 +730,3 @@ export const downloadAttendance = async (req, res) => {
   }
 
 }
-
-

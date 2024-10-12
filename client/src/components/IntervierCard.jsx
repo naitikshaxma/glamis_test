@@ -1,53 +1,55 @@
-import {
-    Card, CardBody, CardFooter, Typography, Button,
-} from "@material-tailwind/react";
+import {Button, Card, CardBody, CardFooter, Typography,} from "@material-tailwind/react";
 import {useNavigate} from "react-router-dom";
 import Cookies from 'js-cookie'
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {bearerInstance as instance} from "../helpers/instance";
 import {toast} from "react-toastify";
 
 export default function InterviewCard({props, status}) {
     const navigate = useNavigate();
-    const [totalQuestions, setTotalQuestions] = useState(15);
-    const [company, setCompany] = useState();
-    const [adminInterviewId, setAdminInterviewId] = useState();
+    const [company, setCompany] = useState();  // todo: fetch Company for jd
+    // const [adminInterviewId, setAdminInterviewId] = useState();  //deprecated as we will fetch it from backend
 
 
     const handleInterview = async () => {
         let url = '';
         let redirect = '';
-        const response = await instance.post("/api/v1/admin/interview/fetchSvarInterviewById", {interviewId: props._id})
-        const questions = response.data.data.no_of_questions; 
+        const response = await instance.post("/api/v1/interview/interviewQuestion/count", {interviewId: props._id})
+        const questions = response.data.data.count;
         const removeCookies = ['interviewId', 'subject', 'jobTitle', 'selectedCompany', 'adminInterviewId', 'delta', 'verbal'];
-        const newCookies = {interviewId: props._id, adminInterviewId, delta: questions};
+        const newCookies = {interviewId: props._id, adminInterviewId: "", delta: questions};
 
         if (props.type === 'subject') {
             newCookies.subject = props.description;
+            newCookies.mockType = 'subject';
             url = '/api/v1/interview/createInterviewByJDAdmin';
             redirect = '/live';
         }
 
         if (props.type === 'written') {
             newCookies.subject = props.description;
+            newCookies.mockType = 'written';
             url = '/api/v1/interview/createInterviewByWrittenAdmin';
             redirect = '/written';
         }
         if (props.type === 'company') {
             newCookies.jobTitle = props.title;
             newCookies.selectedCompany = company;
+            newCookies.mockType = 'company';
             url = '/api/v1/interview/createInterviewByJDAdmin';
             redirect = '/live';
         }
 
         if (props.type === 'verbal') {
             newCookies.verbal = true;
+            newCookies.mockType = 'verbal';
             url = '/api/v1/interview/createInterviewByVerbalAdmin';
             redirect = '/live';
         }
 
         if (props.type === 'Svar') {
             newCookies.svar = props.description;
+            newCookies.mockType = 'svar';
             url = '/api/v1/interview/createInterviewBySvarAdmin';
             redirect = '/live';
         }
@@ -64,25 +66,6 @@ export default function InterviewCard({props, status}) {
         await instance.post(url, {interviewId: props._id}); // todo: fix response NOT used
         navigate(redirect);
     }
-    const fetchAdminInterviewDetails = async () => {
-        try {
-            const response = await instance.post(`/api/v1/admin/interview/fetch`, {interviewId: props._id});
-            console.log(response.data.adminInterviewId);
-
-            if (!response.data.company) {
-                return toast.error('Company not found');
-            }
-            setCompany(response.data.company);
-            setAdminInterviewId(response.data.adminInterviewId);
-            setTotalQuestions(response.data.totalQuestions);
-        } catch (error) {
-            console.warn('Error fetching admin interview details', error);
-        }
-    }
-
-    // useEffect(() => {
-    //     fetchAdminInterviewDetails();
-    // }, []);
 
     return (<Card className="m-4 h-fit w-1/4">
         <CardBody>

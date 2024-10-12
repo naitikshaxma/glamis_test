@@ -3,6 +3,7 @@ const asyncHandler = (fnToExecute) => {
         try {
             fnToExecute(req, res, next)
         } catch (error) {
+            console.error(new Date().toLocaleString(), error.message)
             res.status(error.code || 500).json({
                 success: false,
                 message: error.message
