@@ -1665,7 +1665,7 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
             if(interview.type === "Svar"){
                 console.log("Svar me ghus gaye")
                 feedback = await evaluateAnswerForSvar(answer, question, difficulty);
-                if (feedback === {}) {
+                if (JSON.stringify(feedback) === "{}") {
                     return res.status(500).json(ApiError(500, "Failed to evaluate answer"));
                 }
             } else {
@@ -1821,7 +1821,7 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
             }
 
             let evaluatePrompt = await evaluateAnswerForSvar(answer, question, difficulty);
-            if (evaluatePrompt === {}) {
+            if (JSON.stringify(evaluatePrompt) === "{}") {
                 return res.status(500).json(ApiError(500, "Failed to evaluate answer"));
             }
 
