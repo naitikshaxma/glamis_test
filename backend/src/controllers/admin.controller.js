@@ -59,6 +59,7 @@ export const createCompanyInterview = async (req, res) => {
             start_time: date + 'T' + from,
             end_time: date + 'T' + to,
             title: `${name} | ${company} | ${position}`,
+            totalQuestions: no_of_questions,
             type
           });
           await interview.save();
@@ -140,6 +141,7 @@ export const createSubjectInterview = async (req, res) => {
             start_time: date + 'T' + from,
             end_time: date + 'T' + to,
             title: `${name} | ${subject}`,
+            totalQuestions: no_of_questions,
             type
           });
           await interview.save();
@@ -213,6 +215,7 @@ export const createVerbalInterview = async (req, res) => {
             start_time: date + 'T' + from,
             end_time: date + 'T' + to,
             title: `${name} | Communication round`,
+            totalQuestions: no_of_questions,
             type
           });
           await interview.save();
@@ -293,6 +296,7 @@ export const createWrittenInterview = async (req, res) => {
             start_time: date + 'T' + from,
             end_time: date + 'T' + to,
             title: `${name}`,
+            totalQuestions: no_of_questions,
             type
           });
           await interview.save();
