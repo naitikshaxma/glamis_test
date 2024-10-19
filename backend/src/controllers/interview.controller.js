@@ -1355,7 +1355,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({error: 'Failed to generate audio'});
       }
-      await saveSessionQuestions(interviewId, question);
+      await saveSessionQuestions(interviewId, questionNo, question);
 
 
       const dataToSend = {
@@ -1385,7 +1385,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
         return res.status(500).json({error: "Failed to generate audio"})
       }
       ;
-      await saveSessionQuestions(interviewId, question);
+      await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
         audioFileName: audioFileName, difficulty
@@ -1410,7 +1410,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({error: "Failed to generate audio"});
       }
-      await saveSessionQuestions(interviewId, question);
+      await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
         audioFileName: audioFileName, difficulty
@@ -1428,7 +1428,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
     if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length) {
       const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
-      await saveSessionQuestions(interviewId, question);
+      await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
         question, difficulty
@@ -1468,7 +1468,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   const question = completion.choices[0].message.content.trim();
 
   if (difficulty === "reading" || difficulty === "comprehension") {
-    await saveSessionQuestions(interviewId, question);
+    await saveSessionQuestions(interviewId, questionNo, question);
     return res.status(200).json(new ApiResponse(200, {question, difficulty}, "Quesetion Generated Successfully"));
   }
 
@@ -1481,7 +1481,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   if (!fs.existsSync(audioFilePath)) {
     return res.status(500).json({error: 'Failed to generate audio'});
   }
-  await saveSessionQuestions(interviewId, question);
+  await saveSessionQuestions(interviewId, questionNo, question);
 
   const dataToSend = {
     difficulty, audioFileName: audioFileName
@@ -1652,14 +1652,14 @@ async function textToSpeech(input, audioPath) {
 
 export const evaluateAnswer = asyncHandler(async (req, res) => {
   try {
-    let {question, interviewId, difficulty} = req.body;
+    let {question, interviewId, difficulty, questionNo} = req.body;
     let answer = req.extractedAnswer;
 
     if (answer === undefined) {
       answer = req.body.answer;
     }
     if (!question) {
-      question = await getSessionQuestions(interviewId);
+      question = await getSessionQuestions(interviewId, questionNo);
     }
 
     const interview = await Interview.findById(interviewId); //fetch
@@ -1877,6 +1877,9 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
     const currentUser = req.user;
     const student = await Student.findOne({user: currentUser._id});
     console.log("student ####", student);
+
+    // deleting all session questions after interview ends
+    // await deleteSessionQuestions(interviewId);
 
 
     return res.status(200).json(new ApiResponse(200, {}, "Result saved successfully"));

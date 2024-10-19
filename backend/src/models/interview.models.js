@@ -493,6 +493,10 @@ const SessionQuestion = new mongoose.Schema({
         type: String,
         required: true
     },
+    questionNo: {
+        type: Number,
+        required: true
+    },
     interview: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Interview'
