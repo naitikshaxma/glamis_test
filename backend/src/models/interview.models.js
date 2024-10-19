@@ -16,6 +16,21 @@ const interviewSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+
+    attemptedQuestions: {
+        type: Number,
+        default: 0
+    },
+    firstAttemptedAt: {
+        type: Date
+    },
+    lastAttemptedAt: {
+        type: Date
+    },
+    totalQuestions: {
+        type: Number,
+        // required: true   // todo: make sure to add totalQuestions everywhere in createInterviews
+    },
     title: {
         type: String,
         required: true
@@ -476,6 +491,10 @@ const interviewQuestionByAdmin = new mongoose.Schema({
 const SessionQuestion = new mongoose.Schema({
     question: {
         type: String,
+        required: true
+    },
+    questionNo: {
+        type: Number,
         required: true
     },
     interview: {
