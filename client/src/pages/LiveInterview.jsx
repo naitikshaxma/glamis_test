@@ -127,8 +127,8 @@ const LiveInterview = () => {
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
         formData.append('interviewId', Cookies.get('interviewId'));
-        const interviewId = await Cookies.get('interviewId');
-
+        formData.append('difficulty', currentDiff);
+        formData.append('questionNo', currentQuestion);
 
         // const svarCookie = Cookies.get('svar');
         console.log('Form data:', formData);
@@ -357,13 +357,14 @@ const LiveInterview = () => {
         console.log("Skipping to next question...");
 
         try {
+            const formData = new FormData();
+            formData.append('questionNo', currentQuestion);
             setCurrentQuestion((prev) => prev + 1);
             setQuestion('');    // Clear the question
             const defaultAudioPath = '/not-available.webm'; // Path to default audio file
             const response = await fetch(defaultAudioPath);
             const audioBlob = await response.blob(); // Convert the default audio file to a Blob
 
-            const formData = new FormData();
             formData.append('question', ''); // Since question is skipped, you might want to pass an empty string or a specific value
             formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
             formData.append('interviewId', Cookies.get('interviewId'));
