@@ -8,8 +8,10 @@ import {
   fetchInterviewStatusCount,
   fetchInterviewDetails,
   downloadAttendance,
-  createSvarInterview
+  createSvarInterview,
+  fetchInterviewByID
 } from "../controllers/admin.controller.js";
+
 
 const router = Router();
 
@@ -22,5 +24,6 @@ router.post("/interview/fetch", fetchAdminInterviewbyinterviewId);
 router.post("/interview/fetchInterviewStatusCount", fetchInterviewStatusCount);
 router.post("/interview/fetchInterviewDetails", fetchInterviewDetails);
 router.get("/interview/downloadAttendance", downloadAttendance);
+router.post("/interview/fetchSvarInterviewById", fetchInterviewByID)
 
 export default router;

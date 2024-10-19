@@ -4,6 +4,7 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
 import axios from 'axios';
+import { bearerInstance as instance } from "../helpers/instance.js";
 import { Skeleton } from '@mui/material';
 import EvaluationResult from './EvaluationResult';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -28,6 +29,7 @@ const Timer = (props) => {
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[100, 70, 40, 10]}
             onComplete={() => {
+                props.setNextQuestion((prev)=>prev+1)
                 props.setTimer(0); // Ensures timer is set to 0 when completed
                 return [false, 0]; // Do not repeat the timer
             }}
@@ -63,7 +65,7 @@ const LiveInterview = () => {
     const [question, setQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState([]);
-    
+
     // Parse totalQuestions as an integer
     const totalQuestions = parseInt(Cookies.get("delta"), 10) || 0;
 
@@ -125,8 +127,8 @@ const LiveInterview = () => {
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
         formData.append('interviewId', Cookies.get('interviewId'));
-        const interviewId = await Cookies.get('interviewId'); 
-
+        formData.append('difficulty', currentDiff);
+        formData.append('questionNo', currentQuestion);
 
         // const svarCookie = Cookies.get('svar');
         console.log('Form data:', formData);
@@ -137,7 +139,7 @@ const LiveInterview = () => {
             //         'Content-Type': 'application/json`',
             //         'Authorization': `Bearer ${Cookies.get('accessToken')}`,
             //     },
-            // }); 
+            // });
             // if (fetchInterview.data.data.interview.type === "Svar") {
             //     const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionSvar`, formData, {
             //         headers: {
@@ -149,7 +151,7 @@ const LiveInterview = () => {
             //     // Assuming you want to handle the response, e.g., update results
             //     setResults(prev => [...prev, response.data.data]);
             //     return;
-            // } else { 
+            // } else {
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -213,14 +215,15 @@ const LiveInterview = () => {
         const subject = Cookies.get('subject');
         const jobTitle = Cookies.get('jobTitle');
         const selectedCompany = Cookies.get('selectedCompany');
-        const verbal = Cookies.get('verbal');
-        const svar = Cookies.get('svar');
+        // const verbal = Cookies.get('verbal');  // depricated by Krish
+        // const svar = Cookies.get('svar');  // depricated by Krish
+        const mockType = Cookies.get('mockType');  // new check method
 
-        let url;
-        let data;
+        let url = '';
+        let data = {};
 
-        if (subject && !jobTitle && !selectedCompany && !verbal) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSubjectAdmin`;
+        if (mockType === 'subject') {
+            url = `/api/v1/interview/generateQuestionForSubjectAdmin`;
             data = {
                 subject: subject,
                 interviewId: Cookies.get('interviewId'),
@@ -229,8 +232,9 @@ const LiveInterview = () => {
                 adminInterviewId: Cookies.get('adminInterviewId'),
                 questionNo: currentQuestion,
             };
-        } else if (jobTitle && selectedCompany && !subject && !verbal) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForJDAdmin`;
+        }
+        if (mockType === 'company') {
+            url = `/api/v1/interview/generateQuestionForJDAdmin`;
             data = {
                 selectedCompany: selectedCompany,
                 jobTitle: jobTitle,
@@ -241,8 +245,9 @@ const LiveInterview = () => {
                 adminInterviewId: Cookies.get('adminInterviewId'),
                 questionNo: currentQuestion,
             };
-        } else if (verbal && !subject && !jobTitle && !selectedCompany) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSvarAdmin`;
+        }
+        if (mockType === 'verbal') {
+            url = `/api/v1/interview/generateQuestionForVerbalAdmin`;
             data = {
                 answer: ansMetaData.answer,
                 score: ansMetaData.score,
@@ -250,8 +255,13 @@ const LiveInterview = () => {
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
             };
-        } else if (svar) {
-            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForSvarAdmin`;
+        }  // todo: fix incorrect urls for verbal
+
+        if (mockType === 'written') {
+
+        } // todo: fix incorrect urls for written
+        if (mockType === 'svar') {
+            url = `/api/v1/interview/generateQuestionForSvarAdmin`;
             data = {
                 answer: ansMetaData.answer,
                 score: ansMetaData.score,
@@ -259,19 +269,15 @@ const LiveInterview = () => {
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
             };
-        } else {
+        }
+        if (url === '') {
             console.error('Required cookies are missing.');
             setLoading(false);
             return;
         }
 
         try {
-            const response = await axios.post(url, data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": `Bearer ${Cookies.get('accessToken')}`
-                },
-            });
+            const response = await instance.post(url, data);
             console.log(response.data.data);
 
             // Safely set question and related data
@@ -281,10 +287,19 @@ const LiveInterview = () => {
             setIsAudioPlaying(true);
 
             // Set timer based on difficulty
-            if (response.data.data.difficulty === "Easy")
-                setTimer(60);
-            else
-                setTimer(90);
+            if (response.data.data.difficulty === "reading")
+                setTimer(30);
+            else if(response.data.data.difficulty === "repeating"){
+                setTimer(40)
+            }else if(response.data.data.difficulty === "short"){
+                setTimer(40)
+            }else if(response.data.data.difficulty === "jumbled"){
+                setTimer(40)
+            }else if(response.data.data.difficulty === "comprehension"){
+                setTimer(120)
+            }else{
+                setTimer(90)
+            }
 
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -330,7 +345,7 @@ const LiveInterview = () => {
     // Handle Skip Question
     const handleSkipQuestion = async () => {
         setIsAudioPlaying(false);
-        setSkipQuestionCount(prevCount => prevCount+1); 
+        setSkipQuestionCount(prevCount => prevCount+1);
         // Stop the recording if in progress
         if (isRecording) {
             setIsRecording(false);
@@ -342,16 +357,18 @@ const LiveInterview = () => {
         console.log("Skipping to next question...");
 
         try {
+            const formData = new FormData();
+            formData.append('questionNo', currentQuestion);
             setCurrentQuestion((prev) => prev + 1);
             setQuestion('');    // Clear the question
             const defaultAudioPath = '/not-available.webm'; // Path to default audio file
             const response = await fetch(defaultAudioPath);
             const audioBlob = await response.blob(); // Convert the default audio file to a Blob
 
-            const formData = new FormData();
             formData.append('question', ''); // Since question is skipped, you might want to pass an empty string or a specific value
             formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
             formData.append('interviewId', Cookies.get('interviewId'));
+            formData.append('difficulty', currentDiff);
             console.log('Form data for skipped question:', formData);
 
             await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
@@ -526,7 +543,7 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer} />}
+                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer}  setNextQuestion={setCurrentQuestion} />}
                                 </div>
                             </div>
 

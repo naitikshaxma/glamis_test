@@ -1,4 +1,4 @@
-svar.jsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
     Card, CardBody, Typography,
@@ -21,86 +21,86 @@ const Svar = (props) => {
                     <Typography variant="h3">{props.varTab}</Typography>
                 </div>
                 <CardBody className="flex flex-row items-center space-y-4 p-4">
-                <div className="flex flex-col items-center w-1/2">
-                    <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                            <Pie 
-                                data={props.correctnessScore} 
-                                cx="50%" 
-                                cy="50%" 
-                                innerRadius={60} 
-                                outerRadius={80} 
-                                fill="#8884d8" 
-                                paddingAngle={5} 
-                                dataKey="value"
-                            >
-                                {props.correctnessScore.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-                    <Typography variant="body1" className="my-2 text-green-900 font-semibold">
-                        Correctness Score: &nbsp;
-                        {Math.round(props.correctnessScore[0].value)} / 100
-                    </Typography>
-        </div>
+                    <div className="flex flex-col items-center w-1/2">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie
+                                    data={props.correctnessScore}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {props.correctnessScore.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <Typography variant="body1" className="my-2 text-green-900 font-semibold">
+                            Correctness Score: &nbsp;
+                            {Math.round(props.correctnessScore[0].value)} / 100
+                        </Typography>
+                    </div>
 
-        <div className="flex flex-col items-center w-1/2">
-                <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                        <Pie 
-                            data={props.pronounciationScore} 
-                            cx="50%" 
-                            cy="50%" 
-                            innerRadius={60} 
-                            outerRadius={80} 
-                            fill="#82ca9d" 
-                            paddingAngle={5} 
-                            dataKey="value"
-                        >
-                            {props.pronounciationScore.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                    </PieChart>
-                </ResponsiveContainer>
-                <Typography variant="body1" className="my-2 text-green-900 font-semibold">
-                    Pronunciation: &nbsp;
-                    {Math.round(props.pronounciationScore[0].value)} / 100
-                </Typography>
-            </div>
-            <div className="flex flex-col items-center w-1/2">
-                <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                        <Pie 
-                            data={props.grammarScore} 
-                            cx="50%" 
-                            cy="50%" 
-                            innerRadius={60} 
-                            outerRadius={80} 
-                            fill="#82ca9d" 
-                            paddingAngle={5} 
-                            dataKey="value"
-                        >
-                            {props.grammarScore.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                    </PieChart>
-                </ResponsiveContainer>
-                <Typography variant="body1" className="my-2 text-green-900 font-semibold">
-                    Grammar: &nbsp;
-                    {Math.round(props.grammarScore[0].value)} / 100
-                </Typography>
-            </div>
+                    <div className="flex flex-col items-center w-1/2">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie
+                                    data={props.pronounciationScore}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    fill="#82ca9d"
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {props.pronounciationScore.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <Typography variant="body1" className="my-2 text-green-900 font-semibold">
+                            Pronunciation: &nbsp;
+                            {Math.round(props.pronounciationScore[0].value)} / 100
+                        </Typography>
+                    </div>
+                    <div className="flex flex-col items-center w-1/2">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie
+                                    data={props.grammarScore}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    fill="#82ca9d"
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {props.grammarScore.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <Typography variant="body1" className="my-2 text-green-900 font-semibold">
+                            Grammar: &nbsp;
+                            {Math.round(props.grammarScore[0].value)} / 100
+                        </Typography>
+                    </div>
                 </CardBody>
             </Card>
         </div>
     );
 }
 
-export {Svar}; 
+export { Svar };
 
 const renderFeedbackSection = (feedbackCategory, title) => {
     return (
@@ -139,25 +139,28 @@ const renderFeedbackSection = (feedbackCategory, title) => {
     );
 };
 
-export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswer }) => {
+export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswer, grammar,correctness,pronounciation }) => {
     const [showAnswer, setShowAnswer] = useState(false);
     const renderQuestion = () => {
-            return (
-                <>
-                    <div className="question text-justify">
-                        <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
-                            {question}
-                        </p>
-                    </div>
-                </>
-            );
-        }
+        return (
+            <>
+                <div className="question text-justify">
+                    <p className="text-lg font-semibold p-8 h-fit max-h-[40vh]">
+                        {question}
+                    </p>
+                </div>
+            </>
+        );
+    }
     return (
         <div className="flex  flex-col bg-lightBlue-500 rounded-lg p-4">
             <div className="flex flex-col space-y-2 font-semibold mb-4">
                 Question {qno + 1} : {renderQuestion()}
             </div>
             <p className="font-semibold my-2">Score : {score}/100</p>
+            <p className="font-semibold my-2">Grammar Score : {grammar}/100</p>
+            <p className="font-semibold my-2">Correctness Score : {correctness}/100</p>
+            <p className="font-semibold my-2">Pronunciation Score : {pronounciation}/100</p>
             <div className="flex flex-col space-y-2">
                 <div className="flex flex-col space-y-2">
                     <strong>Your Answer:</strong>
@@ -166,31 +169,31 @@ export const SvarCard = ({ question, answer, feedback, score, qno, expectedAnswe
                 <div className="flex flex-col space-y-2 bg-lightblue-900 rounded-lg p-3">
                     <div className="flex flex-col space-y-2 font-semibold">Feedback</div>
                     <hr />
-                      {/* Render Pronunciation Feedback */}
-                      {renderFeedbackSection(feedback.pronounciation, 'Pronunciation')}
+                    {/* Render Pronunciation Feedback */}
+                    {renderFeedbackSection(feedback.pronounciation, 'Pronounciation')}
 
-                      {/* Render Correctness Feedback */}
-                      {renderFeedbackSection(feedback.correctness, 'Correctness')}
+                    {/* Render Correctness Feedback */}
+                    {renderFeedbackSection(feedback.correctness, 'Correctness')}
 
-                      {/* Render Grammar Feedback */}
-                      {renderFeedbackSection(feedback.grammar, 'Grammar')}
+                    {/* Render Grammar Feedback */}
+                    {renderFeedbackSection(feedback.grammar, 'Grammar')}
+                </div>
+                <hr />
+                <div className="px-2">
+                    <button
+                        className="bg-black text-white rounded-lg p-2 shadow-lg px-4 font-semibold"
+                        onClick={() => setShowAnswer(!showAnswer)}
+                    >
+                        Expected Answer
+                    </button>
+                    <div className='block mt-4'>
+                        {showAnswer && (
+                            expectedAnswer
+                        )}
                     </div>
-                    <hr />
-                    <div className="px-2">
-                        <button
-                            className="bg-black text-white rounded-lg p-2 shadow-lg px-4 font-semibold"
-                            onClick={() => setShowAnswer(!showAnswer)}
-                        >
-                            Expected Answer
-                        </button>
-                        <div className='block mt-4'>
-                            {showAnswer && (
-                                expectedAnswer
-                            )}
-                        </div>
-                        
-                    </div>
+
                 </div>
             </div>
+        </div>
     );
 }

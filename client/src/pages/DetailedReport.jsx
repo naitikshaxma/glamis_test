@@ -81,7 +81,6 @@ const DetailedReport = () => {
             setVarTab1('Written Skills');
             setVarTab2('Content Information');
         } else if (response.data.interviewType === 'Svar'){
-            setActiveTab('Svar')
             setVarTab1('Svar')
             setVarTab2('')
         }
@@ -240,20 +239,22 @@ const DetailedReport = () => {
                 case 'Svar': 
                     return( 
                        
-                    <div className='w-full flex justify-around mb-5'>
-                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                            <div className="flex flex-col space-y-4">
+                    <div className='w-full flex justify-around mb-5 overflow-auto'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0  overflow-x">
+                            <div className="flex space-y-4 ">
+                            <p className='hidden'>hello</p>
                             {
-                                result.interviewResults?.map((item, index) => (
+                                
+                                result?.map((item, index) => (
                                     <Link
                                         key={index}
-                                        to={`#question-${index}`}  // Updated: include '#' to match with the id
+                                        to={`question-${index}`}  // Updated: include '#' to match with the id
                                         smooth={true}
                                         duration={500}
-                                        className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                        className={`flex w-full justify-center items-center space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
                                         onClick={() => handleQuestionClick(index)}
                                     >
-                                        Q{index + 1}
+                                        Q {index + 1}
                                     </Link>
                                 ))
                             }
@@ -264,14 +265,14 @@ const DetailedReport = () => {
                     ref={scrollContainerRef}
                 >
                     {
-                        result.interviewResults.map((item, index) => (
+                        result.map((item, index) => (
                             <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
                                 <SvarCard
                                     qno={index}
-                                    question={item.prompt}
-                                    answer={item.userResponse}
+                                    question={item.question}
+                                    answer={item.answer}
                                     feedback={{
-                                        pronunciation: {
+                                        pronounciation: {
                                             good: [item.pronunciationExplanation[0]],
                                             improvement: [item.pronunciationExplanation[1]]
                                         },
@@ -283,8 +284,11 @@ const DetailedReport = () => {
                                             good: [item.grammarExplanation[0]],
                                             improvement: [item.grammarExplanation[1]]
                                         }}}
-                                    score={item.overallScore}
-                                    expectedAnswer={item.correctAnswer}
+                                    score={item.overallPerformance}
+                                    expectedAnswer={item.expectedAnswer}
+                                    grammar= {item.grammar}
+                                    correctness = {item.correctness}
+                                    pronounciation= {item.pronounciation}
                                 />
                             </div>
                         ))
@@ -348,16 +352,16 @@ const DetailedReport = () => {
                     <div className='flex w-full'>
                         {activeTab === 'Svar' ? 
                         <Svar pronounciationScore={[
-                            { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.pronounciationScore, 0) / result.interviewResults.length },
-                            { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.pronounciationScore, 0) / result.interviewResults.length }
+                            { name: 'Score', value: result.reduce((acc, item) => acc + item.pronounciation, 0) / result.length },
+                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.pronounciation, 0) / result.length }
                           ]} 
                           grammarScore={[
-                              { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.grammarScore, 0) / result.interviewResults.length },
-                              { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.grammarScore, 0) / result.interviewResults.length }
+                              { name: 'Score', value: result.reduce((acc, item) => acc + item.grammar, 0) / result.length },
+                              { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
                             ]} 
                             correctnessScore={[
-                              { name: 'Score', value: result.interviewResults.reduce((acc, item) => acc + item.correctnessScore, 0) / result.interviewResults.length },
-                              { name: 'Remaining', value: 100 - result.interviewResults.reduce((acc, item) => acc + item.correctnessScore, 0) / result.interviewResults.length }
+                              { name: 'Score', value: result.reduce((acc, item) => acc + item.correctness, 0) / result.length },
+                              { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.correctness, 0) / result.length }
                             ]} 
                           />
                             :
