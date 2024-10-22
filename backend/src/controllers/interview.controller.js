@@ -1304,6 +1304,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   const {svar, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
+  let timer = 90;
 
   let redisClient = await connectRedis();
   let conversationHistory = JSON.parse(await redisClient.get(interviewId));
