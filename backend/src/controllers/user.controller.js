@@ -462,6 +462,109 @@ const resetPassword = asyncHandler(async (req,res)=>{
     return res.status(200).json(new ApiResponse(200,{},"Password reset Successfully"))
 })
 
+const getUserDataForProfile = asyncHandler(async (req, res) => {
+    // console.log(req.header("Authorization"))
+    const accessToken  = req.header("Authorization").replace("Bearer ","");
+    // console.log(accessToken) 
+
+    if (!accessToken) {
+        return res.status(400).json(ApiError(400, "Access token not present"))
+    }
+
+    try{
+        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET); 
+        const student = await Student.findOne({user: decodedToken._id}).populate('user', '-password -refreshToken'); // select student data along with user data
+
+        if (!student) {
+            return res.status(404).json(ApiError(404, "User not found")); 
+        }
+
+        return res.status(200).json(new ApiResponse(200, student, "User found successfully"))
+    } catch(err) {
+        console.log("Error in fetching user data: ", err); 
+        return res.status(500).json(ApiError(500, err.message || "Internal Server Error"))
+    }
+})
+
+const updateStudentData = asyncHandler(async (req, res) => {
+    const accessToken  = req.header("Authorization").replace("Bearer ","");
+
+    if (!accessToken) {
+        return res.status(400).json(ApiError(400, "Access token not present"))
+    }
+
+    try {
+        const { section, course, branch } = req.body; 
+        let { semester } = req.body; 
+        semester = Number.parseInt(semester)
+
+        switch(semester) {
+            case 'I': semester = 1; break; 
+            case 'II': semester = 2; break; 
+            case 'III': semester = 3; break; 
+            case 'IV': semester = 4; break; 
+            case 'V': semester = 5; break; 
+            case 'VI': semester = 6; break; 
+            case 'VII': semester = 7; break; 
+            case 'VIII': semester = 8; break; 
+        }
+
+        const updateFields = {}; 
+        if (semester) updateFields.semester = semester; 
+        if (section) updateFields.section = section; 
+        if (branch) updateFields.branch = branch; 
+        if (course) updateFields.course = course; 
+
+        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET); 
+        const updatedStudent = await Student.findOneAndUpdate({user: decodedToken._id}, updateFields, {new: true}); 
+        console.log(updatedStudent)
+
+        if (!updatedStudent) {
+            return res.status(404).json(ApiError(404, "Student not updated")); 
+        }
+
+        return res.status(200).json(new ApiResponse(200, updatedStudent, "User Updated Successfully"))
+
+    } catch(err) {
+        console.log(err); 
+        return res.status(500).json(ApiError(500, "Internal Server Err"))
+    }
+})
+
+const updatePersonalData = asyncHandler(async (req, res) => {
+    const accessToken  = req.header("Authorization").replace("Bearer ","");
+
+    if (!accessToken) {
+        return res.status(400).json(ApiError(400, "Access token not present"))
+    }
+
+    try {
+        const { rollNo, address } = req.body; 
+
+        if (isEmpty(rollNo) && isEmpty(address)) {
+            return res.status(400).json(ApiError(400, "Empty data"))
+        }; 
+
+        const updateFields = {}; 
+
+        if (rollNo) updateFields.rollNo = rollNo 
+        if (address) updateFields.address = address 
+
+        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET); 
+        const updateStudent = await Student.findOneAndUpdate({user: decodedToken._id}, updateFields, {new: true}); 
+
+        if (!updateStudent) {
+            return res.status(400).json(ApiError(400, "Student not updated"))
+        }
+
+        return res.status(200).json(new ApiResponse(200, updateStudent, "Student Updated")); 
+
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(ApiError(500, "Internal Server Error")); 
+    }
+})
+
 export {
     signup,
     login,
@@ -473,5 +576,8 @@ export {
     updateStudent,
     verifyUser,
     forgotPassword,
-    resetPassword
+    resetPassword, 
+    getUserDataForProfile, 
+    updateStudentData,
+    updatePersonalData
 }

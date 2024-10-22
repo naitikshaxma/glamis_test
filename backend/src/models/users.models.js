@@ -68,6 +68,9 @@ const studentProfileSchema = new mongoose.Schema({
     section: {
         type: String
     },
+    rollNo: {
+        type: Number 
+    },
     address: {
         type: String
     },

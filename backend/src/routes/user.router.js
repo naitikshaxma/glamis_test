@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, logout, refreshAccessToken, signup, verifyEmail, resendOTP, addStudent, verifyUser, updateStudent,forgotPassword, resetPassword } from "../controllers/user.controller.js";
+import { login, logout, refreshAccessToken, signup, verifyEmail, resendOTP, addStudent, verifyUser, updateStudent,forgotPassword, resetPassword, getUserDataForProfile, updateStudentData, updatePersonalData } from "../controllers/user.controller.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
 import { RateLimiter15mins } from "../utils/RateLimiter.js";
 
@@ -16,6 +16,9 @@ router.route("/add-student").post( addStudent)
 router.route("/update-student").post( updateStudent)
 router.route("/forgot-password").post( forgotPassword)
 router.route("/reset-password").post(resetPassword)
+router.route("/get-user-data-profile").post(getUserDataForProfile)
+router.route("/update-student-data-profile").post(updateStudentData) 
+router.route("/update-student-personal-data-profile").post(updatePersonalData)
 
 // Authenticated Routes:
 
