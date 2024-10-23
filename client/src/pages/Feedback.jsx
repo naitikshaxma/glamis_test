@@ -9,7 +9,8 @@ export default function Feedback() {
       <h1 className="text-2xl font-semibold mb-4">Feedback</h1>
         </div>
 
-        <iframe className='my-3' src="https://forms.gle/2kaedi2SoQh7FxXu8" height={1000} frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+        {/* <iframe className='my-3' src="https://forms.gle/2kaedi2SoQh7FxXu8" height={1000} frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe> */}
+        <iframe className='my-3' src="https://forms.gle/aB9xUwtRh1AJbqtB7" height={1000} frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
 
         </div>
   )

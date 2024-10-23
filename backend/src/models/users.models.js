@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    feedback_submitted:{
+        type:Boolean,
+        default:true,
+    },
     password: {
         type: String,
         required: true,

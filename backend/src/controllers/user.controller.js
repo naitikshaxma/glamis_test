@@ -565,6 +565,21 @@ const updatePersonalData = asyncHandler(async (req, res) => {
     }
 })
 
+const feedback = asyncHandler(async (req,res)=>{
+    // console.log(req.body);
+    let data = req.body;
+    const emailObject = data.find(item => item.title === 'University Email Id');
+    const email = emailObject ? emailObject.response : null;
+    console.log(email);
+    if(email){
+       const student = await User.findOne({email_id:email});
+       student.feedback_submitted = true;
+       const updated_student = await student.save();
+       console.log(updated_student);
+    }
+    return res.status(200).json("working fine");    
+})
+
 export {
     signup,
     login,
@@ -579,5 +594,6 @@ export {
     resetPassword, 
     getUserDataForProfile, 
     updateStudentData,
-    updatePersonalData
+    updatePersonalData,
+    feedback
 }

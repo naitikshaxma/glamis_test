@@ -635,6 +635,7 @@ const LiveInterview = () => {
                     if (localVideoRef.current && localVideoRef.current.srcObject) {
                         localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
                     }
+                    
                     return <EvaluationResult data={results} />;
                 })()
             )}
