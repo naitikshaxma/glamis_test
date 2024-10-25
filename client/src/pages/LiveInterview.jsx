@@ -122,7 +122,6 @@ const LiveInterview = () => {
     // Handle Save Recording Function
     const handleSaveRecording = async (audioBlob) => {
         setLoading(true);
-        console.log("Break 04");
         const formData = new FormData();
         formData.append('question', question);
         formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
@@ -130,39 +129,10 @@ const LiveInterview = () => {
         formData.append('difficulty', currentDiff);
         formData.append('questionNo', currentQuestion);
 
-        // const svarCookie = Cookies.get('svar');
-        console.log('Form data:', formData);
         try {
-            console.log("Break 05");
-            // const fetchInterview = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/fetchInterviewForSvar`, {interviewId}, {
-            //     headers: {
-            //         'Content-Type': 'application/json`',
-            //         'Authorization': `Bearer ${Cookies.get('accessToken')}`,
-            //     },
-            // });
-            // if (fetchInterview.data.data.interview.type === "Svar") {
-            //     const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestionSvar`, formData, {
-            //         headers: {
-            //             'Content-Type': 'multipart/form-data',
-            //             'Authorization': `Bearer ${Cookies.get('accessToken')}`,
-            //         },
-            //     });
-            //     console.log('Break 06');
-            //     // Assuming you want to handle the response, e.g., update results
-            //     setResults(prev => [...prev, response.data.data]);
-            //     return;
-            // } else {
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${Cookies.get('accessToken')}`,
-                    },
-                });
-                console.log('Break 06');
-                // Assuming you want to handle the response, e.g., update results
-                setResults(prev => [...prev, response.data.data]);
-                return;
-            // }
+            const response = await instance.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData);
+            setResults(prev => [...prev, response.data.data]);
+            return;
         } catch (error) {
             console.error('Error uploading audio:', error);
         }
@@ -208,7 +178,7 @@ const LiveInterview = () => {
         canvasCtx.stroke();
     };
 
-    // Fetch Question Function
+
     const fetchQuestion = async () => {
         setLoading(true);
 
@@ -255,11 +225,17 @@ const LiveInterview = () => {
                 questionNo: currentQuestion,
                 adminInterviewId: Cookies.get('adminInterviewId'),
             };
-        }  // todo: fix incorrect urls for verbal
-
+        }
         if (mockType === 'written') {
-
-        } // todo: fix incorrect urls for written
+            url = `/api/v1/interview/generateQuestionForWrittenAdmin`;
+            data = {
+                answer: ansMetaData.answer,
+                score: ansMetaData.score,
+                interviewId: Cookies.get('interviewId'),
+                questionNo: currentQuestion,
+                adminInterviewId: Cookies.get('adminInterviewId'),
+            };
+        }
         if (mockType === 'svar') {
             url = `/api/v1/interview/generateQuestionForSvarAdmin`;
             data = {
@@ -283,23 +259,10 @@ const LiveInterview = () => {
             // Safely set question and related data
             setQuestion(response.data.data.question || ''); // Default to empty string if undefined
             setCurrentDiff(response.data.data.difficulty || "");
+            setTimer(response.data.data.timer || 90);  // Default to 90 seconds if undefined
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName || ''}`);
             setIsAudioPlaying(true);
-
-            // Set timer based on difficulty
-            if (response.data.data.difficulty === "reading")
-                setTimer(30);
-            else if(response.data.data.difficulty === "repeating"){
-                setTimer(40)
-            }else if(response.data.data.difficulty === "short"){
-                setTimer(40)
-            }else if(response.data.data.difficulty === "jumbled"){
-                setTimer(40)
-            }else if(response.data.data.difficulty === "comprehension"){
-                setTimer(120)
-            }else{
-                setTimer(90)
-            }
+            // set Timer from response
 
         } catch (error) {
             console.error('Error fetching question:', error);
