@@ -31,6 +31,10 @@ const interviewSchema = new mongoose.Schema({
         type: Number,
         // required: true   // todo: make sure to add totalQuestions everywhere in createInterviews
     },
+    evaluatedQuestions: {
+        type: Number,
+        // required: true   // todo: make sure to add totalQuestions everywhere in createInterviews
+    },
     title: {
         type: String,
         required: true

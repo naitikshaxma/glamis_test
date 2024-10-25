@@ -651,9 +651,9 @@ export const downloadAttendance = async (req, res) => {
           _id: {$in: interviews},
         }
       },
-      // Stage 2: Project the _id field of the interviews
+      // Stage 2: Project the _id field of the interviews and attemptedQuestions
       {
-        $project: {_id: 1, is_active: 1}
+        $project: {_id: 1, is_active: 1, attemptedQuestions: 1}
       },
       // Stage 3: Lookup in students collection using interview _id
       {
@@ -678,7 +678,8 @@ export const downloadAttendance = async (req, res) => {
       {
         $project: {
           user_id: "$matched_students.user",
-          is_active: 1
+          is_active: 1,
+          attemptedQuestions: 1
         }
       },
       // Stage 6: Lookup in users collection using user_id
@@ -700,14 +701,15 @@ export const downloadAttendance = async (req, res) => {
           email: "$user_data.email_id",
           name: "$user_data.name",
           _id: "$user_data._id",
-          is_active: 1
+          is_active: 1,
+          attemptedQuestions: 1
         }
       },
       // Stage 9: Group results and include count
       {
         $group: {
           _id: null,
-          emails: {$push: {Email: "$email", Name: "$name", Id: "$_id", Present: {$not: "$is_active"}}},
+          emails: {$push: {Email: "$email", Name: "$name", Id: "$_id", Present: {$not: "$is_active"}, AttemptedQuestions: "$attemptedQuestions"}},
           total_count: {$sum: 1}
         }
       }
