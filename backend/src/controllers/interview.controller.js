@@ -436,7 +436,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   historyPrompt += lastQuestion[lastQuestion.length - 1]?.question;
 
 
-  const adminInterview = await AdminCompanyInterview.findById(adminInterviewId);
+  const adminInterview = await AdminCompanyInterview.findOne({interview: interviewId}).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -891,7 +891,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
   await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
-  const adminInterview = await AdminWrittenInterview.findById(adminInterviewId);
+  const adminInterview = await AdminWrittenInterview.findOne({interview: interviewId}).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -1177,7 +1177,6 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
   }).join("\n");
 
 
-  // todo: fetch the admin interview using interviewId (like svar)
   console.log(interviewId)
   const adminInterview = await AdminSubjectInterview.findOne({interview: interviewId}).populate('interview');
 
