@@ -1765,7 +1765,9 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
       });
     }
 
-    interview.evaluatedQuestions += 1;
+    if (!interview.evaluatedQuestions)
+        interview.evaluatedQuestions = 1;
+    else interview.evaluatedQuestions += 1;
 
     // todo: end interview if all questions are attempted (totalQuestions === attemptedQuestions) but after monitoring it in generate question and frontend
 
