@@ -130,7 +130,7 @@ const LiveInterview = () => {
         formData.append('questionNo', currentQuestion);
 
         try {
-            const response = await instance.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData);
+            const response = await instance.post(`/api/v1/interview/evaluateQuestion`, formData, {headers: {'Content-Type': 'multipart/form-data'}});
             setResults(prev => [...prev, response.data.data]);
             return;
         } catch (error) {
@@ -598,7 +598,7 @@ const LiveInterview = () => {
                     if (localVideoRef.current && localVideoRef.current.srcObject) {
                         localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
                     }
-                    
+
                     return <EvaluationResult data={results} />;
                 })()
             )}
