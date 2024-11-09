@@ -18,7 +18,7 @@ const DetailedReport = () => {
     const navigate = useNavigate();
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
-    const [activeTab, setActiveTab] = useState('Svar');
+    const [activeTab, setActiveTab] = useState('');
     const [varTab1, setVarTab1] = useState('Technical Skills');
     const [varTab2, setVarTab2] = useState('Verbal Skills');
 
@@ -76,13 +76,22 @@ const DetailedReport = () => {
 
         setResult(response.data.interviewResults);
         if (response.data.interviewType === 'verbal') {
-            setVarTab1('Relevancy Score');
+            // setVarTab1('verbal'); no need to set this to verbal 
+            setActiveTab('verbal')
         } else if (response.data.interviewType === 'written') {
             setVarTab1('Written Skills');
+            setActiveTab('Written Skills')
             setVarTab2('Content Information');
         } else if (response.data.interviewType === 'Svar'){
             setVarTab1('Svar')
+            setActiveTab('Svar')
             setVarTab2('')
+        } else if (response.data.interviewType === 'Subject') {
+            setVarTab1('Technical Skills')
+            setActiveTab('Technical Skills')
+        } else if (response.data.interviewType === 'company') {
+            setVarTab1('Technical')
+            setActiveTab('technical')
         }
     }
 
