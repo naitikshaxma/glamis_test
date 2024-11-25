@@ -654,10 +654,10 @@ export const downloadAttendance = async (req, res) => {
       },
       // Stage 2: Project relevant fields, keeping interview ID intact
       {
-        $project: { 
+        $project: {
           interviewId: "$_id",  // Preserve original interview _id
-          is_active: 1, 
-          attemptedQuestions: 1 
+          is_active: 1,
+          attemptedQuestions: 1
         },
       },
       // Stage 3: Lookup in students collection using interviewId
@@ -761,7 +761,7 @@ export const downloadAttendance = async (req, res) => {
 
     const students = await Interview.aggregate(pipeline);
 
-    const fields = ['Email', 'Name', 'UserId', 'Present','TotalScore','AverageScore','View_Report'];
+    const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TotalScore','AverageScore','View_Report'];
     const opts = { fields };
     const parser = new Parser(opts);
     let arr = [];
