@@ -328,18 +328,15 @@ const LiveInterview = () => {
             const response = await fetch(defaultAudioPath);
             const audioBlob = await response.blob(); // Convert the default audio file to a Blob
 
-            formData.append('question', ''); // Since question is skipped, you might want to pass an empty string or a specific value
+            formData.append('question', question); // Since question is skipped, you might want to pass an empty string or a specific value
             formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
             formData.append('interviewId', Cookies.get('interviewId'));
             formData.append('difficulty', currentDiff);
+            formData.append('questionNo', currentQuestion);
+
             console.log('Form data for skipped question:', formData);
 
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/evaluateQuestion`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${Cookies.get('accessToken')}`,
-                },
-            });
+            await instance.post(`/api/v1/interview/evaluateQuestion`, formData, {headers: {'Content-Type': 'multipart/form-data'}});
             console.log('Question skipped successfully');
 
         } catch (error) {
@@ -522,7 +519,7 @@ const LiveInterview = () => {
                                         <canvas ref={canvasRef} width="640" height="200" />
                                     </div>
                                     <div className="actions w-full flex justify-between mt-4">
-                                        <Button color="blue" ripple="light" size="lg" className="w-1/3"
+                                        <Button color="blue" ripple="light" size="lg" className="w-1/3" disabled={!question}
                                             onClick={handleSkipQuestion}>Skip</Button>
                                         <Button
                                             color={isRecording ? "red" : "blue"}
@@ -583,7 +580,7 @@ const LiveInterview = () => {
                                     color='red'
                                     size='lg'
                                     disabled={currentQuestion < totalQuestions - 1}
-                                    onClick={handleSkipQuestion}
+                                    onClick={handleNextQuestion}
                                     className='w-full mx-3'
                                 >
                                     End Interview
