@@ -21,6 +21,7 @@ const DetailedReport = () => {
     const [activeTab, setActiveTab] = useState('');
     const [varTab1, setVarTab1] = useState('Technical Skills');
     const [varTab2, setVarTab2] = useState('Verbal Skills');
+    const [studentName,setStudentName] = useState(Cookies.get("fullName"));
 
     const handleOpen = (value) => {
         setOpen(open === value ? null : value);
@@ -73,7 +74,9 @@ const DetailedReport = () => {
             }
         );
         console.log(response.data);
-
+        if(response.data.studentName){
+            setStudentName(response.data.studentName);
+        }
         setResult(response.data.interviewResults);
         if (response.data.interviewType === 'verbal') {
             // setVarTab1('verbal'); no need to set this to verbal 
@@ -344,7 +347,7 @@ const DetailedReport = () => {
                 </div>
                 <div className="flex items-center">
                     <div className="flex flex-col mr-4">
-                        <div className="font-semibold text-lg text-right">{Cookies.get("fullName")}</div>
+                        <div className="font-semibold text-lg text-right">{studentName}</div>
                         <div className="font-semibold text-sm text-right">2115000000</div>
                         <div className="font-semibold text-sm text-right">Mock Interview Results</div>
                     </div>
