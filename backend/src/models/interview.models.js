@@ -33,6 +33,7 @@ const interviewSchema = new mongoose.Schema({
     },
     evaluatedQuestions: {
         type: Number,
+        default: 0
         // required: true   // todo: make sure to add totalQuestions everywhere in createInterviews
     },
     title: {
