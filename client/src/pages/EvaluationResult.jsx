@@ -36,7 +36,7 @@ const EvaluationResult = ({ data }) => {
             setTimeout(() => {
 
 
-                navigate(`/history/detailed/${Cookies.get('interviewId')}`);
+                navigate(`/feedback`);
 
             }, 7000)
 

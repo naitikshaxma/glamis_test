@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    feedback_submitted:{
+        type:Boolean,
+        default:true,
+    },
     password: {
         type: String,
         required: true,
@@ -52,10 +56,10 @@ const studentProfileSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
-    interview_taken: {
-        type: [mongoose.Schema.Types.ObjectId],
+    interview_taken: [{
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Interview"
-    },
+    }],
     course: {
         type: String
     },
@@ -67,6 +71,9 @@ const studentProfileSchema = new mongoose.Schema({
     },
     section: {
         type: String
+    },
+    rollNo: {
+        type: Number 
     },
     address: {
         type: String

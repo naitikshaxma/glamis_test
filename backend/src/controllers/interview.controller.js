@@ -23,6 +23,7 @@ import {getAdminInterview, getSessionQuestions, saveSessionQuestions} from "../u
 
 
 const objectStorePath = path.resolve("../objectStore");
+const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
 
 
 /*
@@ -189,6 +190,37 @@ export const createInterviewBySvarAdmin = asyncHandler(async (req, res) => {
 
 
 // ---------------------------- Generate Question ----------------------------
+
+const timerObject = {
+  Easy: 60,
+  Medium: 90,
+  Hard: 90,
+  essay: 20 * 60,
+  jumbled: 40,  // for both written and svar
+  errorDetection: 40,
+  fillInTheBlanks: 40,
+  synonymsAndAntonyms: 40,
+  reading: 30,
+  repeating: 40,
+  short: 40,
+  comprehension: 120
+}
+
+
+const PromptObject = ({type, historyPrompt, difficulty}) => (
+  {
+    JD: {},
+    Written: {},
+    Subject: {
+      Easy: `${historyPrompt}\nGenerate a new, entirely different ${difficulty} question covering a different DSA topic without repeating previous areas of ${historyPrompt}. Limit the question to 25 words.`,
+      Medium: `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output.without asking user to write any code. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``,
+      Hard: `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and highly challenging ${difficulty} level scenario-based question in DSA. The scenario should require the user to think critically about advanced concepts like algorithm optimization or space-time complexity analysis, and it should be distinct from any previous questions.`,
+    },
+    Verbal: {},
+    Svar: {},
+  }[type][difficulty]
+)
+
 
 export const generateQuestion = asyncHandler(async (req, res) => {
   const openai = new OpenAI({
@@ -370,6 +402,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
 
 
 export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
+  let timer = 90;
   console.log("entered jd admin")
   const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   const {selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
@@ -403,7 +436,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   historyPrompt += lastQuestion[lastQuestion.length - 1]?.question;
 
 
-  const adminInterview = await AdminCompanyInterview.findById(adminInterviewId);
+  const adminInterview = await AdminCompanyInterview.findOne({interview: interviewId}).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -423,6 +456,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "Easy") {
+    timer = 60;  // 60 seconds
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: {$in: adminInterview.questions}
     });
@@ -442,6 +476,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
       }
 
       const dataToSend = {
+        timer,
         question, // gamma: noOfAttemptedQuestions,
         audioFileName: audioFileName, difficulty
       };
@@ -451,6 +486,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "Medium") {
+    timer = 90;  // 60 seconds
     const mediumQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Medium", _id: {$in: adminInterview.questions}
     });
@@ -469,7 +505,10 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
       }
 
       const dataToSend = {
-        question, audioFileName: audioFileName, difficulty
+        question,
+        audioFileName: audioFileName,
+        difficulty,
+        timer
       };
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -477,6 +516,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "Hard") {
+    timer = 90;  // 90 seconds
     const hardQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Hard", _id: {$in: adminInterview.questions}
     });
@@ -494,7 +534,10 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
       }
 
       const dataToSend = {
-        question, audioFileName: audioFileName, difficulty
+        question,
+        audioFileName: audioFileName,
+        difficulty,
+        timer
       };
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -581,7 +624,10 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   }
 
   const dataToSend = {
-    question, audioFileName: audioFileName, difficulty
+    question,
+    audioFileName: audioFileName,
+    difficulty,
+    timer
   };
 
   return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -589,6 +635,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 });
 
 export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
+  let timer = 90;
   const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   const {answer, score, interviewId, questionNo, adminInterviewId} = req.body;
   console.log(req.body);
@@ -638,6 +685,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "Easy") {
+    timer = 60;  // 60 seconds
 
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: {$in: adminInterview.questions}
@@ -659,7 +707,10 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
       }
 
       const dataToSend = {
-        question, audioFileName: audioFileName
+        question,
+        audioFileName: audioFileName,
+        difficulty,
+        timer
       };
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -668,6 +719,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "Medium") {
+    timer = 90;  // 60 seconds
     const mediumQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Medium", _id: {$in: adminInterview.questions}
     });
@@ -694,7 +746,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
       const dataToSend = {
 
         question,
-
+        timer,
         audioFileName: audioFileName
 
       };
@@ -706,7 +758,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "Hard") {
-
+    timer = 90;  // 90 seconds
     const hardQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Hard", _id: {$in: adminInterview.questions}
     });
@@ -734,7 +786,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
       const dataToSend = {
 
         question,
-
+        timer,
         audioFileName: audioFileName
 
       };
@@ -810,7 +862,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   const dataToSend = {
 
     question,
-
+    timer,
     audioFileName: audioFileName
 
   };
@@ -821,6 +873,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
 
 export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => {
+  let timer = 90;
   console.log("entered written admin")
   const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   const {subject, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
@@ -838,16 +891,12 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
   await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
-  const adminInterview = await AdminWrittenInterview.findById(adminInterviewId);
+  const adminInterview = await AdminWrittenInterview.findOne({interview: interviewId}).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
-
-  console.log('wow')
-
   let difficulty;
-
   if (adminInterview.essay > questionNo) {
     difficulty = 'essay';
   } else if (adminInterview.jumbled + adminInterview.essay > questionNo) {
@@ -863,6 +912,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "essay") {
+    timer = 20 * 60;  // 20 minutes
     const essayQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "essay", _id: {$in: adminInterview.questions}
     });
@@ -882,9 +932,8 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
       }
 
       const dataToSend = {
-
         question,
-
+        timer,
         audioFileName: audioFileName
 
       };
@@ -896,6 +945,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
 
   if (difficulty === "jumbled") {
+    timer = 40;  // 40 seconds
     const jumbledQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "jumbled", _id: {$in: adminInterview.questions}
     });
@@ -917,7 +967,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
       const dataToSend = {
         question,
-
+        timer,
         audioFileName: audioFileName
 
       };
@@ -928,6 +978,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
 
   if (difficulty === "errorDetection") {
+    timer = 40;  // 40 seconds
 
     const errorDetectionQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "errorDetection", _id: {$in: adminInterview.questions}
@@ -952,9 +1003,8 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
       }
 
       const dataToSend = {
-
+        timer,
         question,
-
         audioFileName: audioFileName
 
       };
@@ -966,6 +1016,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
 
   if (difficulty === "fillInTheBlanks") {
+    timer = 40;  // 40 seconds
 
     const fillInTheBlanksQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "fillInTheBlanks", _id: {$in: adminInterview.questions}
@@ -990,9 +1041,8 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
       }
 
       const dataToSend = {
-
+        timer,
         question,
-
         audioFileName: audioFileName
 
       };
@@ -1002,6 +1052,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
 
   if (difficulty === "synonymsAndAntonyms") {
+    timer = 40;  // 40 seconds
 
     const synonymsAndAntonymsQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "synonymsAndAntonyms", _id: {$in: adminInterview.questions}
@@ -1026,9 +1077,8 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
       }
 
       const dataToSend = {
-
+        timer,
         question,
-
         audioFileName: audioFileName
 
       };
@@ -1098,7 +1148,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   const dataToSend = {
 
     question,
-
+    timer,
     audioFileName: audioFileName
 
 
@@ -1108,14 +1158,10 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 });
 
 export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => {
-  console.log("entered subject admin")
-  const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   const {subject, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
-  console.log(req.body);
 
   let redisClient = await connectRedis();
   let conversationHistory = JSON.parse(await redisClient.get(interviewId));
-  console.log("connected redis")
 
   if (conversationHistory.length > 0) {
     conversationHistory.push({
@@ -1131,14 +1177,13 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
   }).join("\n");
 
 
-  const adminInterview = await AdminSubjectInterview.findById(adminInterviewId);
+  console.log(interviewId)
+  const adminInterview = await AdminSubjectInterview.findOne({interview: interviewId}).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
-
-  console.log('wow')
   let difficulty;
   if (adminInterview.easy > questionNo) {
     difficulty = 'Easy';
@@ -1148,32 +1193,28 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     difficulty = 'Hard';
   }
 
-  // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
+  let questionData = "";
+  let audioFileNameData = "";
+  let storedQuestion = false;
+
+  // logic for stored questions
   if (difficulty === "Easy") {
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: {$in: adminInterview.questions}
     });
     if (questionNo < easyQuestions.length) {
-      const question = easyQuestions[questionNo].question;
-      console.log(question)
-      console.log(easyQuestions)
+      storedQuestion = true;
+      questionData = easyQuestions[questionNo].question;
+      audioFileNameData = `question-${generateUniqueKey()}.mp3`;
 
-      const audioFileName = `question-${generateUniqueKey()}.mp3`;
-      const audioFilePath = path.join(objectStorePath, audioFileName);
-
-      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      const audioFilePath = path.join(objectStorePath, audioFileNameData);
+      const cleanedQuestion = questionData.replace(/```[\s\S]*?```/g, '');
       await textToSpeech(cleanedQuestion, audioFilePath);
 
       if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({error: 'Failed to generate audio'});
       }
-
-      const dataToSend = {
-        question, audioFileName: audioFileName
-      };
-
-      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
     }
   }
 
@@ -1183,23 +1224,17 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     });
     console.log("______________________________\n" + mediumQuestions + "\n_______________________________________")
     if (questionNo - adminInterview.easy < mediumQuestions.length) {
-      const question = mediumQuestions[questionNo - adminInterview.easy].question;
+      storedQuestion = true;
+      questionData = mediumQuestions[questionNo - adminInterview.easy].question;
+      audioFileNameData = `question-${generateUniqueKey()}.mp3`;
 
-      const audioFileName = `question-${generateUniqueKey()}.mp3`;
-      const audioFilePath = path.join(objectStorePath, audioFileName);
-
-      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      const audioFilePath = path.join(objectStorePath, audioFileNameData);
+      const cleanedQuestion = questionData.replace(/```[\s\S]*?```/g, '');
       await textToSpeech(cleanedQuestion, audioFilePath);
 
       if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({error: 'Failed to generate audio'});
       }
-
-      const dataToSend = {
-        question, audioFileName: audioFileName
-      };
-
-      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
     }
   }
 
@@ -1208,40 +1243,37 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
       difficulty: "Hard", _id: {$in: adminInterview.questions}
     });
     if (questionNo - (adminInterview.easy + adminInterview.medium) < hardQuestions.length) {
-      const question = hardQuestions[questionNo - (adminInterview.easy + adminInterview.medium)].question;
+      storedQuestion = true;
+      questionData = hardQuestions[questionNo - (adminInterview.easy + adminInterview.medium)].question;
+      audioFileNameData = `question-${generateUniqueKey()}.mp3`;
 
-      const audioFileName = `question-${generateUniqueKey()}.mp3`;
-      const audioFilePath = path.join(objectStorePath, audioFileName);
-
-      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      const audioFilePath = path.join(objectStorePath, audioFileNameData);
+      const cleanedQuestion = questionData.replace(/```[\s\S]*?```/g, '');
       await textToSpeech(cleanedQuestion, audioFilePath);
 
       if (!fs.existsSync(audioFilePath)) {
         return res.status(500).json({error: 'Failed to generate audio'});
       }
-
-      const dataToSend = {
-        question, audioFileName: audioFileName
-      };
-
-      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
     }
   }
 
-  let prompt = "";
-  // if (difficulty === "Easy") {
-  //     prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new ${difficulty} generic question for DSA,without asking for code implementation.`;
-  //     //prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and different ${difficulty} level question focused on fundamental concepts of Data Structures and Algorithms (DSA). Ensure the new question is distinct from any previous ones and challenges the user to explain a core concept or approach without asking for code implementation.`;
-  //}
-  if (difficulty === "Easy") {
-    prompt = `${historyPrompt}\nGenerate a new, entirely different ${difficulty} question covering a different DSA topic without repeating previous areas of ${historyPrompt}. Limit the question to 25 words.`;
-  } else if (difficulty === "Medium") {
-    prompt = `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output.without asking user to write any code. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``;
-  } else {
-    prompt = `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and highly challenging ${difficulty} level scenario-based question in DSA. The scenario should require the user to think critically about advanced concepts like algorithm optimization or space-time complexity analysis, and it should be distinct from any previous questions.`;
+
+  if (storedQuestion) {
+    const context = {
+      question: questionData,
+      audioFileName: audioFileNameData,
+      timer: timerObject[difficulty]
+    }
+    return res.status(200).json(new ApiResponse(200, context, "Question generated successfully"));
   }
 
 
+  // logic for generated questions
+  let prompt = PromptObject({
+    type: "Subject",
+    difficulty: difficulty,
+    historyPrompt: historyPrompt
+  })
   prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
 
 
@@ -1251,27 +1283,31 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     max_tokens: 1000,
   });
 
-  const question = completion.choices[0].message.content.trim();
+  questionData = completion.choices[0].message.content.trim();
+  audioFileNameData = `question-${generateUniqueKey()}.mp3`;
+  const audioFilePath = path.join(objectStorePath, audioFileNameData);
 
-  const audioFileName = `question-${generateUniqueKey()}.mp3`;
-  const audioFilePath = path.join(objectStorePath, audioFileName);
-
-  const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+  const cleanedQuestion = questionData.replace(/```[\s\S]*?```/g, '');
   await textToSpeech(cleanedQuestion, audioFilePath);
 
   if (!fs.existsSync(audioFilePath)) {
     return res.status(500).json({error: 'Failed to generate audio'});
   }
 
-  const dataToSend = {
-    question, audioFileName: audioFileName
+  const context = {
+    question: questionData,
+    audioFileName: audioFileNameData,
+    timer: timerObject[difficulty]
   };
 
-  return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+  return res.status(200).json(new ApiResponse(200, context, "Question generated successfully"));
 
 });
 
 export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
+  let timer = 90;
+
+
   const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   const {svar, answer, score, interviewId, questionNo, adminInterviewId} = req.body;
 
@@ -1294,19 +1330,8 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     return `Q${index + 1}: ${interaction.svar}`;
   }).join("\n");
 
-  // const adminInterview = await AdminSvarInterview.findById(adminInterviewId);
-  /* get the admin interview by Interview table's interviewId
-   * where adminInterview's interview: {
-      type: [mongoose.Schema.Types.ObjectId],
-      // required : true,
-      ref: "Interview"
-  },
-   */
+
   const adminInterview = await AdminSvarInterview.findOne({interview: interviewId}).populate('interview');
-  // console.log(adminInterview);
-  // return res.status(500).json({error: 'Failed to generate audio'});
-
-
   if (adminInterview == null) {
     res.status(404).json(ApiError(404, "Interview not found"));
   }
@@ -1325,6 +1350,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === 'reading') {
+    timer = 30;
     const readingQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "reading", _id: {$in: adminInterview.questions}
     });
@@ -1333,13 +1359,16 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
 
       const dataToSend = {
-        question, difficulty    // only need to send the question since the audio file is not required for read and speak
-      }
+        question,
+        difficulty,
+        timer
+      }  // only need to send the question since the audio file is not required for read and speak
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
     }
   }
   if (difficulty === "repeating") {
+    timer = 40;
     const repeatingQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "repeating", _id: {$in: adminInterview.questions}
     })
@@ -1360,7 +1389,8 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
       const dataToSend = {
         audioFileName: audioFileName,
-        difficulty
+        difficulty,
+        timer
       }
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -1369,6 +1399,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "short") {
+    timer = 40;
     const shortQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "short", _id: {$in: adminInterview.questions}
     });
@@ -1388,7 +1419,9 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
-        audioFileName: audioFileName, difficulty
+        audioFileName: audioFileName,
+        difficulty,
+        timer
       }
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
@@ -1396,6 +1429,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "jumbled") {
+    timer = 40;
     const jumbledQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "jumbled", _id: {$in: adminInterview.questions}
     })
@@ -1413,7 +1447,9 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
-        audioFileName: audioFileName, difficulty
+        audioFileName: audioFileName,
+        difficulty,
+        timer
       }
 
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
@@ -1422,16 +1458,19 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
 
   if (difficulty === "comprehension") {
+    timer = 120;
     const comprehensionQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "comprehension", _id: {$in: adminInterview.questions}
     });
-
     if (questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short) < comprehensionQuestions.length) {
       const question = comprehensionQuestions[questionNo - (adminInterview.reading + adminInterview.repeating + adminInterview.jumbled + adminInterview.short)].question;
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
-        question, difficulty
+
+        question,
+        difficulty,
+        timer
       };
 
       res.status(200).json(new ApiResponse(200, dataToSend, "Question Generated Successfully"));
@@ -1484,7 +1523,9 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   await saveSessionQuestions(interviewId, questionNo, question);
 
   const dataToSend = {
-    difficulty, audioFileName: audioFileName
+    audioFileName: audioFileName,
+    difficulty,
+    timer
   };
 
   return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"))
@@ -1655,6 +1696,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
     let {question, interviewId, difficulty, questionNo} = req.body;
     let answer = req.extractedAnswer;
 
+
     if (answer === undefined) {
       answer = req.body.answer;
     }
@@ -1663,6 +1705,14 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
     }
 
     const interview = await Interview.findById(interviewId); //fetch
+
+    interview.attemptedQuestions += 1;
+    if (interview.attemptedQuestions === 1) {
+      interview.firstAttemptedAt = new Date();
+    }
+    interview.lastAttemptedAt = new Date();
+    await interview.save();
+
 
     let feedback;
     if (interview.type === "Svar") {
@@ -1715,11 +1765,9 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
       });
     }
 
-    interview.attemptedQuestions += 1;
-    if (interview.attemptedQuestions === 1) {
-      interview.firstAttemptedAt = new Date();
-    }
-    interview.lastAttemptedAt = new Date();
+    if (!interview.evaluatedQuestions)
+        interview.evaluatedQuestions = 1;
+    else interview.evaluatedQuestions += 1;
 
     // todo: end interview if all questions are attempted (totalQuestions === attemptedQuestions) but after monitoring it in generate question and frontend
 
@@ -1986,8 +2034,8 @@ export const interviewQuestionCount = asyncHandler(async (req, res) => {
     }
 
     const count = interview.no_of_questions;
-
-    return res.status(200).json(new ApiResponse(200, {count}, "Interview Fetched Successfully"));
+    const currentQuestion = (await Interview.findById(interviewId)).attemptedQuestions;
+    return res.status(200).json(new ApiResponse(200, {count, currentQuestion}, "Interview Fetched Successfully"));
   } catch (err) {
     return res.status(500).json({
       message: "Internal Server Error" || err.message
