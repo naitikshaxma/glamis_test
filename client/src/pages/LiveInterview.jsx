@@ -69,7 +69,7 @@ const LiveInterview = () => {
     // Parse totalQuestions as an integer
     const totalQuestions = parseInt(Cookies.get("delta"), 10) || 0;
 
-    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [currentQuestion, setCurrentQuestion] = useState(parseInt(Cookies.get('currentQuestion')));
     const [timer, setTimer] = useState(100);
     const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
 

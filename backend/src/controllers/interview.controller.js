@@ -2034,8 +2034,8 @@ export const interviewQuestionCount = asyncHandler(async (req, res) => {
     }
 
     const count = interview.no_of_questions;
-
-    return res.status(200).json(new ApiResponse(200, {count}, "Interview Fetched Successfully"));
+    const currentQuestion = (await Interview.findById(interviewId)).attemptedQuestions;
+    return res.status(200).json(new ApiResponse(200, {count, currentQuestion}, "Interview Fetched Successfully"));
   } catch (err) {
     return res.status(500).json({
       message: "Internal Server Error" || err.message
