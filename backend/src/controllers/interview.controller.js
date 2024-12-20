@@ -1481,18 +1481,23 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
   if (difficulty === "reading") {
     prompt = `
-        Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
-        `;
+          Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, clear, and based on diverse topics such as sports, geopolitics, global warming, or any universal theme, or any thing that the user can read and speak."
+          `;
   } else if (difficulty === "repeating") {
     prompt = `
-                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 15 words. Example format: "I had a flat tire while driving home from the office."
-            `;
+          Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 15 words, and inspired by diverse topics like cultural heritage, scientific discoveries, or environmental issues."
+          `;
   } else if (difficulty === "short") {
-    prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Adam was happy to hear the news. Was he glad or unhappy?", "What is the color of grass. Is it green or brown?"`
+    prompt = `
+          Generate a single short comprehension question with two answer choices. The question should reflect diverse themes, such as global challenges, sports achievements, or historical events,or any simple question and the user should select between the two options."
+          `;
   } else if (difficulty === "jumbled") {
-    prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
-  } else if (difficulty === "comprehension") {
-    prompt = `Generate a passage of exactly 80 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
+    prompt = `
+          Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words and draw from diverse topics, including technological innovations, artistic movements, or natural phenomena."
+          `;
+  }
+   else if (difficulty === "comprehension") {
+    prompt = `Generate a passage of exactly 50 words for the user to comprehend. After the passage, generate one short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words."`
   }
 
 
