@@ -1356,7 +1356,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     });
     if (questionNo < readingQuestions.length) {
       const question = readingQuestions[questionNo].question; // get the question from the admin questions
-
+      
 
       const dataToSend = {
         question,
@@ -1467,7 +1467,6 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
-
         question,
         difficulty,
         timer
@@ -1513,6 +1512,9 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
   if (difficulty === "reading" || difficulty === "comprehension") {
     await saveSessionQuestions(interviewId, questionNo, question);
+    if(difficulty === "reading"){
+      difficulty = "Read and Speak"
+    }
     return res.status(200).json(new ApiResponse(200, {question, difficulty}, "Quesetion Generated Successfully"));
   }
 
@@ -1527,6 +1529,13 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
   await saveSessionQuestions(interviewId, questionNo, question);
 
+  if(difficulty == "repeating"){
+    difficulty = "Listen and Speak"
+  }else if(difficulty == "short"){
+    difficulty = "Choice Question"
+  }else if(difficulty == "jumbled"){
+    difficulty = "Jumbled Sentence"
+  }
   const dataToSend = {
     audioFileName: audioFileName,
     difficulty,
