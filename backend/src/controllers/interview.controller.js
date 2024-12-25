@@ -1269,11 +1269,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 
   // logic for generated questions
-  let prompt = PromptObject({
-    type: "Subject",
-    difficulty: difficulty,
-    historyPrompt: historyPrompt
-  })
+  let prompt = generateQuestionsPrompt(subject, conversationHistory, historyPrompt, difficulty);
   prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
 
 
@@ -1356,7 +1352,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     });
     if (questionNo < readingQuestions.length) {
       const question = readingQuestions[questionNo].question; // get the question from the admin questions
-
+      
 
       const dataToSend = {
         question,
@@ -1467,7 +1463,6 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
-
         question,
         difficulty,
         timer
@@ -1481,18 +1476,23 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
   if (difficulty === "reading") {
     prompt = `
-        Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, and clear for the user to read aloud. Example format: "My neighbors often host loud gatherings on the weekends."
-        `;
+          Generate a single reading sentence for the user. The sentence should be no more than 20 words, simple, clear, and based on diverse topics such as sports, geopolitics, global warming, or any universal theme, or any thing that the user can read and speak."
+          `;
   } else if (difficulty === "repeating") {
     prompt = `
-                Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 15 words. Example format: "I had a flat tire while driving home from the office."
-            `;
+          Generate a single sentence for the user to repeat. The sentence should be clear and concise, with a maximum length of 15 words, and inspired by diverse topics like cultural heritage, scientific discoveries, or environmental issues."
+          `;
   } else if (difficulty === "short") {
-    prompt = `Generate a single short comprehension question with two answer choices. The user should select between the two options. Example format: "Adam was happy to hear the news. Was he glad or unhappy?", "What is the color of grass. Is it green or brown?"`
+    prompt = `
+          Generate a single short comprehension question with two answer choices. The question should reflect diverse themes, such as global challenges, sports achievements, or historical events,or any simple question and the user should select between the two options."
+          `;
   } else if (difficulty === "jumbled") {
-    prompt = `Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words. Example format: "Honest politicians need our society" → "Our society needs honest politicians."`
-  } else if (difficulty === "comprehension") {
-    prompt = `Generate a passage of exactly 80 words for the user to comprehend. After the passage, generate three short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words. Example question format: "What problem did Jason have when he woke up?"`
+    prompt = `
+          Generate a single jumbled sentence for the user to unscramble into its correct order. The sentence should have fewer than 15 words and draw from diverse topics, including technological innovations, artistic movements, or natural phenomena."
+          `;
+  }
+   else if (difficulty === "comprehension") {
+    prompt = `Generate a passage of exactly 50 words for the user to comprehend. After the passage, generate one short comprehension questions based on the content. The answers to the questions should be brief and consist of just a few words."`
   }
 
 
@@ -1508,6 +1508,9 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
   if (difficulty === "reading" || difficulty === "comprehension") {
     await saveSessionQuestions(interviewId, questionNo, question);
+    if(difficulty === "reading"){
+      difficulty = "Read and Speak"
+    }
     return res.status(200).json(new ApiResponse(200, {question, difficulty}, "Quesetion Generated Successfully"));
   }
 
@@ -1522,6 +1525,13 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
   await saveSessionQuestions(interviewId, questionNo, question);
 
+  if(difficulty == "repeating"){
+    difficulty = "Listen and Speak"
+  }else if(difficulty == "short"){
+    difficulty = "Choice Question"
+  }else if(difficulty == "jumbled"){
+    difficulty = "Jumbled Sentence"
+  }
   const dataToSend = {
     audioFileName: audioFileName,
     difficulty,
@@ -2034,8 +2044,8 @@ export const interviewQuestionCount = asyncHandler(async (req, res) => {
     }
 
     const count = interview.no_of_questions;
-
-    return res.status(200).json(new ApiResponse(200, {count}, "Interview Fetched Successfully"));
+    const currentQuestion = (await Interview.findById(interviewId)).attemptedQuestions;
+    return res.status(200).json(new ApiResponse(200, {count, currentQuestion}, "Interview Fetched Successfully"));
   } catch (err) {
     return res.status(500).json({
       message: "Internal Server Error" || err.message
