@@ -760,6 +760,7 @@ export const downloadAttendance = async (req, res) => {
         },
       },
     ];
+<<<<<<< HEAD
 
     //   {
     //     $match: {
@@ -836,12 +837,15 @@ export const downloadAttendance = async (req, res) => {
     //             $concat: ["http://glamis.in/history/detailed/", { $toString: "$InterviewId" }]
     //           }
     //         }
+=======
+>>>>>>> a1082346c01b6dc828142f5eaa6bd6e6f1b115be
 
     //       },
     //       total_count: { $sum: 1 }
     //     }
     //   }
 
+<<<<<<< HEAD
     // ]
 
  
@@ -850,6 +854,9 @@ export const downloadAttendance = async (req, res) => {
     const students = await Interview.aggregate(combinedPipeline);
 
     const fields = ['Email', 'Name', 'Id', 'Present','TotalScore','AverageScore','View_Report'];
+=======
+    const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TotalScore','AverageScore','View_Report'];
+>>>>>>> a1082346c01b6dc828142f5eaa6bd6e6f1b115be
     const opts = { fields };
     const parser = new Parser(opts);
     let arr = [];

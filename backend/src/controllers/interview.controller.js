@@ -1269,11 +1269,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 
   // logic for generated questions
-  let prompt = PromptObject({
-    type: "Subject",
-    difficulty: difficulty,
-    historyPrompt: historyPrompt
-  })
+  let prompt = generateQuestionsPrompt(subject, conversationHistory, historyPrompt, difficulty);
   prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
 
 
@@ -1467,10 +1463,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
-<<<<<<< HEAD
 
-=======
->>>>>>> ca5134ec5d933896e1e3aad03f3870e362595fa7
         question,
         difficulty,
         timer
