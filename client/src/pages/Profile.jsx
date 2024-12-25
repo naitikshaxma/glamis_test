@@ -1,17 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PersonalDetails from '../components/profile/PersonalDetails';
 import EducationalDetails from '../components/profile/EducationsDetails';
 import Resume from '../components/profile/Resume';
+import axios from 'axios';
+import Cookies from 'js-cookie'; 
 
 const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState('personal');
+    const [userData, setUserData] = useState({});
+
+    const getUserData = async () => {
+        console.log("In here")
+        try{ 
+            console.log("Before request")
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/get-user-data-profile`, {},
+
+                {
+                    headers: {
+
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${Cookies.get('accessToken')}`
+                    }
+                }
+            );
+            console.log(response)
+            setUserData(response.data.data);  
+            return; 
+    } catch(err) {
+        console.log(err); 
+    }
+
+    }
+
+    useEffect(() => {
+        console.log("Calling user data")
+        getUserData(); // get user data
+        // console.log(userData)
+    }, [])
 
     const renderContent = () => {
         switch (activeTab) {
             case 'personal':
-                return <PersonalDetails />;
+                return <PersonalDetails name={userData.user?.name || ''} emailId={userData.user?.email_id || ''} phoneNo={userData.user?.phone || ''} address={userData.address || ''} rollNo={userData.rollNo || ''} />;
             case 'education':
-                return <EducationalDetails />;
+                return <EducationalDetails semester={userData.semester || ''} section={userData.section || ''} course={userData.course || ''} branch={userData.branch} />;
             case 'resume':
                 return <Resume />;
             default:

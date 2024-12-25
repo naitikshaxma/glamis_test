@@ -1,8 +1,9 @@
-import { Card, Typography } from "@material-tailwind/react";
+import { button, Card, Typography } from "@material-tailwind/react";
 import { Button } from "@material-tailwind/react";
 import React, { useEffect, useState } from "react";
 import { resultPopupState } from "../../store/atoms/resultPopup";
 import { useSetRecoilState } from "recoil";
+import Tooltip from '@mui/material/Tooltip';
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
@@ -40,6 +41,7 @@ export default function Table() {
   const setResultPopup = useSetRecoilState(resultPopupState);
 
   const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
+  const [feedbackStatus, setFeedbackStatus] = useState(true);
 
   const axiosInstance = axios.create({
       baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
@@ -79,7 +81,20 @@ export default function Table() {
           }
       };
 
-      fetchInterviewHeld();
+      const getUser = async ()=>{
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/get-user-data-profile`, {},
+          {
+            headers: {    
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${Cookies.get('accessToken')}`
+            }
+          }
+        );
+        console.log(response)
+        setFeedbackStatus(response.data.data.user.feedback_submitted);  
+      }
+        getUser();
+        fetchInterviewHeld();
   }, []);
 
 
@@ -125,7 +140,7 @@ export default function Table() {
                 </Typography>
               </td>
               <td className="p-4 flex justify-center">
-                <Link
+                {/* <Link
                 to={`/history/detailed/${id}`}
                 // onClick={() => {
                 //   if (!status) return;
@@ -134,7 +149,9 @@ export default function Table() {
                 //   // window.location.href = import.meta.env.VITE_FRONTEND_URL+"/history/detailed/"+id;
                 // }}
                 // className={`${status ? 'bg-[#2b6030] text-white font-semibold' : 'bg-gray-400 disabled text-black'} px-4 py-2`}>{status ? "View Result" : "Expired"}</Link>
-                className='bg-[#2b6030] text-white font-semibold px-4 py-2'>View Result</Link>
+                className='bg-[#2b6030] text-white font-semibold px-4 py-2' >View Result  </Link>
+                 */}
+                 {feedbackStatus ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}
               </td>
             </tr>
           ))}
