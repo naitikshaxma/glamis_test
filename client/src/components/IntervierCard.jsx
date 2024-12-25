@@ -16,8 +16,9 @@ export default function InterviewCard({props, status}) {
         let redirect = '';
         const response = await instance.post("/api/v1/interview/interviewQuestion/count", {interviewId: props._id})
         const questions = response.data.data.count;
+        const currentQuestion = response.data.data.currentQuestion;
         const removeCookies = ['interviewId', 'subject', 'jobTitle', 'selectedCompany', 'adminInterviewId', 'delta', 'verbal'];
-        const newCookies = {interviewId: props._id, adminInterviewId: "", delta: questions};
+        const newCookies = {interviewId: props._id, adminInterviewId: "", delta: questions, currentQuestion: currentQuestion};
 
         if (props.type === 'subject') {
             newCookies.subject = props.description;

@@ -26,6 +26,7 @@ import ProtectedRoute from "./pages/Protectedroute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Team from "./pages/Team";
+import DetailedInterviewStats from './pages/DetailedInterviewStats';
 
 
 
@@ -153,6 +154,8 @@ const App = () => {
                     element={ <ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
                    
                 />
+
+                <Route path="/detailed-interview-stats" element={<DetailedInterviewStats />} />
                
                 
                 
