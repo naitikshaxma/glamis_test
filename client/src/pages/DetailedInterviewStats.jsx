@@ -134,18 +134,39 @@ const DetailedInterviewStats = () => {
   );
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       {/* Sidebar */}
-      <div className="w-1/4">
+      <div className="w-full md:w-1/4">
         <Sidebar />
       </div>
 
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-auto">
+        <div className="w-full md:w-4/5 p-10">
+          <header className="flex justify-between items-center mb-10">
+            <h2 className="text-2xl font-bold">
+              Hello <span className="text-black">Krishankant</span>, welcome back!
+            </h2>
+            <div className="flex items-center">
+              <i className="fas fa-bell text-gray-500 mr-5"></i>
+              <div className="flex items-center">
+                <img
+                  src="https://placehold.co/40x40"
+                  alt="User"
+                  className="rounded-full mr-2"
+                />
+                <span>Krishankant Saraswat</span>
+              </div>
+            </div>
+          </header>
+
+         
+        </div>
         <ExpandedView />
       </div>
     </div>
   );
 };
+
 
 export default DetailedInterviewStats;
