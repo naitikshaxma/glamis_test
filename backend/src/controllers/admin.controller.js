@@ -645,6 +645,8 @@ export const downloadAttendance = async (req, res) => {
       }
     }
 
+    // const pipeline = [
+    //   // Stage 1: Match specific start_time and is_active false
     const pipeline = [
       // Stage 1: Match specific interviews
       {
@@ -759,7 +761,10 @@ export const downloadAttendance = async (req, res) => {
       },
     ];
 
-    const students = await Interview.aggregate(pipeline);
+    //       },
+    //       total_count: { $sum: 1 }
+    //     }
+    //   }
 
     const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TotalScore','AverageScore','View_Report'];
     const opts = { fields };
