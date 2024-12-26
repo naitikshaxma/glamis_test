@@ -28,6 +28,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Team from "./pages/Team";
 import DetailedInterviewStats from './pages/DetailedInterviewStats';
 import PerformanceDashboard from './pages/PerformanceDashboard';
+import SvarDash from './pages/SvarDash';
 
 
 
@@ -158,6 +159,7 @@ const App = () => {
 
                 <Route path="/detailed-interview-stats" element={<DetailedInterviewStats />} />
                 <Route path="/performance-dashboard" element={<PerformanceDashboard />} />
+                <Route path="/svar-dashboard" element={<SvarDash />} />
                
                 
                 
