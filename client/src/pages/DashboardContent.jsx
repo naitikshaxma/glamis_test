@@ -20,8 +20,13 @@ const DashboardContent = () => {
 
   // Define navigation handler
   const handleNavigate = () => {
-    console.log("Navigating to detailed interview stats...");
+  
     navigate("/detailed-interview-stats"); // Navigate to the specified path
+  };
+
+  const handlebySubject = () => {
+  
+    navigate("/performance-dashboard"); // Navigate to the specified path
   };
   const Card = ({ title, lessons, progress, color, onClick }) => (
     <div
@@ -88,6 +93,7 @@ const DashboardContent = () => {
             lessons="40 lessons"
             progress="75%"
             color="bg-yellow-400"
+            onClick={handlebySubject}
           />
           <Card
             title="SVAR"
