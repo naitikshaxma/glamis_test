@@ -138,7 +138,7 @@ const SvarDash = () => {
         <div className="w-full md:w-4/5 p-7">
           <header className="flex justify-between items-center ">
             <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">Krishankant Saraswat</span>, welcome back!
+              Hello <span className="text-black">Yashasvini</span>, welcome back!
             </h2>
 
             <div className="flex items-center">
@@ -149,7 +149,7 @@ const SvarDash = () => {
                   alt="User"
                   className="rounded-full mr-2"
                 />
-                <span>Krishankant Saraswat </span>
+                <span>Yashasvini Tripathi </span>
               </div>
             </div>
           </header>

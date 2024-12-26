@@ -110,7 +110,7 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">
-          Hello <span>Krishankant</span>, welcome back!
+          Hello <span>User</span>, welcome back!
         </h1>
         <div className="flex items-center gap-4">
           <button className="relative">
@@ -212,7 +212,7 @@ const Dashboard = () => {
           </div>
           <div className="bg-yellow-400 py-2 px-4 rounded-full flex items-center">
             <span className="mr-2">#5829</span>
-            <span>Krishankant Saraswat</span>
+            <span>User</span>
           </div>
         </div>
 

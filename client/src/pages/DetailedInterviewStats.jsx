@@ -145,7 +145,7 @@ const DetailedInterviewStats = () => {
         <div className="w-full md:w-4/5 p-7">
           <header className="flex justify-between items-center ">
             <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">Krishankant</span>, welcome back!
+              Hello <span className="text-black">Krishnakant</span>, welcome back!
             </h2>
             
             <div className="flex items-center">
