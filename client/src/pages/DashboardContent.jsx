@@ -28,6 +28,12 @@ const DashboardContent = () => {
   
     navigate("/performance-dashboard"); // Navigate to the specified path
   };
+
+  const handleSvarDash =() =>{
+    navigate("/svar-dashboard");
+  }
+
+
   const Card = ({ title, lessons, progress, color, onClick }) => (
     <div
       className={`${color} rounded-xl p-6 text-white relative overflow-hidden cursor-pointer transition-transform hover:scale-105`}
@@ -100,6 +106,7 @@ const DashboardContent = () => {
             lessons="35 lessons"
             progress="75%"
             color="bg-blue-400"
+            onClick={handleSvarDash}
           />
           <Card
             title="Writing"
