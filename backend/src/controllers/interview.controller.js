@@ -1269,11 +1269,15 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 
   // logic for generated questions
+
   let prompt = PromptObject({
     type: "Subject",
     difficulty: difficulty,
     historyPrompt: historyPrompt
   })
+
+  let prompt = generateQuestionsPrompt(subject, conversationHistory, historyPrompt, difficulty);
+
   prompt += " Please ensure that only the question text is provided, without including any answers or explanations. The question should be less than 100 words in length.";
 
 
