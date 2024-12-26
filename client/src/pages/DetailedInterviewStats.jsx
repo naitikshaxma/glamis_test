@@ -155,7 +155,7 @@ const DetailedInterviewStats = () => {
                   alt="User"
                   className="rounded-full mr-2"
                 />
-                <span>Krishankant Saraswat</span>
+                <span>Krishankant </span>
               </div>
             </div>
           </header>
