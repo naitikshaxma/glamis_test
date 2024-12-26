@@ -3,28 +3,26 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { Smile } from 'lucide-react';
 import Sidebar from '../components/global_components/Sidebar';
 
-const SvarDash = () => {
-  const companyData = [
-    { name: '1', value: 25 },
-    { name: '2', value: 45 },
-    { name: '3', value: 35 },
-    { name: '4', value: 55 },
-    { name: '5', value: 20 }
-  ];
+const  WritingDashboard = () => {
+    
+     
+      const performanceData = [
+        { month: 1, Easy: 80, Medium: 35, Hard: 45 },
+        { month: 2, Easy: 65, Medium: 75, Hard: 30 },
+        { month: 3, Easy: 70, Medium: 68, Hard: 85 },
+        { month: 4, Easy: 45, Medium: 80, Hard: 65 },
+        { month: 5, Easy: 85, Medium: 85, Hard: 70 },
+        { month: 6, Easy: 90, Medium: 82, Hard: 88 }
+      ];
+     
+  
 
   const skillsData = [
-    { category: 'Reading', skill1: 30, skill2: 45, skill3: 65, skill4: 25 },
-    { category: 'Writing', skill1: 40, skill2: 55, skill3: 45, skill4: 35 },
-    { category: 'Speaking', skill1: 35, skill2: 40, skill3: 60, skill4: 45 },
-    { category: 'Jumble', skill1: 45, skill2: 50, skill3: 40, skill4: 55 },
-    { category: 'Comprehensive', skill1: 50, skill2: 35, skill3: 55, skill4: 45 }
-  ];
-  const skillData = [
-    { category: '1', Correctness: 30, Grammar: 45, Punctuation: 65, },
-    { category: '2', Correctness: 40,  Grammar: 55, Punctuation: 45, },
-    { category: '3', Correctness: 35,  Grammar: 40, Punctuation: 60, },
-    { category: '4', Correctness: 45,  Grammar: 50, Punctuation: 40, },
-    { category: '5', Correctness: 50,  Grammar: 35, Punctuation: 55, }
+    { category: '1', Vocabulary: 30, Grammar: 45, Knowledge: 65, },
+    { category: '2', Vocabulary: 40, Grammar: 55, Knowledge: 45,  },
+    { category: '3', Vocabulary: 35, Grammar: 40, Knowledge: 60,  } ,
+    { category: '4', Vocabulary: 45, Grammar: 50, Knowledge: 40,  },
+    { category: '5', Vocabulary: 50, Grammar: 35, Knowledge: 55,  }
   ];
 
   const leaderboardData = [
@@ -34,50 +32,45 @@ const SvarDash = () => {
   ];
 
   const ExpandedView = () => (
-    <div className="bg-blue-100 rounded-xl p-8">
+    <div className="bg-pink-300 rounded-xl p-8">
       <div className="grid grid-cols-4 gap-6">
         {/* Main Charts Section */}
         <div className="col-span-3 space-y-6">
           {/* Top Bar Chart */}
-          <div className="bg-white rounded-lg p-4 h-64">
+         
+          <div className="col-span-2">
+                        
+                        
+                      </div>
+
+          {/* Middle Bar Chart */}
+           <div className="col-span-2">
+                   
+                    <div className="bg-white/60 rounded-lg p-4 h-64">
+                      <ResponsiveContainer>
+                        <LineChart data={performanceData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
+                          <XAxis dataKey="month" stroke="black" />
+                          <YAxis stroke="black" />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="Easy" stroke="red" />
+                          <Line type="monotone" dataKey="Medium" stroke="blue" />
+                          <Line type="monotone" dataKey="Hard" stroke="aqua" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+          {/* Bottom Bar Chart */}
+          <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
               <BarChart data={skillsData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="category" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="skill1" fill="#FF6B6B" />
-                <Bar dataKey="skill2" fill="#4ECDC4" />
-                <Bar dataKey="skill3" fill="#45B7D1" />
-                <Bar dataKey="skill4" fill="yellow" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Middle Bar Chart */}
-          <div className="bg-white rounded-lg p-4 h-64">
-            <ResponsiveContainer>
-              <BarChart data={companyData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#9B5DE5" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Bottom Bar Chart */}
-          <div className="bg-white rounded-lg p-4 h-64">
-            <ResponsiveContainer>
-              <BarChart data={skillData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="category" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="Correctness" fill="#FF6B6B" />
+                <Bar dataKey="Vocabulary" fill="#FF6B6B" />
                 <Bar dataKey="Grammar" fill="#4ECDC4" />
-                <Bar dataKey="Punctuation" fill="#45B7D1" />
+                <Bar dataKey="Knowledge" fill="#45B7D1" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -86,20 +79,20 @@ const SvarDash = () => {
         {/* Right Side Panel */}
         <div className="space-y-6">
           {/* Performance Gauge */}
-          <div className="bg-white rounded-lg p-4">
+          <div className="bg-white/60 rounded-lg p-4">
             <h3 className="text-lg font-semibold mb-2">Performance</h3>
             <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
             <div className="relative w-40 h-40 mx-auto">
               <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-              <div
-                className="absolute inset-0 rounded-full border-8 border-green-400"
+              <div 
+                className="absolute inset-0 rounded-full border-8 border-white-400"
                 style={{
                   clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
                 }}
               ></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Smile className="w-8 h-8 mb-2 text-green-400" />
-                <span className="text-2xl font-bold">95%</span>
+                <Smile className="w-8 h-8 mb-2 text-white" />
+                <span className="text-2xl font-bold text-white">95%</span>
               </div>
             </div>
           </div>
@@ -128,19 +121,19 @@ const SvarDash = () => {
 
   return (
     <div className="flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <div className="w-full md:w-1/4">
-        <Sidebar />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1  overflow-auto">
+          {/* Sidebar */}
+          <div className="w-full md:w-1/4">
+            <Sidebar />
+          </div>
+    
+          {/* Main Content */}
+          <div className="flex-1  overflow-auto">
         <div className="w-full md:w-4/5 p-7">
           <header className="flex justify-between items-center ">
             <h2 className="text-2xl font-bold">
               Hello <span className="text-black">Yashasvini</span>, welcome back!
             </h2>
-
+            
             <div className="flex items-center">
               <i className="fas fa-bell text-gray-500 mr-5"></i>
               <div className="flex items-center ">
@@ -154,15 +147,13 @@ const SvarDash = () => {
             </div>
           </header>
 
-
+         
         </div>
         <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
-
-
-        <ExpandedView />
-      </div>
-    </div>
+            <ExpandedView />
+          </div>
+        </div>
   );
 };
 
-export default SvarDash;
+export default WritingDashboard;
