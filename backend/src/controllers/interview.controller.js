@@ -1471,6 +1471,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
       await saveSessionQuestions(interviewId, questionNo, question);
 
       const dataToSend = {
+
         question,
         difficulty,
         timer

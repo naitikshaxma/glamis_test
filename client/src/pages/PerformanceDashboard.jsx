@@ -34,12 +34,12 @@ const PerformanceDashboard = () => {
   ];
 
   const performanceData = [
-    { month: 1, coding: 80, technical: 35, scenario: 45 },
-    { month: 2, coding: 65, technical: 75, scenario: 30 },
-    { month: 3, coding: 70, technical: 68, scenario: 85 },
-    { month: 4, coding: 45, technical: 80, scenario: 65 },
-    { month: 5, coding: 85, technical: 85, scenario: 70 },
-    { month: 6, coding: 90, technical: 82, scenario: 88 }
+    { month: 1, Easy: 80, Medium: 35, Hard: 45 },
+    { month: 2, Easy: 65, Medium: 75, Hard: 30 },
+    { month: 3, Easy: 70, Medium: 68, Hard: 85 },
+    { month: 4, Easy: 45, Medium: 80, Hard: 65 },
+    { month: 5, Easy: 85, Medium: 85, Hard: 70 },
+    { month: 6, Easy: 90, Medium: 82, Hard: 88 }
   ];
 
   return (
@@ -50,21 +50,29 @@ const PerformanceDashboard = () => {
       </div>
 
       {/* Main Content Section */}
-      <div className="flex-1 p-8 overflow-auto">
-        <div className="w-full md:w-4/5 p-10">
-          <header className="flex justify-between items-center mb-10">
+      <div className="flex-1  overflow-auto">
+        <div className="w-full md:w-4/5 p-7">
+          <header className="flex justify-between items-center ">
             <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">User</span>, welcome back!
+              Hello <span className="text-black">Yashasvini</span>, welcome back!
             </h2>
+            
             <div className="flex items-center">
               <i className="fas fa-bell text-gray-500 mr-5"></i>
-              <div className="flex items-center">
-                <img src="/api/placeholder/40/40" alt="User" className="rounded-full mr-2" />
-                <span>User</span>
+              <div className="flex items-center ">
+                <img
+                  src="https://placehold.co/40x40"
+                  alt="User"
+                  className="rounded-full mr-2"
+                />
+                <span>Yashasvini Tripathi </span>
               </div>
             </div>
           </header>
+
+         
         </div>
+        <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
 
         <div className="bg-yellow-400 rounded-xl p-8 text-white">
           <div className="grid grid-cols-3 gap-8">
@@ -111,24 +119,7 @@ const PerformanceDashboard = () => {
               </div>
             </div>
 
-            {/* Performance Trends */}
-            {/* <div className="col-span-2">
-              <h3 className="text-lg font-semibold mb-4">Performance Trends</h3>
-              <div className="bg-white/60 rounded-lg p-4 h-64">
-                <ResponsiveContainer>
-                  <LineChart data={infographicData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
-                    <XAxis dataKey="month" stroke="black" />
-                    <YAxis stroke="black" />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="productivity" stroke="red" />
-                    <Line type="monotone" dataKey="efficiency" stroke="blue" />
-                    <Line type="monotone" dataKey="quality" stroke="aqua" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div> */}
-
+           
 
             <div className="col-span-2">
           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
@@ -139,9 +130,9 @@ const PerformanceDashboard = () => {
                 <XAxis dataKey="month" stroke="black" />
                 <YAxis stroke="black" />
                 <Tooltip />
-                <Line type="monotone" dataKey="coding" stroke="red" />
-                <Line type="monotone" dataKey="technical" stroke="blue" />
-                <Line type="monotone" dataKey="scenario" stroke="aqua" />
+                <Line type="monotone" dataKey="Easy" stroke="red" />
+                <Line type="monotone" dataKey="Medium" stroke="blue" />
+                <Line type="monotone" dataKey="Hard" stroke="aqua" />
               </LineChart>
             </ResponsiveContainer>
           </div>

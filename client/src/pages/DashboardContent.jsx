@@ -32,6 +32,14 @@ const DashboardContent = () => {
   const handleSvarDash =() =>{
     navigate("/svar-dashboard");
   }
+  const handleWritingDashboard =() =>{
+    navigate("/write-dashboard");
+  }
+  const handleVerbalDashboard =() =>{
+    navigate("/verbal-dashboard");
+  }
+
+
 
 
   const Card = ({ title, lessons, progress, color, onClick }) => (
@@ -113,12 +121,14 @@ const DashboardContent = () => {
             lessons="30 lessons"
             progress="50%"
             color="bg-orange-400"
+            onClick={ handleWritingDashboard}
           />
           <Card
             title="Verbal/Reading"
             lessons="40 lessons"
             progress="75%"
             color="bg-pink-400"
+            onClick={handleVerbalDashboard }
           />
         </div>
       </section>
