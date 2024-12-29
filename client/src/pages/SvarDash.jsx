@@ -5,26 +5,27 @@ import Sidebar from '../components/global_components/Sidebar';
 
 const SvarDash = () => {
   const companyData = [
-    { name: '1', value: 25 },
-    { name: '2', value: 45 },
-    { name: '3', value: 35 },
-    { name: '4', value: 55 },
-    { name: '5', value: 20 }
+    { name: 'Interview 1', Score: 25 },
+    { name: 'Interview 2', Score: 45 },
+    { name: 'Interview 3', Score: 35 },
+    { name: 'Interview 4', Score: 55 },
+    { name: 'Interview 5', Score: 20 }
   ];
 
   const skillsData = [
-    { category: 'Reading', skill1: 30, skill2: 45, skill3: 65, skill4: 25 },
-    { category: 'Writing', skill1: 40, skill2: 55, skill3: 45, skill4: 35 },
-    { category: 'Speaking', skill1: 35, skill2: 40, skill3: 60, skill4: 45 },
-    { category: 'Jumble', skill1: 45, skill2: 50, skill3: 40, skill4: 55 },
-    { category: 'Comprehensive', skill1: 50, skill2: 35, skill3: 55, skill4: 45 }
-  ];
+    { category: 'Interview 1', Reading: 30, Writing: 45, Speaking: 65, Jumble: 25, Comprehensive: 40 },
+    { category: 'Interview 2', Reading: 40, Writing: 55, Speaking: 45, Jumble: 35, Comprehensive: 50 },
+    { category: 'Interview 3', Reading: 35, Writing: 40, Speaking: 60, Jumble: 45, Comprehensive: 55 },
+    { category: 'Interview 4', Reading: 45, Writing: 50, Speaking: 40, Jumble: 55, Comprehensive: 60 },
+    { category: 'Interview 5', Reading: 50, Writing: 35, Speaking: 55, Jumble: 45, Comprehensive: 65 }
+];
+
   const skillData = [
-    { category: '1', Correctness: 30, Grammar: 45, Punctuation: 65, },
-    { category: '2', Correctness: 40,  Grammar: 55, Punctuation: 45, },
-    { category: '3', Correctness: 35,  Grammar: 40, Punctuation: 60, },
-    { category: '4', Correctness: 45,  Grammar: 50, Punctuation: 40, },
-    { category: '5', Correctness: 50,  Grammar: 35, Punctuation: 55, }
+    { category: 'Interview 1', Correctness: 30, Grammar: 45, Punctuation: 65, },
+    { category: 'Interview 2', Correctness: 40,  Grammar: 55, Punctuation: 45, },
+    { category: 'Interview 3', Correctness: 35,  Grammar: 40, Punctuation: 60, },
+    { category: 'Interview 4', Correctness: 45,  Grammar: 50, Punctuation: 40, },
+    { category: 'Interview 5', Correctness: 50,  Grammar: 35, Punctuation: 55, }
   ];
 
   const leaderboardData = [
@@ -46,10 +47,11 @@ const SvarDash = () => {
                 <XAxis dataKey="category" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="skill1" fill="#FF6B6B" />
-                <Bar dataKey="skill2" fill="#4ECDC4" />
-                <Bar dataKey="skill3" fill="#45B7D1" />
-                <Bar dataKey="skill4" fill="yellow" />
+                <Bar dataKey="Reading" fill="#FF6B6B" />
+  <Bar dataKey="Writing" fill="#4ECDC4" />
+  <Bar dataKey="Speaking" fill="#45B7D1" />
+  <Bar dataKey="Jumble" fill="yellow" />
+  <Bar dataKey="Comprehensive" fill="lightblue" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -62,7 +64,7 @@ const SvarDash = () => {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#9B5DE5" />
+                <Bar dataKey="Score" fill="#9B5DE5" />
               </BarChart>
             </ResponsiveContainer>
           </div>

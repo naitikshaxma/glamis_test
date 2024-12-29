@@ -4,17 +4,18 @@ import { Smile } from 'lucide-react';
 import Sidebar from '../components/global_components/Sidebar';
 
 const  WritingDashboard = () => {
-    const infographicData = [
-        { month: 'Cricket', productivity: 180, efficiency: 150, quality: 200 },
-        { month: 'Politics', productivity: 160, efficiency: 170, quality: 180 },
-        { month: 'Geo', productivity: 140, efficiency: 160, quality: 170 },
-        { month: 'Science', productivity: 130, efficiency: 140, quality: 150 },
-        { month: 'Tech', productivity: 120, efficiency: 130, quality: 140 },
-        { month: 'History', productivity: 150, efficiency: 160, quality: 170 },
-        { month: 'Eco', productivity: 140, efficiency: 150, quality: 160 },
-        { month: 'Geo', productivity: 130, efficiency: 140, quality: 150 },
-        { month: 'Current ', productivity: 150, efficiency: 160, quality: 170 },
-      ]; 
+  const infographicData = [
+    { month: 'Cricket', interview1: 180, interview2: 150, interview3: 200 },
+    { month: 'Politics', interview1: 160, interview2: 170, interview3: 180 },
+    { month: 'Geo', interview1: 140, interview2: 160, interview3: 170 },
+    { month: 'Science', interview1: 130, interview2: 140, interview3: 150 },
+    { month: 'Tech', interview1: 120, interview2: 130, interview3: 140 },
+    { month: 'History', interview1: 150, interview2: 160, interview3: 170 },
+    { month: 'Eco', interview1: 140, interview2: 150, interview3: 160 },
+    { month: 'Geo', interview1: 130, interview2: 140, interview3: 150 },
+    { month: 'Current', interview1: 150, interview2: 160, interview3: 170 },
+];
+ 
       const skillData = [
         { category: '1', Essay: 30, Jumbled: 45, Error: 65, Fillups: 25, thesaurus: 30 },
         { category: '2', Essay: 40, Jumbled: 55,  Error: 45,Fillups: 35, thesaurus: 30 },
@@ -48,22 +49,24 @@ const  WritingDashboard = () => {
           {/* Top Bar Chart */}
          
           <div className="col-span-2">
-                        
+
+          <h3 className="text-lg font-semibold mb-4">Word Count</h3>
                         <div className="bg-white/60 rounded-lg p-4 h-64">
                           <ResponsiveContainer>
                           <BarChart data={infographicData}>
                             <XAxis dataKey="month" />
                             <YAxis />
                             <Tooltip />
-                            <Bar dataKey="productivity" fill="#4299e1" stackId="stack" />
-                            <Bar dataKey="efficiency" fill="#48bb78" stackId="stack" />
-                            <Bar dataKey="quality" fill="#ed64a6" stackId="stack" />
+                            <Bar dataKey="interview1" fill="#4299e1" stackId="stack" />
+                            <Bar dataKey="interview2" fill="#48bb78" stackId="stack" />
+                            <Bar dataKey="interview3" fill="#ed64a6" stackId="stack" />
                           </BarChart>
                           </ResponsiveContainer>
                         </div>
                       </div>
 
           {/* Middle Bar Chart */}
+          <h3 className="text-lg font-semibold mb-4">Skills Analysis</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
                      <ResponsiveContainer>
                        <BarChart data={skillData}>
@@ -80,6 +83,7 @@ const  WritingDashboard = () => {
                      </ResponsiveContainer>
                    </div>
           {/* Bottom Bar Chart */}
+          <h3 className="text-lg font-semibold mb-4">Communication Skills</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
               <BarChart data={skillsData}>
