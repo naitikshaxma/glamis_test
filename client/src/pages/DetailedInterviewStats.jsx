@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Smile } from 'lucide-react';
 import Sidebar from '../components/global_components/Sidebar';
+import { bearerInstance } from '../helpers/instance';
 
 const DetailedInterviewStats = () => {
-  const companyData = [
-    { name: 'Google', marks: 85 },
-    { name: 'Apple', marks: 65 },
-    { name: 'Airbnb', marks: 45 },
-    { name: 'Microsoft', marks: 42 },
-    { name: 'Tesla', marks: 60 },
-    { name: 'BlackRock', marks: 30 }
-  ];
+  const [companyPerformance,setCompanyPerformance] = useState([
+    { companyName: 'Google', averagePerformance: 85 },
+    { companyName: 'Apple', averagePerformance: 65 },
+    { companyName: 'Airbnb', averagePerformance: 45 },
+    { companyName: 'Microsoft', averagePerformance: 42 },
+    { companyName: 'Tesla', averagePerformance: 60 },
+  ]);
+  const getData = async()=>{
+    const response = await bearerInstance.post("/api/v1/interview/fetch/company");
+    console.log(response);
+    setCompanyPerformance(response.data.data);
+  }
+  useEffect(()=>{
+    getData();
+  },[]);
 
   const performanceData = [
     { month: 1, coding: 80, technical: 35, scenario: 45 },
@@ -44,12 +52,12 @@ const DetailedInterviewStats = () => {
           <h3 className="text-lg font-semibold mb-4">Company Performance</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <BarChart data={companyData}>
+              <BarChart data={companyPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                <XAxis dataKey="name" stroke="black" />
-                <YAxis stroke="black" />
+                <XAxis dataKey="companyName" stroke="black" />
+                <YAxis stroke="black"/>
                 <Tooltip />
-                <Bar dataKey="marks" fill="#8884d8" />
+                <Bar dataKey="averagePerformance" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -117,14 +125,14 @@ const DetailedInterviewStats = () => {
           <h3 className="text-lg font-semibold mb-4">Skills Analysis</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <BarChart data={skillsData}>
+              <BarChart data={companyPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="category" stroke="black" />
                 <YAxis stroke="black" />
                 <Tooltip />
-                <Bar dataKey="Vocabulary" fill="#69247C" />
-                <Bar dataKey="Grammar" fill="#DA498D" />
-                <Bar dataKey="Domain Knowledge" fill="#4DA1A9" />
+                <Bar dataKey="averageVocabularyPerformance" fill="#69247C" />
+                <Bar dataKey="averageGrammarPerformance" fill="#DA498D" />
+                <Bar dataKey="averagePerformance" fill="#4DA1A9" />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -21,7 +21,8 @@ import {
     fetchInterviewForSvar,
     interviewQuestionCount,
     fetchCompanyInterviews,
-    fetchCompanyInterviewSpecific
+    fetchCompanyInterviewSpecific,
+    fetchSubjectInterview
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -56,6 +57,7 @@ router.route("/interviewQuestion/count").post(isAuthenticated, interviewQuestion
 
 router.route("/fetch/company").post(isAuthenticated,fetchCompanyInterviews)
 router.route("/fetch/company/specific").post(isAuthenticated,fetchCompanyInterviewSpecific)
+router.route("/fetch/subject").post(isAuthenticated,fetchSubjectInterview)
 
 
 export default router;
