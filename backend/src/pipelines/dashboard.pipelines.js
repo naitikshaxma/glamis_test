@@ -95,7 +95,7 @@ export const SvarPipeline = (user) => [
           }
         }
       },
-      Repeating: {
+      Repeating: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -120,8 +120,8 @@ export const SvarPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Short: {
+      } } },
+      Short: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 2] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -152,8 +152,8 @@ export const SvarPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Jumbled: {
+      } } },
+      Jumbled: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 3] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -190,8 +190,8 @@ export const SvarPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Comprehension: {
+      } } },
+      Comprehension: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 4] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -234,7 +234,7 @@ export const SvarPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      }
+      } } }
     }
   },
   {
@@ -371,7 +371,7 @@ export const WrittenPipeline = (user) => [
   },
   {
     $addFields: {
-      Essay: {
+      Essay: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -386,8 +386,8 @@ export const WrittenPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Jumbled: {
+      } } },
+      Jumbled: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -412,8 +412,8 @@ export const WrittenPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      ErrorDetection: {
+      } } },
+      ErrorDetection: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 2] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -444,7 +444,7 @@ export const WrittenPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
+      } } }
     }
   },
   {

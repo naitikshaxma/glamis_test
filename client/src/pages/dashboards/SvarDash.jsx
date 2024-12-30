@@ -98,7 +98,7 @@ const SvarDash = () => {
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 {/*<Smile className="w-8 h-8 mb-2 text-green-400"/>*/}
-                <span className="text-2xl font-bold">{overallPercenatge}%</span>
+                <span className="text-2xl font-bold">{overallPercenatge.toFixed(2)}%</span>
               </div>
             </div>
           </div>
