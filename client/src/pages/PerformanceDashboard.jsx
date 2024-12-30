@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Smile } from 'lucide-react';
 import Sidebar from '../components/global_components/Sidebar';
+import { bearerInstance } from '../helpers/instance';
 
 const PerformanceDashboard = () => {
+  const [subjectPerformance,setSubjectPerformance] = useState();
+    const getData = async()=>{
+      const response = await bearerInstance.get("/api/v1/dashboard/subject");
+      console.log(response);
+      setSubjectPerformance(response.data.data);
+    }
+    useEffect(()=>{
+      getData();
+    },[]);
+
   const infographicData = [
     { month: 'DSA', interview1: 180, interview2: 150, interview3: 200 },
     { month: 'OS', interview1: 160, interview2: 170, interview3: 180 },
@@ -127,14 +138,14 @@ const PerformanceDashboard = () => {
           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <LineChart data={performanceData}>
+              <LineChart data={subjectPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
                 <XAxis dataKey="month" stroke="black" />
-                <YAxis stroke="black" />
+                <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Line type="monotone" dataKey="Easy" stroke="red" />
-                <Line type="monotone" dataKey="Medium" stroke="blue" />
-                <Line type="monotone" dataKey="Hard" stroke="aqua" />
+                <Line type="monotone" dataKey="easyAvgPerformance" stroke="red" />
+                <Line type="monotone" dataKey="mediumAvgPerformance" stroke="blue" />
+                <Line type="monotone" dataKey="hardAvgPerformance" stroke="aqua" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -180,14 +191,14 @@ const PerformanceDashboard = () => {
               <h3 className="text-lg font-semibold mb-2">Skills Analysis</h3>
               <div className="bg-white/60 rounded-lg p-4 h-64">
                 <ResponsiveContainer>
-                  <BarChart data={skillsData}>
+                  <BarChart data={subjectPerformance}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="category" stroke="black" />
-                    <YAxis stroke="black" />
+                    <YAxis stroke="black" domain={[0,100]}/>
                     <Tooltip />
-                    <Bar dataKey="Vocabulary" fill="#69247C" />
-                    <Bar dataKey="Grammar" fill="#DA498D" />
-                    <Bar dataKey="Domain Knowledge" fill="#4DA1A9" />
+                    <Bar dataKey="vocabulary" fill="#69247C" />
+                    <Bar dataKey="grammar" fill="#DA498D" />
+                    <Bar dataKey="performance" fill="#4DA1A9" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

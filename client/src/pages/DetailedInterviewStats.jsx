@@ -6,14 +6,14 @@ import { bearerInstance } from '../helpers/instance';
 
 const DetailedInterviewStats = () => {
   const [companyPerformance,setCompanyPerformance] = useState([
-    { companyName: 'Google', averagePerformance: 85 },
-    { companyName: 'Apple', averagePerformance: 65 },
-    { companyName: 'Airbnb', averagePerformance: 45 },
-    { companyName: 'Microsoft', averagePerformance: 42 },
-    { companyName: 'Tesla', averagePerformance: 60 },
+    { company: 'Google', performance: 85 },
+    { company: 'Apple', performance: 65 },
+    { company: 'Airbnb', performance: 45 },
+    { company: 'Microsoft', performance: 42 },
+    { company: 'Tesla', performance: 60 },
   ]);
   const getData = async()=>{
-    const response = await bearerInstance.post("/api/v1/interview/fetch/company");
+    const response = await bearerInstance.get("/api/v1/dashboard/company");
     console.log(response);
     setCompanyPerformance(response.data.data);
   }
@@ -54,10 +54,10 @@ const DetailedInterviewStats = () => {
             <ResponsiveContainer>
               <BarChart data={companyPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                <XAxis dataKey="companyName" stroke="black" />
-                <YAxis stroke="black"/>
+                <XAxis dataKey="company" stroke="black" />
+                <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Bar dataKey="averagePerformance" fill="#8884d8" />
+                <Bar dataKey="performance" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -90,14 +90,14 @@ const DetailedInterviewStats = () => {
           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <LineChart data={performanceData}>
+              <LineChart data={companyPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
                 <XAxis dataKey="month" stroke="black" />
-                <YAxis stroke="black" />
+                <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Line type="monotone" dataKey="coding" stroke="red" />
-                <Line type="monotone" dataKey="technical" stroke="blue" />
-                <Line type="monotone" dataKey="scenario" stroke="aqua" />
+                <Line type="monotone" dataKey="easyAvgPerformance" stroke="red" />
+                <Line type="monotone" dataKey="mediumAvgPerformance" stroke="blue" />
+                <Line type="monotone" dataKey="hardAvgPerformance" stroke="aqua" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -129,11 +129,11 @@ const DetailedInterviewStats = () => {
               <BarChart data={companyPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="category" stroke="black" />
-                <YAxis stroke="black" />
+                <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Bar dataKey="averageVocabularyPerformance" fill="#69247C" />
-                <Bar dataKey="averageGrammarPerformance" fill="#DA498D" />
-                <Bar dataKey="averagePerformance" fill="#4DA1A9" />
+                <Bar dataKey="vocabulary" fill="#69247C" />
+                <Bar dataKey="grammar" fill="#DA498D" />
+                <Bar dataKey="performance" fill="#4DA1A9" />
               </BarChart>
             </ResponsiveContainer>
           </div>
