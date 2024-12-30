@@ -28,8 +28,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Team from "./pages/Team";
 import DetailedInterviewStats from './pages/DetailedInterviewStats';
 import PerformanceDashboard from './pages/PerformanceDashboard';
-import SvarDash from './pages/SvarDash';
-import WritingDashboard from "./pages/WritingDashboard";
+import SvarDash from './pages/dashboards/SvarDash.jsx';
+import WrittenDashboard from "./pages/dashboards/WrittenDashboard.jsx";
 import VerbalDashboard from "./pages/VerbalDashboard";
 
 
@@ -100,7 +100,7 @@ const App = () => {
                 <Route
                     path="/dashboard"
                     element={ <ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>}
-                   
+
                 />
                 <Route
                     path="/myInterview"
@@ -156,17 +156,16 @@ const App = () => {
                 <Route
                     path="/team"
                     element={ <ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
-                   
+
                 />
 
                 <Route path="/detailed-interview-stats" element={<DetailedInterviewStats />} />
                 <Route path="/performance-dashboard" element={<PerformanceDashboard />} />
                 <Route path="/svar-dashboard" element={<SvarDash />} />
-                <Route path="/write-dashboard" element={<WritingDashboard />} />
+                <Route path="/write-dashboard" element={<WrittenDashboard />} />
                 <Route path="/verbal-dashboard" element={<VerbalDashboard />} />
-               
-                
-                
+
+
             </Routes>
             <ToastContainer />
         </Router>

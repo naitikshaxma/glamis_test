@@ -1,20 +1,18 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
+import LinkText from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SidePic from '../assets/SidePic.png';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { toast } from 'react-toastify';
 
@@ -22,8 +20,8 @@ function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
+            <Link color="inherit" to="https://Glamis.in/">
+                Glamis.in
             </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
@@ -71,9 +69,9 @@ export default function SignInSide() {
                     }
                 }
             )
-    
+
             console.log(response.data);
-    
+
             if (response.status == 201) {
                 Cookies.set('accessToken', response.data.data.accessToken);
                 Cookies.set('fullName', response.data.data.userData.name);
@@ -84,7 +82,7 @@ export default function SignInSide() {
             else{
                 setIsLoading(false);
                 console.log(response.status)
-                toast.error("USer may be exist");                
+                toast.error("USer may be exist");
             }
         }
         catch (error) {
@@ -195,14 +193,14 @@ export default function SignInSide() {
                             </Button>
                             <Grid container className='flex justify-between items-center'>
                                 <Grid item>
-                                    <Link href="/forgot">
-                                        Forgot password?
+                                    <Link to="/forgot">
+                                      <LinkText>Forgot password?</LinkText>
                                     </Link>
                                 </Grid>
                                 <Grid item className='text-sm'>
-                                    <span>Don't have an account?</span>
-                                    <Link href="/">
-                                        {" Sign Up"}
+                                    <span>Don't have an account? </span>
+                                    <Link to="/">
+                                      <LinkText>Sign Up</LinkText>
                                     </Link>
                                 </Grid>
                             </Grid>

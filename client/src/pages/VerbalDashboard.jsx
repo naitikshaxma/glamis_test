@@ -18,11 +18,11 @@ const  WritingDashboard = () => {
   
 
   const skillsData = [
-    { category: '1', Vocabulary: 30, Grammar: 45, Knowledge: 65, },
-    { category: '2', Vocabulary: 40, Grammar: 55, Knowledge: 45,  },
-    { category: '3', Vocabulary: 35, Grammar: 40, Knowledge: 60,  } ,
-    { category: '4', Vocabulary: 45, Grammar: 50, Knowledge: 40,  },
-    { category: '5', Vocabulary: 50, Grammar: 35, Knowledge: 55,  }
+    { category: 'Interview 1', Vocabulary: 30, Grammar: 45, Knowledge: 65, },
+    { category: 'Interview 2', Vocabulary: 40, Grammar: 55, Knowledge: 45,  },
+    { category: 'Interview 3', Vocabulary: 35, Grammar: 40, Knowledge: 60,  } ,
+    { category: 'Interview 4', Vocabulary: 45, Grammar: 50, Knowledge: 40,  },
+    { category: 'Interview 5', Vocabulary: 50, Grammar: 35, Knowledge: 55,  }
   ];
 
   const leaderboardData = [
@@ -45,7 +45,7 @@ const  WritingDashboard = () => {
 
           {/* Middle Bar Chart */}
            <div className="col-span-2">
-                   
+           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
                     <div className="bg-white/60 rounded-lg p-4 h-64">
                       <ResponsiveContainer>
                         <LineChart data={performanceData}>
@@ -61,6 +61,7 @@ const  WritingDashboard = () => {
                     </div>
                   </div>
           {/* Bottom Bar Chart */}
+          <h3 className="text-lg font-semibold mb-4">Communication Skills</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
               <BarChart data={skillsData}>
@@ -80,22 +81,23 @@ const  WritingDashboard = () => {
         <div className="space-y-6">
           {/* Performance Gauge */}
           <div className="bg-white/60 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Performance</h3>
-            <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
-            <div className="relative w-40 h-40 mx-auto">
-              <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-              <div 
-                className="absolute inset-0 rounded-full border-8 border-white-400"
-                style={{
-                  clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
-                }}
-              ></div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Smile className="w-8 h-8 mb-2 text-white" />
-                <span className="text-2xl font-bold text-white">95%</span>
-              </div>
-            </div>
-          </div>
+                      <h3 className="text-lg font-semibold mb-2">Performance</h3>
+                      <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
+                      <div className="relative w-40 h-40 mx-auto">
+                        <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
+                        <div 
+                          className="absolute inset-0 rounded-full border-8 border-green-400"
+                          style={{
+                            clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
+                          }}
+                        ></div>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <Smile className="w-8 h-8 mb-2 text-green-400" />
+                          <span className="text-2xl font-bold">95%</span>
+                        </div>
+                      </div>
+                    </div>
+          
 
           {/* Leaderboard */}
           <div className="bg-white rounded-lg p-4">

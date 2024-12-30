@@ -65,23 +65,24 @@ const DetailedInterviewStats = () => {
 
         {/* Performance Gauge */}
         <div>
-          <div className="bg-white/30 rounded-lg p-4 h-64">
+        <div className="bg-white/60 rounded-lg p-4">
             <h3 className="text-lg font-semibold mb-2">Performance</h3>
-            <p className="text-sm mb-4">Average score last of 5 interviews</p>
+            <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
             <div className="relative w-40 h-40 mx-auto">
-              <div className="absolute inset-0 rounded-full border-8 border-white/30"></div>
+              <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
               <div 
-                className="absolute inset-0 rounded-full border-8 border-white"
+                className="absolute inset-0 rounded-full border-8 border-green-400"
                 style={{
                   clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
                 }}
               ></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Smile className="w-8 h-8 mb-2" />
-                <span className="text-2xl font-bold">95%</span>
+                <Smile className="w-8 h-8 mb-2 text-green-400" />
+                <span className="text-2xl font-bold text-black">95%</span>
               </div>
             </div>
           </div>
+
         </div>
 
         {/* Performance Trend */}
