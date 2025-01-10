@@ -13,7 +13,7 @@ const leaderboardData = [
 ];
 
 
-const SvarDash = () => {
+const SvarDashboard = () => {
   const [chartsData, setChartsData] = React.useState({});
   const [overallPercenatge, setOverallPercenatge] = React.useState(0);
 
@@ -165,4 +165,4 @@ const SvarDash = () => {
   );
 };
 
-export default SvarDash;
+export default SvarDashboard;

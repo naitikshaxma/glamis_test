@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Smile } from 'lucide-react';
-import Sidebar from '../components/global_components/Sidebar';
-import { bearerInstance } from '../helpers/instance';
+import Sidebar from '../../components/global_components/Sidebar.jsx';
+import { bearerInstance } from '../../helpers/instance.js';
 
-const DetailedInterviewStats = () => {
+const CompanyDashboard = () => {
   const [companyPerformance,setCompanyPerformance] = useState([
     { company: 'Google', performance: 85 },
     { company: 'Apple', performance: 65 },
@@ -70,7 +70,7 @@ const DetailedInterviewStats = () => {
             <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
             <div className="relative w-40 h-40 mx-auto">
               <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-              <div 
+              <div
                 className="absolute inset-0 rounded-full border-8 border-green-400"
                 style={{
                   clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
@@ -156,7 +156,7 @@ const DetailedInterviewStats = () => {
             <h2 className="text-2xl font-bold">
               Hello <span className="text-black">Krishnakant</span>, welcome back!
             </h2>
-            
+
             <div className="flex items-center">
               <i className="fas fa-bell text-gray-500 mr-5"></i>
               <div className="flex items-center ">
@@ -170,7 +170,7 @@ const DetailedInterviewStats = () => {
             </div>
           </header>
 
-         
+
         </div>
         <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
         <ExpandedView />
@@ -180,4 +180,4 @@ const DetailedInterviewStats = () => {
 };
 
 
-export default DetailedInterviewStats;
+export default CompanyDashboard;

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Smile } from 'lucide-react';
-import Sidebar from '../components/global_components/Sidebar';
-import { bearerInstance } from '../helpers/instance';
+import Sidebar from '../../components/global_components/Sidebar.jsx';
+import { bearerInstance } from '../../helpers/instance.js';
 
-const PerformanceDashboard = () => {
+const SubjectDashboard = () => {
   const [subjectPerformance,setSubjectPerformance] = useState();
     const getData = async()=>{
       const response = await bearerInstance.get("/api/v1/dashboard/subject");
@@ -68,7 +68,7 @@ const PerformanceDashboard = () => {
             <h2 className="text-2xl font-bold">
               Hello <span className="text-black">Krishankant</span>, welcome back!
             </h2>
-            
+
             <div className="flex items-center">
               <i className="fas fa-bell text-gray-500 mr-5"></i>
               <div className="flex items-center ">
@@ -82,7 +82,7 @@ const PerformanceDashboard = () => {
             </div>
           </header>
 
-         
+
         </div>
         <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
 
@@ -90,7 +90,7 @@ const PerformanceDashboard = () => {
           <div className="grid grid-cols-3 gap-8">
             {/* Monthly Performance Chart */}
 
-            
+
             <div className="col-span-2">
               <h3 className="text-lg font-semibold mb-4">Monthly Performance</h3>
               <div className="bg-white/60 rounded-lg p-4 h-64">
@@ -106,9 +106,9 @@ const PerformanceDashboard = () => {
                 </ResponsiveContainer>
               </div>
             </div>
-            
 
-            
+
+
 
             {/* Performance Gauge */}
             <div>
@@ -117,7 +117,7 @@ const PerformanceDashboard = () => {
                           <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
                           <div className="relative w-40 h-40 mx-auto">
                             <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-                            <div 
+                            <div
                               className="absolute inset-0 rounded-full border-8 border-green-400"
                               style={{
                                 clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
@@ -129,10 +129,10 @@ const PerformanceDashboard = () => {
                             </div>
                           </div>
                         </div>
-              
+
             </div>
 
-           
+
 
             <div className="col-span-2">
           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
@@ -210,4 +210,4 @@ const PerformanceDashboard = () => {
   );
 };
 
-export default PerformanceDashboard;
+export default SubjectDashboard;

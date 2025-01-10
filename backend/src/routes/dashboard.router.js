@@ -5,7 +5,8 @@ import {
   subjectDashboard,
   svarDashboard,
   writtenDashboard,
-  verbalDashboard
+  verbalDashboard,
+  home
 } from "../controllers/dashboard.controller.js";
 
 
@@ -16,6 +17,7 @@ router.get("/written", isAuthenticated, writtenDashboard);
 router.get("/company", isAuthenticated, companyDashboard);
 router.get("/subject", isAuthenticated, subjectDashboard);
 router.get("/verbal", isAuthenticated, verbalDashboard);
+router.get('/', isAuthenticated, home);
 
 export default router;
 
