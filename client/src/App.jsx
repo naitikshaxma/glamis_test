@@ -30,7 +30,7 @@ import DetailedInterviewStats from './pages/DetailedInterviewStats';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import SvarDash from './pages/dashboards/SvarDash.jsx';
 import WrittenDashboard from "./pages/dashboards/WrittenDashboard.jsx";
-import VerbalDashboard from "./pages/VerbalDashboard";
+import VerbalDashboard from "./pages/dashboards/VerbalDashboard.jsx";
 
 
 

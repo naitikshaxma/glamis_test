@@ -1,22 +1,11 @@
 import React from 'react';
-import {BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer} from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 // import {Smile} from 'lucide-react';
 import Sidebar from '../../components/global_components/Sidebar.jsx';
 import {bearerInstance as instance} from "../../helpers/instance.js";
 import Cookies from "js-cookie";
 
 
-const infographicData = [
-    {month: 'Cricket', interview1: 180, interview2: 150, interview3: 200},
-    {month: 'Politics', interview1: 160, interview2: 170, interview3: 180},
-    {month: 'Geo', interview1: 140, interview2: 160, interview3: 170},
-    {month: 'Science', interview1: 130, interview2: 140, interview3: 150},
-    {month: 'Tech', interview1: 120, interview2: 130, interview3: 140},
-    {month: 'History', interview1: 150, interview2: 160, interview3: 170},
-    {month: 'Eco', interview1: 140, interview2: 150, interview3: 160},
-    {month: 'Geo', interview1: 130, interview2: 140, interview3: 150},
-    {month: 'Current', interview1: 150, interview2: 160, interview3: 170},
-  ];
 const leaderboardData = [
   {company: 'Google', score: '4,532,311', icon: 'G'},
   {company: 'Apple', score: '4,532,311', icon: 'A'},
@@ -24,12 +13,12 @@ const leaderboardData = [
 ];
 
 
-const WrittenDashboard = () => {
+const  VerbalDashboard = () => {
   const [chartsData, setChartsData] = React.useState({});
   const [overallPercenatge, setOverallPercenatge] = React.useState(0);
 
     const fetchData = async () => {
-    const res = await instance.get('/api/v1/dashboard/written');
+    const res = await instance.get('/api/v1/dashboard/verbal');
     setChartsData(res.data);
     const overall = res.data.reduce((acc, item) => acc + item.OverallPerformance, 0) / res.data.length;
     setOverallPercenatge(overall);
@@ -42,25 +31,27 @@ const WrittenDashboard = () => {
 
 
   const ExpandedView = () => (
-    <div className="bg-orange-300 rounded-xl p-8">
+    <div className="bg-pink-300 rounded-xl p-8">
       <div className="grid grid-cols-4 gap-6">
         {/* Main Charts Section */}
         <div className="col-span-3 space-y-6">
           {/* Middle Bar Chart */}
-          <h3 className="text-lg font-semibold mb-4">Skills Analysis</h3>
-          <div className="bg-white/60 rounded-lg p-4 h-64">
-            <ResponsiveContainer>
-              <BarChart data={chartsData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false}/>
-                <XAxis dataKey="Title"/>
-                <YAxis/>
-                <Tooltip/>
-                <Bar dataKey="Essay" fill="#FF6B6B"/>
-                <Bar dataKey="Jumbled" fill="#4ECDC4"/>
-                <Bar dataKey="ErrorDetection" fill="#45B7D1"/>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+           <div className="col-span-2">
+           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
+                    <div className="bg-white/60 rounded-lg p-4 h-64">
+                      <ResponsiveContainer>
+                        <LineChart data={chartsData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
+                          <XAxis dataKey="Title" stroke="black" />
+                          <YAxis stroke="black" />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="Easy" stroke="red"/>
+                          <Line type="monotone" dataKey="Medium" stroke="blue"/>
+                          <Line type="monotone" dataKey="Hard" stroke="aqua"/>
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
           {/* Bottom Bar Chart */}
           <h3 className="text-lg font-semibold mb-4">Communication Skills</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
@@ -75,21 +66,6 @@ const WrittenDashboard = () => {
                 <Bar dataKey="OverallPerformance" fill="#45B7D1"/>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div className="col-span-2">
-            <h3 className="text-lg font-semibold mb-4">Word Count</h3>
-            <div className="bg-white/60 rounded-lg p-4 h-64">
-              <ResponsiveContainer>
-                <BarChart data={infographicData}>
-                  <XAxis dataKey="month"/>
-                  <YAxis/>
-                  <Tooltip/>
-                  <Bar dataKey="interview1" fill="#4299e1" stackId="stack"/>
-                  <Bar dataKey="interview2" fill="#48bb78" stackId="stack"/>
-                  <Bar dataKey="interview3" fill="#ed64a6" stackId="stack"/>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
           </div>
         </div>
 
@@ -177,4 +153,4 @@ const WrittenDashboard = () => {
   );
 };
 
-export default WrittenDashboard;
+export default VerbalDashboard;
