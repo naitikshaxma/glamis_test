@@ -151,7 +151,7 @@ export default function Table() {
                 // className={`${status ? 'bg-[#2b6030] text-white font-semibold' : 'bg-gray-400 disabled text-black'} px-4 py-2`}>{status ? "View Result" : "Expired"}</Link>
                 className='bg-[#2b6030] text-white font-semibold px-4 py-2' >View Result  </Link>
                  */}
-                 {feedbackStatus ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}
+                 {true ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}
               </td>
             </tr>
           ))}

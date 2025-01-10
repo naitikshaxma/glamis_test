@@ -1,20 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Smile } from 'lucide-react';
 import Sidebar from '../components/global_components/Sidebar';
+import { bearerInstance } from '../helpers/instance';
 
 const PerformanceDashboard = () => {
+  const [subjectPerformance,setSubjectPerformance] = useState();
+    const getData = async()=>{
+      const response = await bearerInstance.get("/api/v1/dashboard/subject");
+      console.log(response);
+      setSubjectPerformance(response.data.data);
+    }
+    useEffect(()=>{
+      getData();
+    },[]);
+
   const infographicData = [
-    { month: 'DSA', productivity: 180, efficiency: 150, quality: 200 },
-    { month: 'OS', productivity: 160, efficiency: 170, quality: 180 },
-    { month: 'CN', productivity: 140, efficiency: 160, quality: 170 },
-    { month: 'DBMS', productivity: 130, efficiency: 140, quality: 150 },
-    { month: 'ML', productivity: 120, efficiency: 130, quality: 140 },
-    { month: 'Cloud', productivity: 150, efficiency: 160, quality: 170 },
-    { month: 'Web', productivity: 140, efficiency: 150, quality: 160 },
-    { month: 'Java', productivity: 130, efficiency: 140, quality: 150 },
-    { month: 'Python', productivity: 150, efficiency: 160, quality: 170 },
-  ];
+    { month: 'DSA', interview1: 180, interview2: 150, interview3: 200 },
+    { month: 'OS', interview1: 160, interview2: 170, interview3: 180 },
+    { month: 'CN', interview1: 140, interview2: 160, interview3: 170 },
+    { month: 'DBMS', interview1: 130, interview2: 140, interview3: 150 },
+    { month: 'ML', interview1: 120, interview2: 130, interview3: 140 },
+    { month: 'Cloud', interview1: 150, interview2: 160, interview3: 170 },
+    { month: 'Web', interview1: 140, interview2: 150, interview3: 160 },
+    { month: 'Java', interview1: 130, interview2: 140, interview3: 150 },
+    { month: 'Python', interview1: 150, interview2: 160, interview3: 170 },
+];
+
 
   const performanceMetrics = [
     { name: 'DSA', score: 4.8 },
@@ -87,9 +99,9 @@ const PerformanceDashboard = () => {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="productivity" fill="#4299e1" stackId="stack" />
-                  <Bar dataKey="efficiency" fill="#48bb78" stackId="stack" />
-                  <Bar dataKey="quality" fill="#ed64a6" stackId="stack" />
+                  <Bar dataKey="interview1" fill="#4299e1" stackId="stack" />
+                  <Bar dataKey="interview2" fill="#48bb78" stackId="stack" />
+                  <Bar dataKey="interview3" fill="#ed64a6" stackId="stack" />
                 </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -100,23 +112,24 @@ const PerformanceDashboard = () => {
 
             {/* Performance Gauge */}
             <div>
-              <div className="bg-white/30 rounded-lg p-4 h-64">
-                <h3 className="text-lg font-semibold mb-2">Performance</h3>
-                <p className="text-sm mb-4">Average score last of 5 interviews</p>
-                <div className="relative w-40 h-40 mx-auto">
-                  <div className="absolute inset-0 rounded-full border-8 border-white/30"></div>
-                  <div 
-                    className="absolute inset-0 rounded-full border-8 border-white"
-                    style={{
-                      clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
-                    }}
-                  ></div>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Smile className="w-8 h-8 mb-2" />
-                    <span className="text-2xl font-bold">95%</span>
-                  </div>
-                </div>
-              </div>
+              <div className="bg-white/60 rounded-lg p-4">
+                          <h3 className="text-lg font-semibold mb-2">Performance</h3>
+                          <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
+                          <div className="relative w-40 h-40 mx-auto">
+                            <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
+                            <div 
+                              className="absolute inset-0 rounded-full border-8 border-green-400"
+                              style={{
+                                clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
+                              }}
+                            ></div>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <Smile className="w-8 h-8 mb-2 text-green-400" />
+                              <span className="text-2xl font-bold text-black">95%</span>
+                            </div>
+                          </div>
+                        </div>
+              
             </div>
 
            
@@ -125,14 +138,14 @@ const PerformanceDashboard = () => {
           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <LineChart data={performanceData}>
+              <LineChart data={subjectPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
                 <XAxis dataKey="month" stroke="black" />
-                <YAxis stroke="black" />
+                <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Line type="monotone" dataKey="Easy" stroke="red" />
-                <Line type="monotone" dataKey="Medium" stroke="blue" />
-                <Line type="monotone" dataKey="Hard" stroke="aqua" />
+                <Line type="monotone" dataKey="easyAvgPerformance" stroke="red" />
+                <Line type="monotone" dataKey="mediumAvgPerformance" stroke="blue" />
+                <Line type="monotone" dataKey="hardAvgPerformance" stroke="aqua" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -178,14 +191,14 @@ const PerformanceDashboard = () => {
               <h3 className="text-lg font-semibold mb-2">Skills Analysis</h3>
               <div className="bg-white/60 rounded-lg p-4 h-64">
                 <ResponsiveContainer>
-                  <BarChart data={skillsData}>
+                  <BarChart data={subjectPerformance}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                     <XAxis dataKey="category" stroke="black" />
-                    <YAxis stroke="black" />
+                    <YAxis stroke="black" domain={[0,100]}/>
                     <Tooltip />
-                    <Bar dataKey="Vocabulary" fill="#69247C" />
-                    <Bar dataKey="Grammar" fill="#DA498D" />
-                    <Bar dataKey="Domain Knowledge" fill="#4DA1A9" />
+                    <Bar dataKey="vocabulary" fill="#69247C" />
+                    <Bar dataKey="grammar" fill="#DA498D" />
+                    <Bar dataKey="performance" fill="#4DA1A9" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

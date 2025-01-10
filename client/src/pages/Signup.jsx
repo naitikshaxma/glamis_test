@@ -1,9 +1,8 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
+import LinkText from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -14,7 +13,7 @@ import { InputAdornment } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate, Link } from 'react-router-dom'; // Import useNavigate
 import { toast } from 'react-toastify';
 
 const defaultTheme = createTheme();
@@ -255,9 +254,7 @@ export default function Signup() {
                             </Button>
                             <div className="flex justify-center">
                                 <span>Already have an account?&nbsp;</span>
-                                <Link href="/login">
-                                    {"Sign In"}
-                                </Link>
+                                <Link to="/login"><LinkText>Sign In</LinkText></Link>
                             </div>
                         </Box>
                     </Box>

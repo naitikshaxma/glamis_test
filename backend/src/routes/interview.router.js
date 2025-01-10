@@ -19,7 +19,7 @@ import {
     createInterviewBySvarAdmin,
     evaluateAnswerSvar,
     fetchInterviewForSvar,
-    interviewQuestionCount
+    interviewQuestionCount,
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -51,7 +51,6 @@ router.route("/generateQuestionForVerbalAdmin").post(isAuthenticated, generateQu
 router.route("/generateQuestionForSvarAdmin").post(isAuthenticated, generateQuestionforSvarAdmin);
 router.route("/createInterviewBySvarAdmin").post(isAuthenticated, createInterviewBySvarAdmin)
 router.route("/interviewQuestion/count").post(isAuthenticated, interviewQuestionCount);
-
 
 export default router;
 
