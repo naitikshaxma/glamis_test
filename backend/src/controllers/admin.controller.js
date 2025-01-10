@@ -648,47 +648,58 @@ export const downloadAttendance = async (req, res) => {
     // const pipeline = [
     //   // Stage 1: Match specific start_time and is_active false
     const pipeline = [
-      // Stage 1: Match specific interviews
       {
         $match: {
-          _id: { $in: interviews }, // List of interview IDs
-        },
+          _id: {$in:interviews}
+        }
       },
-      // Stage 2: Project relevant fields, keeping interview ID intact
       {
         $project: {
-          interviewId: "$_id",  // Preserve original interview _id
+          interviewId: "$_id",
           is_active: 1,
           attemptedQuestions: 1
-        },
+        }
       },
       // Stage 3: Lookup in students collection using interviewId
       {
         $lookup: {
           from: "students",
-          let: { interviewId: "$interviewId" },
+          let: {
+            interviewId: "$interviewId"
+          },
           pipeline: [
             {
               $match: {
-                $expr: { $in: ["$$interviewId", { $ifNull: ["$interview_taken", []] }] },
-              },
-            },
+                $expr: {
+                  $in: [
+                    "$$interviewId",
+                    {
+                      $ifNull: [
+                        "$interview_taken",
+                        []
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
           ],
-          as: "matched_students",
-        },
+          as: "matched_students"
+        }
       },
       // Stage 4: Unwind the matched_students array
       {
-        $unwind: "$matched_students",
+        $unwind: "$matched_students"
       },
       // Stage 5: Project the user_id from matched students, and keep interviewId
       {
         $project: {
-          user_id: "$matched_students.user",  // Student's user ID
+          user_id: "$matched_students.user",
+          // Student's user ID
           is_active: 1,
           attemptedQuestions: 1,
-          interviewId: 1,  // Retain interview ID
-        },
+          interviewId: 1 // Retain interview ID
+        }
       },
       // Stage 6: Lookup in users collection using user_id
       {
@@ -696,12 +707,12 @@ export const downloadAttendance = async (req, res) => {
           from: "users",
           localField: "user_id",
           foreignField: "_id",
-          as: "user_data",
-        },
+          as: "user_data"
+        }
       },
       // Stage 7: Unwind the user_data array
       {
-        $unwind: "$user_data",
+        $unwind: "$user_data"
       },
       // Stage 8: Project email, name, and other fields, including interviewId
       {
@@ -711,33 +722,66 @@ export const downloadAttendance = async (req, res) => {
           userId: "$user_data._id",
           is_active: 1,
           attemptedQuestions: 1,
-          interviewId: 1, // Retain interview ID for next lookup
-        },
+          interviewId: 1 // Retain interview ID for next lookup
+        }
       },
       // Stage 9: Lookup in interviewQuestion collection for scores
       {
         $lookup: {
           from: "interviewquestions",
-          localField: "interviewId", // Match using preserved interview ID
-          foreignField: "interview", // Match with interview field in interviewquestions
-          as: "questions",
-        },
+          localField: "interviewId",
+          // Match using preserved interview ID
+          foreignField: "interview",
+          // Match with interview field in interviewquestions
+          as: "questions"
+        }
       },
       // Stage 10: Add total and average score fields
       {
         $addFields: {
-          totalScore: { $sum: "$questions.overallPerformance" },
+          totalScore: {
+            $sum: "$questions.overallPerformance"
+          },
           averageScore: {
             $cond: [
-              { $gt: [{ $size: "$questions" }, 0] },
-              { $avg: "$questions.overallPerformance" },
-              0,
-            ],
+              {
+                $gt: [
+                  {
+                    $size: "$questions"
+                  },
+                  0
+                ]
+              },
+              {
+                $avg: "$questions.overallPerformance"
+              },
+              0
+            ]
           },
           viewReport: {
-            $concat: ["http://glamis.in/history/detailed/", { $toString: "$interviewId" }],
+            $concat: [
+              "http://glamis.in/history/detailed/",
+              {
+                $toString: "$interviewId"
+              }
+            ]
           },
-        },
+          grammar: {
+            $cond: [
+              {
+                $gt: [
+                  {
+                    $size: "$questions"
+                  },
+                  0
+                ]
+              },
+              {
+                $avg: "$questions.grammar"
+              },0
+            ]
+          }
+        }
       },
       // Stage 11: Group results with the new fields
       {
@@ -749,24 +793,27 @@ export const downloadAttendance = async (req, res) => {
               Name: "$name",
               UserId: "$userId",
               InterviewId: "$interviewId",
-              Present: { $not: "$is_active" },
-              AttemptedQuestions: "$attemptedQuestions",
+              Present: {
+                $not: "$is_active"
+              },
+              AttemptedQuestions:
+                "$attemptedQuestions",
               TotalScore: "$totalScore",
               AverageScore: "$averageScore",
               View_Report: "$viewReport",
-            },
+              GrammarScore:"$grammar"
+            }
           },
-          total_count: { $sum: 1 },
-        },
-      },
-    ];
+          total_count: {
+            $sum: 1
+          }
+        }
+      }
+    ]
 
-    //       },
-    //       total_count: { $sum: 1 }
-    //     }
-    //   }
+    const students = await Interview.aggregate(pipeline);
 
-    const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TotalScore','AverageScore','View_Report'];
+    const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TotalScore','AverageScore','GrammarScore','View_Report'];
     const opts = { fields };
     const parser = new Parser(opts);
     let arr = [];
