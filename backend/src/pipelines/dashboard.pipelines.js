@@ -694,202 +694,194 @@ export const CompanyPipeline = (user)=> [
       user:user._id
     }
   },
-  {
-    $lookup:{
-      from:"interviews",
-      localField:"interview_taken",
-      foreignField:"_id",
-      as:"interview_s"
+ {
+    $lookup: {
+      from: "interviews",
+      localField: "interview_taken",
+      foreignField: "_id",
+      as: "interview"
     }
   },
   {
-    $project:{
-      interview_s:1,
-      _id:0
+    $project: {
+      interview: 1,
+      _id: 0
     }
   },
   {
-    $unwind:"$interview_s"
+    $unwind: "$interview"
   },
   {
-    $match:{
-      "interview_s.type":"company",
-      "interview_s.is_active":false
+    $match: {
+      "interview.type": "company",
+      "interview.is_active": false
     }
   },
   {
-    $addFields:{
-      createdAt:"$interview_s.createdAt"
+    $sort: {
+      "interview.createdAt": -1
     }
   },
   {
-    $lookup:{
-      from:"interviewquestions",
-      localField:"interview_s._id",
-      foreignField:"interview",
-      as:"questions"
+    $limit: 5
+  },
+  {
+    $sort: {
+      "interview.createdAt": 1
     }
   },
   {
-    $unwind:"$questions"
-  },
-  {
-    $group:{
-      _id:"$questions.interview",
-      performance:{$sum:"$questions.overallPerformance"},
-      vocabulary:{$sum:"$questions.vocabulary"},
-      grammar:{$sum:"$questions.grammar"},
-      questionCount:{$sum:1},
-      createdAt:{$first:"$createdAt"},
-      questions:{$push:"$questions"}
-    }
-  },
-  {
-    $lookup:{
-      from:"admincompanyinterviews",
-      let: { interviewId: "$_id" },
-      pipeline: [
-        {
-          $match: {
-            $expr: { $in: ["$$interviewId", { $ifNull: ["$interview", []] }] },
-          }
-        }
-      ],
+    $lookup: {
+      from: "admincompanyinterviews",
+      localField: "interview._id",
+      foreignField: "interview",
       as: "adminInterview"
     }
   },
   {
-    $unwind:"$adminInterview"
-  },
-  {
     $addFields: {
-      company: "$adminInterview.company",
-      easy: { $ifNull: ["$adminInterview.easy_remaining", 0] },
-      medium: { $ifNull: ["$adminInterview.medium_remaining", 0] },
-      hard: { $ifNull: ["$adminInterview.hard_remaining", 0] }
-    }
-  },
-  {
-    $addFields: {
-      easyQuestions: {
-        $cond: [
-          { $gt: ["$easy", 0] },
-          { $slice: ["$questions", 0, "$easy"] },
-          []
-        ]
-      },
-      mediumQuestions: {
-        $cond: [
-          { $gt: ["$medium", 0] },
-          { $slice: ["$questions", "$easy", "$medium"] },
-          []
-        ]
-      },
-      hardQuestions: {
-        $cond: [
-          { $gt: ["$hard", 0] },
-          {
-            $slice: [
-              "$questions",
-              { $subtract: [{ $size: "$questions" }, "$hard"] },
-              "$hard"
-            ]
-          },
-          []
-        ]
+      adminInterview: {
+        $first: "$adminInterview"
       }
     }
   },
   {
     $addFields: {
-      easyAvgPerformance: {
-        $cond: [
-          { $gt: [{ $size: "$easyQuestions" }, 0] },
-          {
-            $divide: [
-              {
-                $reduce: {
-                  input: "$easyQuestions.overallPerformance",
-                  initialValue: 0,
-                  in: { $add: ["$$value", "$$this"] }
+      Title: "$interview.title",
+      QuestionCounts: [
+        "$adminInterview.easy_remaining",
+        "$adminInterview.medium_remaining",
+        "$adminInterview.hard_remaining"
+      ]
+    }
+  },
+  {
+    $lookup: {
+      from: "interviewquestions",
+      localField: "interview._id",
+      foreignField: "interview",
+      as: "Questions"
+    }
+  },
+  {
+    $addFields: {
+      Easy: {
+        $avg: {
+          $map: {
+            input: {
+              $slice: [
+                "$Questions",
+                {
+                  $first: "$QuestionCounts"
                 }
-              },
-              { $size: "$easyQuestions" }
-            ]
-          },
-          0
-        ]
+              ]
+            },
+            as: "item",
+            in: "$$item.overallPerformance"
+          }
+        }
       },
-      mediumAvgPerformance: {
-        $cond: [
-          { $gt: [{ $size: "$mediumQuestions" }, 0] },
-          {
-            $divide: [
-              {
-                $reduce: {
-                  input: "$mediumQuestions.overallPerformance",
-                  initialValue: 0,
-                  in: { $add: ["$$value", "$$this"] }
+      Medium: {
+        $avg: {
+          $map: {
+            input: {
+              $slice: [
+                "$Questions",
+                {
+                  $add: [
+                    {
+                      $first: "$QuestionCounts"
+                    }
+                  ]
+                },
+                {
+                  $arrayElemAt: [
+                    "$QuestionCounts",
+                    1
+                  ]
                 }
-              },
-              { $size: "$mediumQuestions" }
-            ]
-          },
-          0
-        ]
+              ]
+            },
+            as: "item",
+            in: "$$item.overallPerformance"
+          }
+        }
       },
-      hardAvgPerformance: {
-        $cond: [
-          { $gt: [{ $size: "$hardQuestions" }, 0] },
-          {
-            $divide: [
-              {
-                $reduce: {
-                  input: "$hardQuestions.overallPerformance",
-                  initialValue: 0,
-                  in: { $add: ["$$value", "$$this"] }
+      Hard: {
+        $avg: {
+          $map: {
+            input: {
+              $slice: [
+                "$Questions",
+                {
+                  $add: [
+                    {
+                      $first: "$QuestionCounts"
+                    },
+                    {
+                      $arrayElemAt: [
+                        "$QuestionCounts",
+                        1
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $arrayElemAt: [
+                    "$QuestionCounts",
+                    2
+                  ]
                 }
-              },
-              { $size: "$hardQuestions" }
-            ]
-          },
-          0
-        ]
+              ]
+            },
+            as: "item",
+            in: "$$item.overallPerformance"
+          }
+        }
       }
     }
   },
   {
-    $project:{
-      company:1,
-      performance:{
-        $cond:[
-          {$ne:["$questionCount",0]},
-          {$divide:["$performance","$questionCount"]},
-          0
-        ]
+    $addFields: {
+      Grammar: {
+        $avg: {
+          $map: {
+            input: "$Questions",
+            as: "item",
+            in: "$$item.grammar"
+          }
+        }
       },
-      vocabulary:{
-        $cond:[
-          {$ne:["$questionCount",0]},
-          {$divide:["$vocabulary","$questionCount"]},
-          0
-        ]
+      OverallPerformance: {
+        $avg: {
+          $map: {
+            input: "$Questions",
+            as: "item",
+            in: "$$item.overallPerformance"
+          }
+        }
       },
-      createdAt:1,
-      grammar:{
-        $cond:[
-          {$ne:["$questionCount",0]},
-          {$divide:["$grammar","$questionCount"]},
-          0
-        ]
-      },
-      easyAvgPerformance: 1,
-      mediumAvgPerformance: 1,
-      hardAvgPerformance: 1,
+      Vocabulary: {
+        $avg: {
+          $map: {
+            input: "$Questions",
+            as: "item",
+            in: "$$item.vocabulary"
+          }
+        }
+      }
     }
   },
   {
-    $sort:{"createdAt":-1}
+    $project: {
+      Title: 1,
+      Easy: 1,
+      Medium: 1,
+      Hard: 1,
+      Grammar: 1,
+      OverallPerformance: 1,
+      Vocabulary: 1
+    }
   }
 ]
 

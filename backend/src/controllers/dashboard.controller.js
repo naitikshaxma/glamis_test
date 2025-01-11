@@ -31,7 +31,7 @@ export const verbalDashboard = async (req, res) => {
 export const companyDashboard = asyncHandler(async (req,res)=>{
   const user = req.user;
   const result = await Student.aggregate(CompanyPipeline(user))
-  return res.status(200).json(new ApiResponse(200, result, "Company Interview fetched successfully"));
+  return res.json(result);
 })
 
 export const subjectDashboard = asyncHandler(async (req,res)=>{
