@@ -13,7 +13,7 @@ const SubjectDashboard = () => {
       const response = await bearerInstance.get("/api/v1/dashboard/subject");
       console.log(response);
       setSubjectPerformance(response.data.data);
-      const overall = response.data.data.reduce((acc, item) => acc + item.performance, 0) / response.data.data.length;
+      const overall = response.data.data.reduce((acc, item) => acc + item.OverallPerformance, 0) / response.data.data.length;
       setOverallPercenatge(overall);
     }
     useEffect(()=>{
@@ -204,7 +204,7 @@ const SubjectDashboard = () => {
                     <Tooltip />
                     <Bar dataKey="vocabulary" fill="#69247C" />
                     <Bar dataKey="grammar" fill="#DA498D" />
-                    <Bar dataKey="performance" fill="#4DA1A9" />
+                    <Bar dataKey="OverallPerformance" fill="#4DA1A9" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
