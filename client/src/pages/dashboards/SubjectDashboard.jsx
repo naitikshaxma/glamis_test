@@ -3,13 +3,18 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { Smile } from 'lucide-react';
 import Sidebar from '../../components/global_components/Sidebar.jsx';
 import { bearerInstance } from '../../helpers/instance.js';
+import Cookies from 'js-cookie'
 
 const SubjectDashboard = () => {
-  const [subjectPerformance,setSubjectPerformance] = useState();
+  const [subjectPerformance,setSubjectPerformance] = useState({});
+  const [overallPercenatge, setOverallPercenatge] = useState(0);
+
     const getData = async()=>{
       const response = await bearerInstance.get("/api/v1/dashboard/subject");
       console.log(response);
       setSubjectPerformance(response.data.data);
+      const overall = response.data.data.reduce((acc, item) => acc + item.performance, 0) / response.data.data.length;
+      setOverallPercenatge(overall);
     }
     useEffect(()=>{
       getData();
@@ -66,18 +71,20 @@ const SubjectDashboard = () => {
         <div className="w-full md:w-4/5 p-7">
           <header className="flex justify-between items-center ">
             <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">Krishankant</span>, welcome back!
+              Hello <span className="text-black">{Cookies.get('fullName')}</span>, welcome back!
             </h2>
 
             <div className="flex items-center">
               <i className="fas fa-bell text-gray-500 mr-5"></i>
               <div className="flex items-center ">
                 <img
-                  src="https://placehold.co/40x40"
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
                   alt="User"
-                  className="rounded-full mr-2"
+                  height="40"
+                  width="40"
+                  className="h-8 w-8 rounded-full border-green-600 border-2 mr-2"
                 />
-                <span>Krishankant Saraswat </span>
+                <span>{Cookies.get('fullName')}</span>
               </div>
             </div>
           </header>
@@ -111,26 +118,25 @@ const SubjectDashboard = () => {
 
 
             {/* Performance Gauge */}
-            <div>
-              <div className="bg-white/60 rounded-lg p-4">
-                          <h3 className="text-lg font-semibold mb-2">Performance</h3>
-                          <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
-                          <div className="relative w-40 h-40 mx-auto">
-                            <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-                            <div
-                              className="absolute inset-0 rounded-full border-8 border-green-400"
-                              style={{
-                                clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
-                              }}
-                            ></div>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <Smile className="w-8 h-8 mb-2 text-green-400" />
-                              <span className="text-2xl font-bold text-black">95%</span>
-                            </div>
-                          </div>
-                        </div>
-
+            <div className="bg-white rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2">Performance</h3>
+            <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
+            <div className="relative w-40 h-40 mx-auto">
+              <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
+              <div
+                className="relative w-40 h-40 rounded-full bg-gray-200"
+                style={{
+                  maskImage: `conic-gradient(green ${overallPercenatge}%, transparent 0)`
+                }}
+              >
+                <div className="absolute inset-0 rounded-full border-8 border-green-400"></div>
+              </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                {/*<Smile className="w-8 h-8 mb-2 text-green-400"/>*/}
+                <span className="text-2xl text-black font-bold">{overallPercenatge.toFixed(2)}%</span>
+              </div>
             </div>
+          </div>
 
 
 
@@ -193,7 +199,7 @@ const SubjectDashboard = () => {
                 <ResponsiveContainer>
                   <BarChart data={subjectPerformance}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="category" stroke="black" />
+                    <XAxis dataKey="company" stroke="black" />
                     <YAxis stroke="black" domain={[0,100]}/>
                     <Tooltip />
                     <Bar dataKey="vocabulary" fill="#69247C" />
