@@ -56,10 +56,10 @@ const studentProfileSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
-    interview_taken: {
-        type: [mongoose.Schema.Types.ObjectId],
+    interview_taken: [{
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Interview"
-    },
+    }],
     course: {
         type: String
     },

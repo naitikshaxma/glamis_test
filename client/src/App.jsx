@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/dashboards/Dashboard.jsx";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import History from "./pages/History";
@@ -26,6 +26,11 @@ import ProtectedRoute from "./pages/Protectedroute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Team from "./pages/Team";
+import CompanyDashboard from './pages/dashboards/CompanyDashboard.jsx';
+import SubjectDashboard from './pages/dashboards/SubjectDashboard.jsx';
+import SvarDashboard from './pages/dashboards/SvarDashboard.jsx';
+import WrittenDashboard from "./pages/dashboards/WrittenDashboard.jsx";
+import VerbalDashboard from "./pages/dashboards/VerbalDashboard.jsx";
 
 
 
@@ -95,7 +100,7 @@ const App = () => {
                 <Route
                     path="/dashboard"
                     element={ <ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>}
-                   
+
                 />
                 <Route
                     path="/myInterview"
@@ -151,11 +156,16 @@ const App = () => {
                 <Route
                     path="/team"
                     element={ <ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
-                   
+
                 />
-               
-                
-                
+
+                <Route path="/dashboard/company" element={<CompanyDashboard />} />
+                <Route path="/dashboard/subject" element={<SubjectDashboard />} />
+                <Route path="/dashboard/svar" element={<SvarDashboard />} />
+                <Route path="/dashboard/written" element={<WrittenDashboard />} />
+                <Route path="/dashboard/verbal" element={<VerbalDashboard />} />
+
+
             </Routes>
             <ToastContainer />
         </Router>

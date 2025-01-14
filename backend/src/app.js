@@ -2,6 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from "path";
+import userRouter from './routes/user.router.js';
+import interviewRouter from './routes/interview.router.js';
+import resultRouter from './routes/result.router.js';
+import objectRouter from './routes/object.router.js';
+import adminRouter from './routes/admin.router.js';
+import dashboardRouter from './routes/dashboard.router.js';
 // import { RateLimiter15mins } from "./utils/RateLimiter.js";
 
 
@@ -20,17 +26,13 @@ app.use(cookieParser())
 
 // Routes Import
 
-import userRouter from './routes/user.router.js';
-import interviewRouter from './routes/interview.router.js';
-import resultRouter from './routes/result.router.js';
-import objectRouter from './routes/object.router.js';
-import adminRouter from './routes/admin.router.js';
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/interview", interviewRouter)
 app.use("/api/v1/result", resultRouter)
 app.use("/api/v1/objectStore", objectRouter)
 app.use("/api/v1/admin", adminRouter)
+app.use("/api/v1/dashboard", dashboardRouter)
 
 
 // health check route
