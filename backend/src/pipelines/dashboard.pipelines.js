@@ -747,7 +747,7 @@ export const CompanyPipeline = (user)=> [
   },
   {
     $addFields: {
-      Title: "$interview.title",
+      Company:"$adminInterview.company",
       QuestionCounts: [
         "$adminInterview.easy_remaining",
         "$adminInterview.medium_remaining",
@@ -874,7 +874,7 @@ export const CompanyPipeline = (user)=> [
   },
   {
     $project: {
-      Title: 1,
+      Company: 1,
       Easy: 1,
       Medium: 1,
       Hard: 1,
