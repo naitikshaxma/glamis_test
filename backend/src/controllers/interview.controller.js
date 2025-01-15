@@ -406,7 +406,15 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   let timer = 90;
   console.log("entered jd admin")
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+  let { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+  let jobDescription = jdDetails.split(",");
+
+  const randomIndex = Math.floor(Math.random() * jobDescription.length);
+
+// Access the value at the random index
+  jdDetails = jobDescription[randomIndex];
+
+
   // const [offset, setOffset] = useState(0);
   const noOfAttemptedQuestions = await InterviewQuestion.find({ interview: interviewId }).countDocuments();
 
