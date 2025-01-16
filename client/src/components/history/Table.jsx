@@ -84,14 +84,14 @@ export default function Table() {
       const getUser = async ()=>{
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/get-user-data-profile`, {},
           {
-            headers: {    
+            headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${Cookies.get('accessToken')}`
             }
           }
         );
         console.log(response)
-        setFeedbackStatus(response.data.data.user.feedback_submitted);  
+        setFeedbackStatus(response.data.data.user.feedback_submitted);
       }
         getUser();
         fetchInterviewHeld();
@@ -151,7 +151,7 @@ export default function Table() {
                 // className={`${status ? 'bg-[#2b6030] text-white font-semibold' : 'bg-gray-400 disabled text-black'} px-4 py-2`}>{status ? "View Result" : "Expired"}</Link>
                 className='bg-[#2b6030] text-white font-semibold px-4 py-2' >View Result  </Link>
                  */}
-                 {true ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}
+                 {feedbackStatus ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}
               </td>
             </tr>
           ))}
