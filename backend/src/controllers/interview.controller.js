@@ -406,7 +406,15 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   let timer = 90;
   console.log("entered jd admin")
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+  let { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+  let jobDescription = jdDetails.split(",");
+
+  const randomIndex = Math.floor(Math.random() * jobDescription.length);
+
+// Access the value at the random index
+  jdDetails = jobDescription[randomIndex];
+
+
   // const [offset, setOffset] = useState(0);
   const noOfAttemptedQuestions = await InterviewQuestion.find({ interview: interviewId }).countDocuments();
 
@@ -558,7 +566,8 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
   let prompt = "";
   if (difficulty === "Easy") {
-    prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct from the previous one and covers topics that have not yet been addressed or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}`;
+    prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct and completely different from this (${historyPrompt}) one and covers topics that have not yet been addressed and the topics are  "${jdDetails}" or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}
+`;
   } else if (difficulty === "Medium") {
     // Initialize the question counter within this block
     //   let questionCount = 0;
@@ -566,7 +575,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     // Randomly decide whether to generate a coding or a numerical question
     //console.log(questionType);
 
-    if (questionNo >= 5 && questionNo < 7) {
+    if (questionNo >= adminInterview.easy_remaining && questionNo < adminInterview.easy_remaining + parseInt(adminInterview.medium_remaining / 2)) {
       // First two questions are coding questions
       prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for ${jobTitle} at ${selectedCompany}. 
         Ensure the coding question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
@@ -578,7 +587,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
       // Increment the question count after asking a coding question
       //questionCount++;
-    } else if (questionNo >= 7 && questionNo < 9) {
+    } else if (questionNo >= adminInterview.easy_remaining + parseInt(adminInterview.medium_remaining / 2) && questionNo < adminInterview.medium_remaining) {
       // The next two questions are numerical
       prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new numerical question for ${jobTitle} at ${selectedCompany}.
         Ensure this numerical question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
