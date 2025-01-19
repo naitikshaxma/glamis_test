@@ -91,10 +91,10 @@ export default function InterviewCard({props, status}) {
                 <hr/>
                 <div className="flex justify-between my-2">
                     <div>
-                        <span className="font-bold">Date:</span> {props.start_time?.split('T')[0]}
+                        <span className="font-bold">Date:</span> {(new Date(props.start_time)).toLocaleDateString()}
                     </div>
                     <div>
-                        <span className="font-bold">Time:</span> {props.start_time?.split('T')[1].split('.')[0]}
+                        <span className="font-bold">Time:</span> {(new Date(props.start_time)).toLocaleTimeString()}
                     </div>
                 </div>
                 <div className="my-2">
