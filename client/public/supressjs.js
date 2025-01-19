@@ -1,6 +1,6 @@
 const prevention = () => {
   const head = document.head;
-  if (head.lastChild.classList.contains("CopyProtection")) {
+  if (head.lastChild.classList && head.lastChild.classList.contains("CopyProtection")) {
     head.removeChild(head.lastChild);
   }
 
