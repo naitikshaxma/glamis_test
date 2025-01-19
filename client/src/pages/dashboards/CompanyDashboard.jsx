@@ -41,7 +41,7 @@ const CompanyDashboard = () => {
             <ResponsiveContainer>
               <BarChart data={chartsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                <XAxis dataKey="Title" stroke="black" />
+                <XAxis dataKey="Company" stroke="black" />
                 <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
                 <Bar dataKey="OverallPerformance" fill="#8884d8" />
@@ -81,7 +81,7 @@ const CompanyDashboard = () => {
             <ResponsiveContainer>
               <LineChart data={chartsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
-                <XAxis dataKey="Title" stroke="black" />
+                <XAxis dataKey="Company" stroke="black" />
                 <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
                 <Line type="monotone" dataKey="Easy" stroke="red" />
@@ -117,7 +117,7 @@ const CompanyDashboard = () => {
             <ResponsiveContainer>
               <BarChart data={chartsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="Title" stroke="black" />
+                <XAxis dataKey="Company" stroke="black" />
                 <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
                 <Bar dataKey="Vocabulary" fill="#69247C" />
