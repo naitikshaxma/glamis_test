@@ -10,7 +10,7 @@ export default function Feedback() {
         </div>
 
         {/* <iframe className='my-3' src="https://forms.gle/2kaedi2SoQh7FxXu8" height={1000} frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe> */}
-        <iframe className='my-3' src="https://forms.gle/aB9xUwtRh1AJbqtB7" height={1000} frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+        <iframe className='my-3' src="https://docs.google.com/forms/d/e/1FAIpQLSc0dtkpe_Y50bXyDTG2T05jVfzp8ICKJCnfT2JVMjLdo69mhg/viewform" height={1000} frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
 
         </div>
   )
