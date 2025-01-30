@@ -813,7 +813,7 @@ export const downloadAttendance = async (req, res) => {
 
     const students = await Interview.aggregate(pipeline);
 
-    const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TotalScore','AverageScore','GrammarScore','View_Report'];
+    const fields = ['Email', 'Name', 'UserId', 'Present', "AttemptedQuestions", 'TechnicalScore','AverageScore','GrammarScore','View_Report'];
     const opts = { fields };
     const parser = new Parser(opts);
     let arr = [];

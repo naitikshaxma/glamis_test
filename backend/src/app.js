@@ -20,7 +20,7 @@ app.use("/api/v1/objectStore", express.static(objectStorePath));
 
 app.use(cors())
 
-app.use(express.json({ limit : "16kb" }))
+app.use(express.json({ limit : "1gb" }))
 app.use(express.urlencoded({ extended : true, limit : "16kb" }))
 app.use(cookieParser())
 

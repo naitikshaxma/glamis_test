@@ -193,7 +193,7 @@ export const createInterviewBySvarAdmin = asyncHandler(async (req, res) => {
 // ---------------------------- Generate Question ----------------------------
 
 const timerObject = {
-  Easy: 60,
+  Easy: 45,
   Medium: 90,
   Hard: 90,
   essay: 20 * 60,
@@ -465,7 +465,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "Easy") {
-    timer = 60;  // 60 seconds
+    timer = 45;  // 60 seconds
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: { $in: adminInterview.questions }
     });
@@ -695,7 +695,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "Easy") {
-    timer = 60;  // 60 seconds
+    timer = 45;  // 45 seconds
 
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: { $in: adminInterview.questions }
