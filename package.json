@@ -4,7 +4,6 @@
   "description": "This is a mock interview portal designed for the students of GLA University to prepare for interviews.",
   "main": "index.js",
   "scripts": {
-    "start": "electron main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently -n server,client,admin-client -c yellow,blue,green \"cd backend && npm i && npm run dev\" \"cd client && npm i && npm run dev\" \"cd admin-client && npm i && npm run dev\"",
     "prod": "concurrently -n server,client,admin-client -c yellow,blue,green \"cd backend && npm i && npm start\" \"cd client && npm i && npm run build && npm run preview\" \"cd admin-client && npm i && npm run build && npm run preview\""
@@ -16,7 +15,6 @@
     "child_process": "^1.0.2",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.7",
-    "electron": "^33.3.1",
     "react-icons": "^5.3.0"
   }
 }
