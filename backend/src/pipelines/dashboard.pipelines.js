@@ -765,15 +765,20 @@ export const CompanyPipeline = (user)=> [
   },
   {
     $addFields: {
+      QuestionCounts: {
+        $ifNull: ["$QuestionCounts", [0, 0, 0]]
+      }
+    }
+  },
+  {
+    $addFields: {
       Easy: {
         $avg: {
           $map: {
             input: {
               $slice: [
                 "$Questions",
-                {
-                  $first: "$QuestionCounts"
-                }
+                { $max: [{ $ifNull: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 1] }, 1] }
               ]
             },
             as: "item",
@@ -787,19 +792,15 @@ export const CompanyPipeline = (user)=> [
             input: {
               $slice: [
                 "$Questions",
-                {
-                  $add: [
-                    {
-                      $first: "$QuestionCounts"
-                    }
-                  ]
-                },
-                {
-                  $arrayElemAt: [
-                    "$QuestionCounts",
-                    1
-                  ]
-                }
+                { 
+                  $max: [{ 
+                    $add: [
+                      { $ifNull: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 0] },
+                      1
+                    ] 
+                  }, 1] }
+                ,
+                { $max: [{ $ifNull: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 1] }, 1] }
               ]
             },
             as: "item",
@@ -813,25 +814,16 @@ export const CompanyPipeline = (user)=> [
             input: {
               $slice: [
                 "$Questions",
-                {
-                  $add: [
-                    {
-                      $first: "$QuestionCounts"
-                    },
-                    {
-                      $arrayElemAt: [
-                        "$QuestionCounts",
-                        1
-                      ]
-                    }
-                  ]
-                },
-                {
-                  $arrayElemAt: [
-                    "$QuestionCounts",
-                    2
-                  ]
-                }
+                { 
+                  $max: [{ 
+                    $add: [
+                      { $ifNull: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 0] },
+                      { $ifNull: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 0] },
+                      1
+                    ] 
+                  }, 1] }
+                ,
+                { $max: [{ $ifNull: [{ $arrayElemAt: ["$QuestionCounts", 2] }, 1] }, 1] }
               ]
             },
             as: "item",

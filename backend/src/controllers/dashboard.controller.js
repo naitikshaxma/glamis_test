@@ -10,23 +10,23 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 // --------------- DASHBOARDS Start -----------------
-export const svarDashboard = async (req, res) => {
+export const svarDashboard = asyncHandler(async (req, res) => {
   const user = req.user;
   const data = await Student.aggregate(SvarPipeline(user));
   res.json(data);
-}
+})
 
-export const writtenDashboard = async (req, res) => {
+export const writtenDashboard = asyncHandler(async (req, res) => {
   const user = req.user;
   const data = await Student.aggregate(WrittenPipeline(user));
   res.json(data);
-}
+})
 
-export const verbalDashboard = async (req, res) => {
+export const verbalDashboard = asyncHandler(async (req, res) => {
   const user = req.user;
   const data = await Student.aggregate(VerbalPipeline(user));
   res.json(data);
-}
+})
 
 export const companyDashboard = asyncHandler(async (req,res)=>{
   const user = req.user;
@@ -42,7 +42,7 @@ export const subjectDashboard = asyncHandler(async (req,res)=>{
 
 // --------------- DASHBOARDS End -----------------
 
-export const home = async (req, res) => {
+export const home = asyncHandler(async (req, res) => {
   const user = req.user;
 
   const stage = [{
@@ -60,4 +60,4 @@ export const home = async (req, res) => {
     Subject: (await Student.aggregate(SubjectPipeline(user).concat(stage)))[0]?.OverallPerformance,
   }
   res.json(data);
-}
+})
