@@ -1583,6 +1583,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
     4. technicalExplanation: A detailed evaluation of the technical content of the answer. Provide feedback on the accuracy, depth, and relevance of the technical knowledge displayed. Only the first or second point in pros or cons should be included.
     5. vocabularyExplanation: Detailed feedback on the vocabulary used in the answer. Analyze the choice of words, clarity, and appropriateness of vocabulary, with suggestions for improvement. Only the first or second point in pros or cons should be included.
     6. grammarExplanation: Feedback on the grammatical correctness of the answer. Point out strengths as well as errors, providing corrections and suggestions for improvement. Only the first or second point in pros or cons should be included.
+    7. Moderation: Ensure that the scores are awarded moderately, avoiding overly strict or lenient evaluations to maintain fairness and consistency.
 
     The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
     {
