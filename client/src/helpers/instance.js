@@ -13,7 +13,7 @@ export const bearerInstance = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL,
     headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+        'Authorization': `Bearer ${Cookies.get('accessToken') || Cookies.get('accessToken')}`,
     },
 });
 

@@ -3,7 +3,6 @@ import { Button } from "@material-tailwind/react";
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
-import axios from 'axios';
 import { bearerInstance as instance } from "../helpers/instance.js";
 import { Skeleton } from '@mui/material';
 import EvaluationResult from './EvaluationResult';
@@ -41,6 +40,8 @@ const Timer = (props) => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
+    const [tabSwitchCount, setTabSwitchCount] = useState(0);
+    const [warning, setWarning] = useState(false);
 
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
@@ -499,8 +500,59 @@ const LiveInterview = () => {
         }
     }, []);
 
+
+    useEffect(() => {
+        const onBlur = () => {
+            setTabSwitchCount(prevCount => prevCount + 1);
+        }
+        window.addEventListener('blur', onBlur);
+
+        return () => {
+            window.removeEventListener('blur', onBlur);
+        }
+    }, []);
+
+
+    useEffect( () => {
+        if (tabSwitchCount <= 0) {
+            (async ()=>{
+                try {
+                    const res = await instance.post('/api/v1/interview/proc/continue', {interviewId: Cookies.get('interviewId')});
+                    setTabSwitchCount(res.data.tabSwitchCount);
+                } catch (error) {
+                    console.error(error.response ? error.response.data.message : error.message);
+                }
+            })();
+            return
+        }
+        setWarning(true);
+        try {
+            instance.post('/api/v1/interview/proc', {tabSwitchCount, interviewId: Cookies.get('interviewId')});
+        }
+        catch (error) {
+            console.error(error.response? error.response.data.message : error.message);
+        }
+    }, [tabSwitchCount]);
+
     return (
         <>
+            {warning && <div
+              className='fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center'>
+                <div className='bg-white p-8 rounded-lg'>
+                    <p className='text-lg font-semibold'>Please do not switch tabs or minimize the window during the
+                        interview.</p>
+                    <p className='text-lg font-semibold'>We are tracking your activity. Your tab switching will decrease
+                        your final score.</p>
+                    <p className='text-blue-500 text-center text-lg font-semibold'>You Tab
+                        Switched {tabSwitchCount} times.</p>
+                    <div className='flex justify-end'>
+                        <button className='bg-blue-500 text-white p-2 rounded-lg mt-4'
+                                onClick={() => setWarning(false)}>OK, I Understand
+                        </button>
+                    </div>
+                </div>
+            </div>}
+
             {currentQuestion < totalQuestions ? (
                 <>
                     <div className="flex w-full">

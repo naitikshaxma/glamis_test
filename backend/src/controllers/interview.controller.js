@@ -2072,3 +2072,56 @@ export const interviewQuestionCount = asyncHandler(async (req, res) => {
     })
   }
 })
+
+
+// ---------------------------- Proctoring ----------------------------
+
+export const tabSwitch = async (req, res) => {
+  const { interviewId, tabSwitchCount } = req.body;
+  const interview = await Interview.findById(interviewId);
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  if (!interview) {
+    return res.status(404).json({ message: "Interview not found" });
+  }
+
+  if (interview.is_active === false) {
+    return res.status(404).json({ message: "Interview not found" });
+  }
+  console.log("interview.tabSwitchCount", interview.tabSwitchCount, tabSwitchCount)
+  if (interview.tabSwitchCount === undefined) {
+    interview.tabSwitchCount = tabSwitchCount;
+    await interview.save();
+    return res.json({ message: "Success0" });
+  }
+  if (interview.tabSwitchCount >= tabSwitchCount) {
+    return res.json({ message: "Success1" });
+  }
+
+  interview.tabSwitchCount = tabSwitchCount;
+  await interview.save();
+
+  return res.json({ message: "Success2" });
+}
+
+
+export const continueInterview = async (req, res) => {
+  const { interviewId } = req.body;
+  const interview = await Interview.findById(interviewId);
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  if (!interview) {
+    return res.status(404).json({ message: "Interview not found" });
+  }
+  if (interview.is_active === false) {
+    return res.status(404).json({ message: "Interview not found" });
+  }
+
+  const details = {
+    tabSwitchCount: interview.tabSwitchCount,
+  }
+
+  return res.json(details);
+}
