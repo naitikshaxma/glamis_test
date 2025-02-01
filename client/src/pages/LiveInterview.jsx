@@ -71,7 +71,6 @@ const LiveInterview = () => {
 
     const [currentQuestion, setCurrentQuestion] = useState(parseInt(Cookies.get('currentQuestion')));
     const [timer, setTimer] = useState(100);
-    const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
 
     // Start Recording Function
     const startRecording = async () => {
@@ -453,17 +452,7 @@ const LiveInterview = () => {
     };
 
     // Effect to handle disabling the Next button based on recording status
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         if (isRecording) {
-    //             setIsNextButtonDisabled(false);
-    //         } else {
-    //             setIsNextButtonDisabled(true);
-    //         }
-    //     }, 5000);
 
-    //     return () => clearInterval(interval);
-    // }, [isRecording]);
 
     // Effect to handle the timer countdown
     useEffect(() => {
@@ -567,7 +556,7 @@ const LiveInterview = () => {
                                             ripple="light"
                                             size="lg"
                                             className="w-1/3"
-                                            disabled={isNextButtonDisabled || loading}
+                                            disabled={loading}
                                             onClick={handleNextQuestion}
                                         >
                                             {loading ? "Loading..." : "Next"}
