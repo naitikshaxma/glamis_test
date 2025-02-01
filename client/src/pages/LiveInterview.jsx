@@ -29,7 +29,7 @@ const Timer = (props) => {
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}
             colorsTime={[100, 70, 40, 10]}
             onComplete={() => {
-                props.setNextQuestion((prev)=>prev+1)
+                props.handleNextQuestion();
                 props.setTimer(0); // Ensures timer is set to 0 when completed
                 return [false, 0]; // Do not repeat the timer
             }}
@@ -106,7 +106,6 @@ const LiveInterview = () => {
         }
         console.log("Break 02");
         if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop();
             console.log("Break 02.1");
             mediaRecorderRef.current.onstop = async () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
@@ -115,6 +114,7 @@ const LiveInterview = () => {
                 await handleSaveRecording(audioBlob);
                 console.log('Break 07');
             };
+            mediaRecorderRef.current.stop();
         }
         console.log("Break 08");
     };
@@ -302,6 +302,44 @@ const LiveInterview = () => {
             setTimer(0); // Reset timer
             console.log("Break 10");
             setCurrentQuestion((prev) => prev + 1);
+        }else{
+            setIsAudioPlaying(false);
+        setSkipQuestionCount(prevCount => prevCount+1);
+        // Stop the recording if in progress
+        if (isRecording) {
+            setIsRecording(false);
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+            }
+        }
+        setLoading(true);
+        console.log("Skipping to next question...");
+
+        try {
+            const formData = new FormData();
+            formData.append('questionNo', currentQuestion);
+            setCurrentQuestion((prev) => prev + 1);
+            setQuestion('');    // Clear the question
+            const defaultAudioPath = '/not-available.webm'; // Path to default audio file
+            const response = await fetch(defaultAudioPath);
+            const audioBlob = await response.blob(); // Convert the default audio file to a Blob
+
+            formData.append('question', question); // Since question is skipped, you might want to pass an empty string or a specific value
+            formData.append('answerAudio', audioBlob, `answer+${generateUniqueKey()}+${currentQuestion + 1}.webm`);
+            formData.append('interviewId', Cookies.get('interviewId'));
+            formData.append('difficulty', currentDiff);
+            formData.append('questionNo', currentQuestion);
+
+            console.log('Form data for skipped question:', formData);
+
+            await instance.post(`/api/v1/interview/evaluateQuestion`, formData, {headers: {'Content-Type': 'multipart/form-data'}});
+            console.log('Question skipped successfully');
+
+        } catch (error) {
+            console.error('Error uploading default audio:', error);
+        }
+
+        setLoading(false);
         }
     };
 
@@ -415,17 +453,17 @@ const LiveInterview = () => {
     };
 
     // Effect to handle disabling the Next button based on recording status
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (isRecording) {
-                setIsNextButtonDisabled(false);
-            } else {
-                setIsNextButtonDisabled(true);
-            }
-        }, 5000);
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         if (isRecording) {
+    //             setIsNextButtonDisabled(false);
+    //         } else {
+    //             setIsNextButtonDisabled(true);
+    //         }
+    //     }, 5000);
 
-        return () => clearInterval(interval);
-    }, [isRecording]);
+    //     return () => clearInterval(interval);
+    // }, [isRecording]);
 
     // Effect to handle the timer countdown
     useEffect(() => {
@@ -443,14 +481,6 @@ const LiveInterview = () => {
     }, []);
 
     // Effect to auto-submit when timer reaches 0
-    useEffect(() => {
-        console.log('Timer:', timer);
-        if (timer === 0) {
-            // Auto-submit the answer when the timer reaches 0
-            handleNextQuestion();
-        }
-    }, [timer]);
-
     // Effect to handle fullscreen mode and redirection
     useEffect(() => {
         if (!Cookies.get('interviewId')) {
@@ -503,7 +533,7 @@ const LiveInterview = () => {
                                     <p className="text-lg text-gray-600 font-semibold">{Cookies.get("fullName")}</p>
                                 </div>
                                 <div className="timer">
-                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer}  setNextQuestion={setCurrentQuestion} />}
+                                    {timer && !loading && <Timer timer={timer} setTimer={setTimer} handleNextQuestion={handleNextQuestion} />}
                                 </div>
                             </div>
 
@@ -528,6 +558,7 @@ const LiveInterview = () => {
                                             className="p-4 rounded-full"
                                             onClick={isRecording ? handleNextQuestion : startRecording}
                                             title='Tap to Speak'
+                                            disabled={loading}
                                         >
                                             {isRecording ? <StopIcon /> : <MicIcon />}
                                         </Button>
