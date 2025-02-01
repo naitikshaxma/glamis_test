@@ -1,16 +1,31 @@
 import {Button, Card, CardBody, CardFooter, Typography,} from "@material-tailwind/react";
 import {useNavigate} from "react-router-dom";
 import Cookies from 'js-cookie'
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {bearerInstance as instance} from "../helpers/instance";
 import {toast} from "react-toastify";
+import { Tooltip } from "@mui/material";
 
 export default function InterviewCard({props, status}) {
     const navigate = useNavigate();
     const [company, setCompany] = useState();  // todo: fetch Company for jd
+    const [feedbackStatus,setFeedbackStatus] = useState(false);
     // const [adminInterviewId, setAdminInterviewId] = useState();  //deprecated as we will fetch it from backend
 
-
+    useEffect(()=>{
+        const getUser = async ()=>{
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/get-user-data-profile`, {},
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${Cookies.get('accessToken')}`
+                }
+              }
+            );
+            setFeedbackStatus(response.data.data.user.feedback_submitted);
+          }
+        getUser();
+    },[])
     const handleInterview = async () => {
         let url = '';
         let redirect = '';
@@ -91,10 +106,10 @@ export default function InterviewCard({props, status}) {
                 <hr/>
                 <div className="flex justify-between my-2">
                     <div>
-                        <span className="font-bold">Date:</span> {props.start_time?.split('T')[0]}
+                        <span className="font-bold">Date:</span> {(new Date(props.start_time)).toLocaleDateString()}
                     </div>
                     <div>
-                        <span className="font-bold">Time:</span> {props.start_time?.split('T')[1].split('.')[0]}
+                        <span className="font-bold">Time:</span> {(new Date(props.start_time)).toLocaleTimeString()}
                     </div>
                 </div>
                 <div className="my-2">
@@ -113,10 +128,7 @@ export default function InterviewCard({props, status}) {
             >Join Interview</Button>) : status === 'Upcoming Interview' ? (<Button color="lightGreen"
                                                                                    className="w-full bg-yellow-900 hover:bg-yellow-800"
                                                                                    disabled
-            >Coming Soon</Button>) : (<Button color="lightGreen"
-                                              className="w-full bg-red-900 hover:bg-red-800"
-                                              onClick={() => navigate(`/history/detailed/${props._id}`)}
-            >View Result</Button>)}
+            >Coming Soon</Button>) : feedbackStatus ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}
         </CardFooter>
     </Card>);
 }

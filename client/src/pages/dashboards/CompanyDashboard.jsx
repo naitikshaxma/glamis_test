@@ -1,48 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Smile } from 'lucide-react';
-import Sidebar from '../components/global_components/Sidebar';
-import { bearerInstance } from '../helpers/instance';
+// import {Smile} from 'lucide-react';
+import Sidebar from '../../components/global_components/Sidebar.jsx';
+import {bearerInstance as instance} from "../../helpers/instance.js";
+import Cookies from "js-cookie";
 
-const DetailedInterviewStats = () => {
-  const [companyPerformance,setCompanyPerformance] = useState([
-    { company: 'Google', performance: 85 },
-    { company: 'Apple', performance: 65 },
-    { company: 'Airbnb', performance: 45 },
-    { company: 'Microsoft', performance: 42 },
-    { company: 'Tesla', performance: 60 },
-  ]);
-  const getData = async()=>{
-    const response = await bearerInstance.get("/api/v1/dashboard/company");
-    console.log(response);
-    setCompanyPerformance(response.data.data);
+
+const leaderboardData = [
+  {company: 'Google', score: '4,532,311', icon: 'G'},
+  {company: 'Apple', score: '4,532,311', icon: 'A'},
+  {company: 'Facebook', score: '4,532,311', icon: 'F'}
+];
+
+
+const CompanyDashboard = () => {
+  const [chartsData, setChartsData] = React.useState({});
+  const [overallPercenatge, setOverallPercenatge] = React.useState(0);
+
+    const fetchData = async () => {
+    const res = await instance.get('/api/v1/dashboard/company');
+    setChartsData(res.data);
+    let overall = res.data.reduce((acc, item) => acc + item.OverallPerformance, 0) / res.data.length;
+    overall = parseFloat(overall).toFixed(2);
+    setOverallPercenatge(overall);
   }
-  useEffect(()=>{
-    getData();
-  },[]);
 
-  const performanceData = [
-    { month: 1, coding: 80, technical: 35, scenario: 45 },
-    { month: 2, coding: 65, technical: 75, scenario: 30 },
-    { month: 3, coding: 70, technical: 68, scenario: 85 },
-    { month: 4, coding: 45, technical: 80, scenario: 65 },
-    { month: 5, coding: 85, technical: 85, scenario: 70 },
-    { month: 6, coding: 90, technical: 82, scenario: 88 }
-  ];
+  React.useEffect(() => {
+    fetchData();
+  }, []);
 
-  const skillsData = [
-    { category: '1', Vocabulary: 25, Grammar: 45, 'Domain Knowledge': 90 },
-    { category: '2', Vocabulary: 35, Grammar: 75, 'Domain Knowledge': 20 },
-    { category: '3', Vocabulary: 45, Grammar: 65, 'Domain Knowledge': 85 },
-    { category: '4', Vocabulary: 55, Grammar: 35, 'Domain Knowledge': 70 },
-    { category: '5', Vocabulary: 20, Grammar: 85, 'Domain Knowledge': 95 }
-  ];
 
-  const leaderboardData = [
-    { company: 'Google', score: '4,532,311', icon: 'G' },
-    { company: 'Apple', score: '4,532,311', icon: '' },
-    { company: 'Facebook', score: '4,532,311', icon: 'f' }
-  ];
 
   const ExpandedView = () => (
     <div className="bg-green-400 rounded-xl p-8 text-white">
@@ -52,12 +39,12 @@ const DetailedInterviewStats = () => {
           <h3 className="text-lg font-semibold mb-4">Company Performance</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <BarChart data={companyPerformance}>
+              <BarChart data={chartsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                <XAxis dataKey="company" stroke="black" />
+                <XAxis dataKey="Company" stroke="black" />
                 <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Bar dataKey="performance" fill="#8884d8" />
+                <Bar dataKey="OverallPerformance" fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -70,15 +57,17 @@ const DetailedInterviewStats = () => {
             <p className="text-sm text-gray-500 mb-4">Average score last of 5 interviews</p>
             <div className="relative w-40 h-40 mx-auto">
               <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-              <div 
-                className="absolute inset-0 rounded-full border-8 border-green-400"
+              <div
+                className="relative w-40 h-40 rounded-full bg-gray-200"
                 style={{
-                  clipPath: 'polygon(0 0, 95% 0, 95% 100%, 0 100%)'
+                  maskImage: `conic-gradient(green ${overallPercenatge}%, transparent 0)`
                 }}
-              ></div>
+              >
+                <div className="absolute inset-0 rounded-full border-8 border-green-400"></div>
+              </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Smile className="w-8 h-8 mb-2 text-green-400" />
-                <span className="text-2xl font-bold text-black">95%</span>
+                {/*<Smile className="w-8 h-8 mb-2 text-green-400" />*/}
+                <span className="text-2xl text-black font-bold">{overallPercenatge}%</span>
               </div>
             </div>
           </div>
@@ -90,14 +79,14 @@ const DetailedInterviewStats = () => {
           <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <LineChart data={companyPerformance}>
+              <LineChart data={chartsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(246, 238, 238, 0.1)" />
-                <XAxis dataKey="month" stroke="black" />
+                <XAxis dataKey="Company" stroke="black" />
                 <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Line type="monotone" dataKey="easyAvgPerformance" stroke="red" />
-                <Line type="monotone" dataKey="mediumAvgPerformance" stroke="blue" />
-                <Line type="monotone" dataKey="hardAvgPerformance" stroke="aqua" />
+                <Line type="monotone" dataKey="Easy" stroke="red" />
+                <Line type="monotone" dataKey="Medium" stroke="blue" />
+                <Line type="monotone" dataKey="Hard" stroke="aqua" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -126,14 +115,14 @@ const DetailedInterviewStats = () => {
           <h3 className="text-lg font-semibold mb-4">Skills Analysis</h3>
           <div className="bg-white/60 rounded-lg p-4 h-64">
             <ResponsiveContainer>
-              <BarChart data={companyPerformance}>
+              <BarChart data={chartsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="category" stroke="black" />
+                <XAxis dataKey="Company" stroke="black" />
                 <YAxis stroke="black" domain={[0,100]}/>
                 <Tooltip />
-                <Bar dataKey="vocabulary" fill="#69247C" />
-                <Bar dataKey="grammar" fill="#DA498D" />
-                <Bar dataKey="performance" fill="#4DA1A9" />
+                <Bar dataKey="Vocabulary" fill="#69247C" />
+                <Bar dataKey="Grammar" fill="#DA498D" />
+                <Bar dataKey="OverallPerformance" fill="#4DA1A9" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -146,7 +135,7 @@ const DetailedInterviewStats = () => {
     <div className="flex flex-col md:flex-row">
       {/* Sidebar */}
       <div className="w-full md:w-1/4">
-        <Sidebar />
+        <Sidebar/>
       </div>
 
       {/* Main Content */}
@@ -154,30 +143,32 @@ const DetailedInterviewStats = () => {
         <div className="w-full md:w-4/5 p-7">
           <header className="flex justify-between items-center ">
             <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">Krishnakant</span>, welcome back!
+              Hello <span className="text-black">{Cookies.get("fullName")}</span>, welcome back!
             </h2>
-            
+
             <div className="flex items-center">
               <i className="fas fa-bell text-gray-500 mr-5"></i>
               <div className="flex items-center ">
                 <img
-                  src="https://placehold.co/40x40"
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
                   alt="User"
-                  className="rounded-full mr-2"
+                  height="40"
+                  width="40"
+                  className="h-8 w-8 rounded-full border-green-600 border-2 mr-2"
                 />
-                <span>Krishankant Saraswat </span>
+                <span>{Cookies.get("fullName")}</span>
               </div>
             </div>
           </header>
 
-         
+
         </div>
-        <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
-        <ExpandedView />
+        <h3 className="text-xl font-bold mb-5 ml-7">My Interviews</h3>
+        <ExpandedView/>
       </div>
     </div>
   );
 };
 
 
-export default DetailedInterviewStats;
+export default CompanyDashboard;

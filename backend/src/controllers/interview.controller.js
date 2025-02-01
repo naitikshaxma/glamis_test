@@ -193,7 +193,7 @@ export const createInterviewBySvarAdmin = asyncHandler(async (req, res) => {
 // ---------------------------- Generate Question ----------------------------
 
 const timerObject = {
-  Easy: 60,
+  Easy: 45,
   Medium: 90,
   Hard: 90,
   essay: 20 * 60,
@@ -406,7 +406,15 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   let timer = 90;
   console.log("entered jd admin")
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+  let { selectedCompany, jobTitle, jdDetails, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
+  let jobDescription = jdDetails.split(",");
+
+  const randomIndex = Math.floor(Math.random() * jobDescription.length);
+
+// Access the value at the random index
+  jdDetails = jobDescription[randomIndex];
+
+
   // const [offset, setOffset] = useState(0);
   const noOfAttemptedQuestions = await InterviewQuestion.find({ interview: interviewId }).countDocuments();
 
@@ -457,7 +465,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "Easy") {
-    timer = 60;  // 60 seconds
+    timer = 45;  // 60 seconds
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: { $in: adminInterview.questions }
     });
@@ -558,7 +566,8 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
   let prompt = "";
   if (difficulty === "Easy") {
-    prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct from the previous one and covers topics that have not yet been addressed or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}`;
+    prompt = `Based on the previous questions and answers (${historyPrompt}), generate a straightforward and generic question related to the job title ${jobTitle} for ${selectedCompany}. Ensure that this question is distinct and completely different from this (${historyPrompt}) one and covers topics that have not yet been addressed and the topics are  "${jdDetails}" or have been underrepresented so far.Without asking the user to write code. Focus on core CS subjects without involving coding or complex scenarios. Consider the entire job description, not just the first line.\n\nJob Description: ${jdDetails}
+`;
   } else if (difficulty === "Medium") {
     // Initialize the question counter within this block
     //   let questionCount = 0;
@@ -566,7 +575,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     // Randomly decide whether to generate a coding or a numerical question
     //console.log(questionType);
 
-    if (questionNo >= 5 && questionNo < 7) {
+    if (questionNo >= adminInterview.easy_remaining && questionNo < adminInterview.easy_remaining + parseInt(adminInterview.medium_remaining / 2)) {
       // First two questions are coding questions
       prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new coding question for ${jobTitle} at ${selectedCompany}. 
         Ensure the coding question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
@@ -578,7 +587,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
       // Increment the question count after asking a coding question
       //questionCount++;
-    } else if (questionNo >= 7 && questionNo < 9) {
+    } else if (questionNo >= adminInterview.easy_remaining + parseInt(adminInterview.medium_remaining / 2) && questionNo < adminInterview.medium_remaining) {
       // The next two questions are numerical
       prompt = `Considering the previous questions and answers (${historyPrompt}), generate a new numerical question for ${jobTitle} at ${selectedCompany}.
         Ensure this numerical question is different from the previous one, introducing a new concept or challenge not yet fully explored in the interview.
@@ -686,7 +695,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   // if difficulty is Easy and no of questions are less than easy_remaining then fetch the question from db
 
   if (difficulty === "Easy") {
-    timer = 60;  // 60 seconds
+    timer = 45;  // 45 seconds
 
     const easyQuestions = await InterviewQuestionsByAdmin.find({
       difficulty: "Easy", _id: { $in: adminInterview.questions }
@@ -1574,6 +1583,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
     4. technicalExplanation: A detailed evaluation of the technical content of the answer. Provide feedback on the accuracy, depth, and relevance of the technical knowledge displayed. Only the first or second point in pros or cons should be included.
     5. vocabularyExplanation: Detailed feedback on the vocabulary used in the answer. Analyze the choice of words, clarity, and appropriateness of vocabulary, with suggestions for improvement. Only the first or second point in pros or cons should be included.
     6. grammarExplanation: Feedback on the grammatical correctness of the answer. Point out strengths as well as errors, providing corrections and suggestions for improvement. Only the first or second point in pros or cons should be included.
+    7. Moderation: Ensure that the scores are awarded moderately, avoiding overly strict or lenient evaluations to maintain fairness and consistency.
 
     The response should be in JSON format and must follow this structure. Do not add any additional information, and ensure the keys are exactly as shown below. Ensure that there are no symbols like tilde so that I can parse it as JSON:
     {
