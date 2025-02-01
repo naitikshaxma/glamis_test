@@ -579,6 +579,20 @@ const feedback = asyncHandler(async (req,res)=>{
     }
     return res.status(200).json("working fine");    
 })
+const savePhoto = async (req,res)=>{
+    if(!req.file){
+        console.log("no photo uploaded");
+    }else{
+        const user = await User.findOne({email_id:req.user.email_id});
+        console.log(user);
+        if(user.interview_photos.length <5){
+            user.interview_photos.push(`/user-photos/${req.file.filename}`);
+        }
+        await user.save();
+        console.log("uploaded",req.file.filename);
+    }
+    res.status(200).json({message:"photo save successfuly"});
+}
 
 export {
     signup,
@@ -595,5 +609,6 @@ export {
     getUserDataForProfile, 
     updateStudentData,
     updatePersonalData,
-    feedback
+    feedback,
+    savePhoto
 }

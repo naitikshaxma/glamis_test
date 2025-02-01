@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:true,
     },
+    interview_photos:{
+        type:[String],
+        default:[]
+    },
     password: {
         type: String,
         required: true,

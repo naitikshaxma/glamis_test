@@ -5,6 +5,7 @@ export default async function updateFeedback(req,res,next){
         const user = await User.findOne({email_id:students[i]});
         if(user){
             user.feedback_submitted = false;
+            user.interview_photos = []
             const updated_user = await user.save();
             console.log(updated_user);
         }
