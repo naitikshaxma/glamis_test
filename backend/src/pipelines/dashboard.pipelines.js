@@ -77,7 +77,7 @@ export const SvarPipeline = (user) => [
   },
   {
     $addFields: {
-      Reading: {
+      Reading: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -92,6 +92,7 @@ export const SvarPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
+      } }
       },
       Repeating: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 0] }, then: 0, else: {
         $avg: {
@@ -567,7 +568,7 @@ export const VerbalPipeline = (user) => [
   },
   {
     $addFields: {
-      Easy: {
+      Easy: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -582,8 +583,8 @@ export const VerbalPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Medium: {
+      } } },
+      Medium: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -608,8 +609,8 @@ export const VerbalPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Hard: {
+      } } },
+      Hard: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 2] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -640,9 +641,8 @@ export const VerbalPipeline = (user) => [
             in: "$$item.overallPerformance"
           }
         }
-      }
-    }
-  },
+      } } } },
+    },
   {
     $addFields: {
       Grammar: {
@@ -765,7 +765,7 @@ export const CompanyPipeline = (user)=> [
   },
   {
     $addFields: {
-      Easy: {
+      Easy: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 0] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -780,8 +780,8 @@ export const CompanyPipeline = (user)=> [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Medium: {
+      } } },
+      Medium: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 1] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -806,8 +806,8 @@ export const CompanyPipeline = (user)=> [
             in: "$$item.overallPerformance"
           }
         }
-      },
-      Hard: {
+      } }},
+      Hard: { $cond: { if: { $eq: [{ $arrayElemAt: ["$QuestionCounts", 2] }, 0] }, then: 0, else: {
         $avg: {
           $map: {
             input: {
@@ -838,7 +838,7 @@ export const CompanyPipeline = (user)=> [
             in: "$$item.overallPerformance"
           }
         }
-      }
+      }}}
     }
   },
   {
