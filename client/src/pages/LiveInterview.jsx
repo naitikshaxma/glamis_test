@@ -530,11 +530,12 @@ const LiveInterview = () => {
             window.location.href = '/dashboard';
         }
         if (!document.fullscreenElement) {
+            alert("You are getting captured. Don't do suspicious activity. ");
             console.log('Requesting fullscreen...');
             document.documentElement.requestFullscreen().catch(err => {
                 console.error('Failed to enable fullscreen mode:', err);
             });
-            alert("You are getting captured. Don't do suspicious activity. ");
+           
 
             const handleFullscreenChange = () => {
                 if (!document.fullscreenElement) {
