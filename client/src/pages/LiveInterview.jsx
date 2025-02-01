@@ -41,7 +41,7 @@ const Timer = (props) => {
 
 const LiveInterview = () => {
     const [open, setOpen] = useState(true);
-
+    const videoRef = useRef(null);
     const localVideoRef = useRef();
     const [localVideoTrack, setLocalVideoTrack] = useState('');
     const [questionAudio, setQuestionAudio] = useState('');
@@ -56,6 +56,7 @@ const LiveInterview = () => {
     const sourceRef = useRef(null);
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
+    const [photoCnt,setPhotoCnt] = useState(0);
 
     const [ansMetaData, setAnsMetaData] = useState({
         answer: "",
@@ -177,6 +178,57 @@ const LiveInterview = () => {
         canvasCtx.stroke();
     };
 
+    // Get Random phots
+    const ClickPhoto = async () => {
+        const video = localVideoRef.current;
+    
+        if (!video) {
+            console.error("Video element not found.");
+            return;
+        }
+    
+        // Create an offscreen canvas (no UI disturbance)
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+    
+        // Ensure video is ready
+        if (video.readyState >= 2) {
+            console.log("Capturing photo...");
+    
+            // Draw the video frame onto the hidden canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+            // Convert the canvas content to Blob
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    console.error("Failed to create Blob from canvas.");
+                    return;
+                }
+    
+                const formData = new FormData();
+                formData.append("image", blob, "photo.png");
+    
+                try {
+                    const response = await instance.post(
+                        "/api/v1/users/save-photo",
+                        formData,
+                        { headers: { "Content-Type": "multipart/form-data" } }
+                    );
+                    console.log("Photo successfully sent to backend:", response.data);
+                    setPhotoCnt((prev)=>prev+1);
+                } catch (error) {
+                    console.error("Error sending photo:", error);
+                }
+            }, "image/png");
+        } else {
+            console.warn("Video is not ready for capturing.");
+        }
+    };
+    
+    
+
 
     const fetchQuestion = async () => {
         setLoading(true);
@@ -250,17 +302,19 @@ const LiveInterview = () => {
             setLoading(false);
             return;
         }
-
         try {
             const response = await instance.post(url, data);
             console.log(response.data.data);
-
+            
             // Safely set question and related data
             setQuestion(response.data.data.question || ''); // Default to empty string if undefined
             setCurrentDiff(response.data.data.difficulty || "");
             setTimer(response.data.data.timer || 90);  // Default to 90 seconds if undefined
             setQuestionAudio(`${import.meta.env.VITE_BACKEND_URL}/api/v1/objectStore/${response.data.data.audioFileName || ''}`);
             setIsAudioPlaying(true);
+            if(photoCnt<5){
+                ClickPhoto();
+            }
             // set Timer from response
 
         } catch (error) {
@@ -480,6 +534,7 @@ const LiveInterview = () => {
             document.documentElement.requestFullscreen().catch(err => {
                 console.error('Failed to enable fullscreen mode:', err);
             });
+            alert("You are getting captured. Don't do suspicious activity. ");
 
             const handleFullscreenChange = () => {
                 if (!document.fullscreenElement) {

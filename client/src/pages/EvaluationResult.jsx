@@ -48,7 +48,6 @@ const EvaluationResult = ({ data }) => {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
             Your Result will be Available at History Page
-            <Link to="/history" className="text-white bg-green-800 px-4 py-2">Go to History</Link>
             <p className="text-2xl font-bold text-center">Please Wait...for 10 seconds</p>
             {/* <Card className="w-full max-w-md mx-auto mb-4 shadow-lg">
                 <CardBody>
