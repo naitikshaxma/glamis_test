@@ -557,6 +557,7 @@ const LiveInterview = () => {
 
   useEffect(() => {
     const onBlur = () => {
+      console.log(videoWarning)
       if (videoWarning) return;
       setTabSwitchCount(prevCount => prevCount + 1);
     }
@@ -565,7 +566,7 @@ const LiveInterview = () => {
     return () => {
       window.removeEventListener('blur', onBlur);
     }
-  }, []);
+  }, [videoWarning]);
 
   useEffect(() => {
     if (videoWarning) return;
@@ -592,7 +593,7 @@ const LiveInterview = () => {
     } catch (error) {
       console.error(error.response ? error.response.data.message : error.message);
     }
-  }, [tabSwitchCount]);
+  }, [tabSwitchCount, videoWarning]);
 
   return (
     <>
