@@ -19,7 +19,7 @@ import { useEffect } from "react";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import WrittenInterview from "./pages/WrittenInterview";
-import WrittenReport from "./pages/WrittenReport";
+
 import Feedback from "./pages/Feedback";
 import Cookies from 'js-cookie';
 import ProtectedRoute from "./pages/Protectedroute";
@@ -139,7 +139,7 @@ const App = () => {
                     </ProtectedRoute>
                     }
                 />
-                <Route path="/history/detailed-written" element={<ProtectedRoute><WrittenReport /></ProtectedRoute>} />
+
                 <Route
                     path="/live"
                     element={<LiveInterview />}

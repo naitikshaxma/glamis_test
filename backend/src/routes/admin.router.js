@@ -9,7 +9,8 @@ import {
   fetchInterviewDetails,
   downloadAttendance,
   createSvarInterview,
-  fetchInterviewByID
+  fetchInterviewByID,
+  fetchDashboardStats
 } from "../controllers/admin.controller.js";
 import updateFeedback from "../middlewares/updateFeedback.js";
 
@@ -26,5 +27,6 @@ router.post("/interview/fetchInterviewStatusCount", fetchInterviewStatusCount);
 router.post("/interview/fetchInterviewDetails", fetchInterviewDetails);
 router.get("/interview/downloadAttendance", downloadAttendance);
 router.post("/interview/fetchSvarInterviewById", fetchInterviewByID)
+router.post("/dashboard/stats", fetchDashboardStats)
 
 export default router;

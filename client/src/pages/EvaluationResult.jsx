@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
 import Cookies from 'js-cookie';
@@ -7,116 +7,119 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const EvaluationResult = ({ data }) => {
     const navigate = useNavigate();
-    const calculateAverage = (key) => {
-        return data.reduce((sum, result) => sum + parseInt(result[key], 10), 0) / data.length;
-    };
-
-    const totalScore = 100; //calculateAverage('overallScore')
-    const grammarScore = 100; //calculateAverage('grammarScore')
-    const vocabularyScore = 100; //calculateAverage('vocabularyScore')
-
-    const donutData = [
-        { name: 'Score', value: totalScore },
-        { name: 'Remaining', value: 100 - totalScore }
-    ];
-
-    const COLORS = ['#0088FE', '#FFBB28'];
+    const [status, setStatus] = useState('saving'); // 'saving', 'success', 'error'
+    const [errorMsg, setErrorMsg] = useState('');
+    const [countdown, setCountdown] = useState(10);
+    const [savedInterviewId, setSavedInterviewId] = useState(null);
 
     useEffect(() => {
+        let isMounted = true;
         const saveResultToDB = async () => {
-            console.log(data)
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/saveResultToDb`, { data, interviewId: Cookies.get('interviewId') }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${Cookies.get('accessToken')}`
+            try {
+                console.log(data);
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/saveResultToDb`, { data, interviewId: Cookies.get('interviewId') }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${Cookies.get('accessToken')}`
+                    }
+                });
+                console.log(response.data);
+                if (isMounted) {
+                    setStatus('success');
+                    // Store the interview ID from backend response if available
+                    if (response.data?.data?.interviewId) {
+                        setSavedInterviewId(response.data.data.interviewId);
+                    }
                 }
-            });
-            console.log(response.data);
+            } catch (error) {
+                console.error('Error saving result:', error);
+                if (isMounted) {
+                    setStatus('error');
+                    setErrorMsg(error?.response?.data?.message || error.message || 'Failed to save results');
+                }
+            }
+        };
 
-            setTimeout(() => {
+        saveResultToDB();
+        return () => { isMounted = false; };
+    }, []); // Fix: add empty dependency array to prevent infinite loop
 
-
-                navigate(`/feedback`);
-
-            }, 7000)
-
+    // Countdown timer that navigates after 10 seconds
+    useEffect(() => {
+        window.interviewCompleted = true;
+        if (status !== 'saving') {
+            const interval = setInterval(() => {
+                setCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        // Exit fullscreen gracefully before navigating
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen().catch(() => {});
+                        }
+                        // Clean up interview cookies
+                        Cookies.remove('interviewId');
+                        Cookies.remove('subject');
+                        Cookies.remove('currentQuestion');
+                        // Auto-redirect to feedback after timeout
+                        navigate('/feedback');
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(interval);
         }
+    }, [status]);
 
-        saveResultToDB()
-    })
+    const handleViewReport = () => {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        }
+        
+        // Priority 1: Backend response ID, Priority 2: Cookie ID
+        const finalInterviewId = savedInterviewId || Cookies.get('interviewId');
+        
+        Cookies.remove('interviewId');
+        Cookies.remove('subject');
+        Cookies.remove('currentQuestion');
+        
+        if (finalInterviewId) {
+            navigate(`/history/detailed/${finalInterviewId}`);
+        } else {
+            navigate('/history'); // Fallback if no ID is found
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            Your Result will be Available at History Page
-            <p className="text-2xl font-bold text-center">Please Wait...for 10 seconds</p>
-            {/* <Card className="w-full max-w-md mx-auto mb-4 shadow-lg">
-                <CardBody>
-                    <Typography variant="h5" color="blue-gray" className="mb-4">
-                        Evaluation Result
-                    </Typography>
-                    <div className="flex items-center justify-center">
-                        <PieChart width={200} height={200}>
-                            <Pie
-                                data={donutData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                fill="#8884d8"
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {donutData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                        </PieChart>
-                    </div>
-                    <Typography variant="h6" color="gray" className="mt-4">
-                        {`Average Overall Score: ${totalScore.toFixed(2)}/100`}
-                    </Typography>
-                    <Typography variant="h6" color="gray" className="mt-2">
-                        {`Average Grammar Score: ${grammarScore.toFixed(2)}/100`}
-                    </Typography>
-                    <Typography variant="h6" color="gray" className="mt-2">
-                        {`Average Vocabulary Score: ${vocabularyScore.toFixed(2)}/100`}
-                    </Typography>
+            <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
+                <div className="text-6xl mb-4">
+                    {status === 'saving' ? '⏳' : status === 'success' ? '✅' : '⚠️'}
+                </div>
+                <Typography variant="h4" color="blue-gray" className="mb-4">
+                    {status === 'saving' ? 'Saving Your Results...' : status === 'success' ? 'Interview Complete!' : 'Results Saved With Errors'}
+                </Typography>
+                <Typography variant="paragraph" color="gray" className="mb-4">
+                    {status === 'saving' 
+                        ? 'Please wait while we save your interview results.' 
+                        : status === 'success' 
+                            ? 'Your results have been saved successfully. You can view your detailed report in the History page.'
+                            : `There was an issue: ${errorMsg}. Your results may still be available in the History page.`}
+                </Typography>
+                {status !== 'saving' && (
                     <div className="mt-4">
-                        {data.map((result, index) => (
-                            <div key={index} className="mb-4">
-                                <Typography variant="h6" color="blue-gray" className="mb-2">
-                                    {`Question ${index + 1}`}
-                                </Typography>
-                                <Typography variant="body1" color="gray">
-                                    <strong>Question:</strong> {result.question}
-                                </Typography>
-                                <Typography variant="body1" color="gray">
-                                    <strong>User Answer:</strong> {result.userAnswer}
-                                </Typography>
-                                <Typography variant="body1" color="gray">
-                                    <strong>Technical Score:</strong> {result.overallScore}/100
-                                </Typography>
-                                <Typography variant="body1" color="gray">
-                                    <strong>Grammar Score:</strong> {result.grammarScore}/100
-                                </Typography>
-                                <Typography variant="body1" color="gray">
-                                    <strong>Vocabulary Score:</strong> {result.vocabularyScore}/100
-                                </Typography>
-                                <Typography variant="body1" color="gray">
-                                    <strong>1. Technical: {result.technicalExplanation}</strong>
-                                </Typography>
-                                <Typography>
-                                    <strong>2. Vocabulary: {result.vocabularyExplanation}</strong>
-                                </Typography>
-                                <Typography>
-                                    <strong>3. Grammar: {result.grammarExplanation}</strong>
-                                </Typography>
-                            </div>
-                        ))}
+                        <Typography variant="small" color="gray">
+                            Redirecting to feedback form in <span className="font-bold text-blue-500 text-lg">{countdown}</span> seconds...
+                        </Typography>
+                        <button
+                            onClick={handleViewReport}
+                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                        >
+                            View Report
+                        </button>
                     </div>
-                </CardBody>
-            </Card> */}
+                )}
+            </div>
         </div>
     );
 };

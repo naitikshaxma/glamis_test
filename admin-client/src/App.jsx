@@ -11,6 +11,7 @@ import VerbalInterview from "./components/dashboard/scheduleInterview/VerbalInte
 import ProtectedRoute from "./pages/Protectedroute";
 import SwarInterview from "./components/dashboard/scheduleInterview/SwarInterview";
 import {Toaster} from 'react-hot-toast';
+import AdminProfile from "./pages/AdminProfile";
 
 // Layout component that includes Sidebar
 const MainLayout = () => (
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
           {
             path: "/admin/dashboard",
             element: <AdminDashboard/>,
+          },
+          {
+            path: "/admin/profile",
+            element: <AdminProfile/>,
           },
           {
             path: "/admin/schedule/company",

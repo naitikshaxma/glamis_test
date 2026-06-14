@@ -321,6 +321,13 @@ const LiveInterview = () => {
 
     } catch (error) {
       console.error('Error fetching question:', error);
+      const errMsg = error?.response?.data?.message || error.message || 'Unknown error';
+      if (errMsg.includes('insufficient_quota') || errMsg.includes('429') || errMsg.includes('quota')) {
+        setQuestion('⚠️ AI service is temporarily unavailable (API quota exceeded). Please contact your administrator to resolve this. You can skip this question.');
+      } else {
+        setQuestion(`⚠️ Failed to load question: ${errMsg}. You can skip or try the next question.`);
+      }
+      setTimer(90);
     }
 
     setLoading(false);
@@ -537,7 +544,7 @@ const LiveInterview = () => {
       });
 
       const handleFullscreenChange = () => {
-        if (!document.fullscreenElement) {
+        if (!document.fullscreenElement && !window.interviewCompleted) {
           console.log('Exiting fullscreen...');
           Cookies.remove('subject');
           Cookies.remove('interviewId');

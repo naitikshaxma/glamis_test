@@ -451,6 +451,30 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      timer = 45; // default for custom question
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
+
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question,
+        timer,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
 
   console.log('wow')
   let difficulty = '';
@@ -669,13 +693,34 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
   const adminInterview = await AdminVerbalInterview.findOne({ interview: interviewId }).populate('interview');
 
-
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
-  console.log('wow')
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
 
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question,
+        timer,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
+  console.log('wow')
   console.log(questionNo);
 
   let difficulty = '';
@@ -906,6 +951,31 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
+
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      timer = 20 * 60; // 20 minutes
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
+
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question,
+        timer,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
   let difficulty;
   if (adminInterview.essay > questionNo) {
     difficulty = 'essay';
@@ -913,7 +983,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
     difficulty = 'jumbled';
   } else if (adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
     difficulty = 'errorDetection';
-  } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + admview.essay > questionNo) {
+  } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
     difficulty = 'fillInTheBlanks';
   } else {
     difficulty = 'synonymsAndAntonyms';
@@ -1194,6 +1264,28 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
+
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        questionData: question,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
   let difficulty;
   if (adminInterview.easy > questionNo) {
     difficulty = 'Easy';
@@ -1347,7 +1439,37 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
   const adminInterview = await AdminSvarInterview.findOne({ interview: interviewId }).populate('interview');
   if (adminInterview == null) {
-    res.status(404).json(ApiError(404, "Interview not found"));
+    return res.status(404).json(ApiError(404, "Interview not found"));
+  }
+
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      timer = 30; // 30 seconds for reading
+
+      const dataToSend = {
+        question,
+        difficulty: customQuestion.difficulty || 'reading',
+        timer
+      };
+      
+      // if audio is needed, generate it
+      if (dataToSend.difficulty !== 'reading') {
+        const audioFileName = `question-${generateUniqueKey()}.mp3`;
+        const audioFilePath = path.join(objectStorePath, audioFileName);
+        const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+        await textToSpeech(cleanedQuestion, audioFilePath);
+
+        if (!fs.existsSync(audioFilePath)) {
+          return res.status(500).json({ error: 'Failed to generate audio' });
+        }
+        dataToSend.audioFileName = audioFileName;
+      }
+
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
   }
 
   let difficulty = '';
@@ -1960,7 +2082,7 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
     // await deleteSessionQuestions(interviewId);
 
 
-    return res.status(200).json(new ApiResponse(200, {}, "Result saved successfully"));
+    return res.status(200).json(new ApiResponse(200, { interviewId }, "Result saved successfully"));
   } catch (err) {
     console.log(err.message)
     return res.status(500).json(ApiError(500, err.message));
@@ -2054,16 +2176,22 @@ export const interviewQuestionCount = asyncHandler(async (req, res) => {
     const { interviewId } = req.body;
 
     if (!interviewId) {
-      return res.status(400).json(ApiError(404, "Interview ID not sent"))
+      return res.status(400).json(ApiError(400, "Interview ID not sent"))
     }
 
-    const interview = await getAdminInterview({ interview: interviewId });
+    const adminInterview = await getAdminInterview({ interview: interviewId });
 
-    if (!interview) {
-      return res.status(400).json(ApiError(400, "Interview not found!"));
+    if (!adminInterview) {
+      const studentInterview = await Interview.findById(interviewId);
+      if (!studentInterview) {
+        return res.status(400).json(ApiError(400, "Interview not found!"));
+      }
+      const count = studentInterview.totalQuestions || 5;
+      const currentQuestion = studentInterview.attemptedQuestions || 0;
+      return res.status(200).json(new ApiResponse(200, { count, currentQuestion }, "Interview Fetched Successfully"));
     }
 
-    const count = interview.no_of_questions;
+    const count = adminInterview.no_of_questions;
     const currentQuestion = (await Interview.findById(interviewId)).attemptedQuestions;
     return res.status(200).json(new ApiResponse(200, { count, currentQuestion }, "Interview Fetched Successfully"));
   } catch (err) {

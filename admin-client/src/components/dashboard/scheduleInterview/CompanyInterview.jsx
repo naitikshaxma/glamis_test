@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
     Input,
     Button,
@@ -42,6 +44,7 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function CompanyInterview() {
+    const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [interviewName, setInterviewName] = useState("");
     const [companyName, setCompanyName] = useState("");
@@ -57,8 +60,18 @@ export default function CompanyInterview() {
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
-        if (currentStep === 1 && interviewName && companyName && date && noOfQuestions && position) {
+        if (currentStep === 1 && interviewName && companyName && date && duration.from && duration.to && noOfQuestions && position) {
+            if (duration.from >= duration.to) {
+                toast.error("End time must be after start time!");
+                return;
+            }
+            if (!emailObject || emailObject.length === 0) {
+                toast.error("Please upload a CSV with student emails first!");
+                return;
+            }
             setCurrentStep(2);
+        } else if (currentStep === 1) {
+            toast.error("Please fill all required fields in Step 1");
         }
     };
 
@@ -78,9 +91,9 @@ export default function CompanyInterview() {
                 to: duration.to,
                 no_of_questions: noOfQuestions,
                 position: position,
-                easy_remaining: easy,
-                medium_remaining: medium,
-                hard_remaining: hard,
+                easy_remaining: Number(easy) || 0,
+                medium_remaining: Number(medium) || 0,
+                hard_remaining: Number(hard) || 0,
                 job_description: jobDescription,
                 questions : questions,
                 students: emailObject,
@@ -89,9 +102,11 @@ export default function CompanyInterview() {
                 headers: { "Content-Type": "application/json" }
             });
             console.log("Form submitted successfully:", response.data);
-            alert("Interview Created successfully");
+            toast.success('Interview Created Successfully! 🎉');
+            navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
+            toast.error(error?.response?.data?.message || 'Failed to create interview');
         }
     };
 
@@ -117,7 +132,7 @@ export default function CompanyInterview() {
                 // accept global.ac.in or glamis.in  
                 const emailIds = contents.match(emailRegex);
                 console.log(emailIds)
-                setEmailObject(emailIds);
+                setEmailObject(emailIds || []);
             };
             reader.readAsText(file);
         }

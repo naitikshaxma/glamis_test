@@ -30,7 +30,7 @@ export default function Sidebar() {
     {
       name: 'Profile',
       icon: <UserCircleIcon className="h-5 w-5" />,
-      href: '/admin/dsahboard'
+      href: '/admin/profile'
     },
     {
       name: "Review Board",
@@ -134,18 +134,6 @@ export default function Sidebar() {
                   </Link>
                 </List>
               </AccordionBody>
-            </Accordion>
-            <Accordion
-              open={open === 2}
-              icon={
-                <ChevronDownIcon
-                  strokeWidth={2.5}
-                  className={`mx-auto h-4 w-4 transition-transform ${open === 2 ? "rotate-180" : ""}`}
-                />
-              }
-            >
-              {/* Add content here if needed */}
-              {""}
             </Accordion>
           </List>
           <div className="mt-auto">

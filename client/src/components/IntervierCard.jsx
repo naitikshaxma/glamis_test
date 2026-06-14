@@ -27,60 +27,64 @@ export default function InterviewCard({props, status}) {
         getUser();
     },[])
     const handleInterview = async () => {
-        let url = '';
-        let redirect = '';
-        const response = await instance.post("/api/v1/interview/interviewQuestion/count", {interviewId: props._id})
-        const questions = response.data.data.count;
-        const currentQuestion = response.data.data.currentQuestion;
-        const removeCookies = ['interviewId', 'subject', 'jobTitle', 'selectedCompany', 'adminInterviewId', 'delta', 'verbal'];
-        const newCookies = {interviewId: props._id, adminInterviewId: "", delta: questions, currentQuestion: currentQuestion};
+        try {
+            let url = '';
+            let redirect = '';
+            const response = await instance.post("/api/v1/interview/interviewQuestion/count", {interviewId: props._id})
+            const questions = response.data.data.count;
+            const currentQuestion = response.data.data.currentQuestion;
+            const removeCookies = ['interviewId', 'subject', 'jobTitle', 'selectedCompany', 'adminInterviewId', 'delta', 'verbal'];
+            const newCookies = {interviewId: props._id, adminInterviewId: "", delta: questions, currentQuestion: currentQuestion};
 
-        if (props.type === 'subject') {
-            newCookies.subject = props.description;
-            newCookies.mockType = 'subject';
-            url = '/api/v1/interview/createInterviewByJDAdmin';
-            redirect = '/live';
+            if (props.type === 'subject') {
+                newCookies.subject = props.description;
+                newCookies.mockType = 'subject';
+                url = '/api/v1/interview/createInterviewByJDAdmin';
+                redirect = '/live';
+            }
+
+            if (props.type === 'written') {
+                newCookies.subject = props.description;
+                newCookies.mockType = 'written';
+                url = '/api/v1/interview/createInterviewByWrittenAdmin';
+                redirect = '/written';
+            }
+            if (props.type === 'company') {
+                newCookies.jobTitle = props.title;
+                newCookies.selectedCompany = company || 'Unknown';
+                newCookies.mockType = 'company';
+                url = '/api/v1/interview/createInterviewByJDAdmin';
+                redirect = '/live';
+            }
+
+            if (props.type === 'verbal') {
+                newCookies.verbal = true;
+                newCookies.mockType = 'verbal';
+                url = '/api/v1/interview/createInterviewByVerbalAdmin';
+                redirect = '/live';
+            }
+
+            if (props.type === 'Svar') {
+                newCookies.svar = props.description;
+                newCookies.mockType = 'svar';
+                url = '/api/v1/interview/createInterviewBySvarAdmin';
+                redirect = '/live';
+            }
+
+            if (url === '') {
+                return toast.error('Interview type not found: ' + props.type);
+            }
+
+            removeCookies.forEach(cookie => Cookies.remove(cookie));
+            Object.entries(newCookies).forEach(([key, value]) => Cookies.set(key, value));
+            localStorage.setItem('jd', props.description);
+
+            await instance.post(url, {interviewId: props._id}); // todo: fix response NOT used
+            navigate(redirect);
+        } catch (error) {
+            console.error(error);
+            alert("Error joining interview: " + (error.response?.data?.message || error.message));
         }
-
-        if (props.type === 'written') {
-            newCookies.subject = props.description;
-            newCookies.mockType = 'written';
-            url = '/api/v1/interview/createInterviewByWrittenAdmin';
-            redirect = '/written';
-        }
-        if (props.type === 'company') {
-            newCookies.jobTitle = props.title;
-            newCookies.selectedCompany = company;
-            newCookies.mockType = 'company';
-            url = '/api/v1/interview/createInterviewByJDAdmin';
-            redirect = '/live';
-        }
-
-        if (props.type === 'verbal') {
-            newCookies.verbal = true;
-            newCookies.mockType = 'verbal';
-            url = '/api/v1/interview/createInterviewByVerbalAdmin';
-            redirect = '/live';
-        }
-
-        if (props.type === 'Svar') {
-            newCookies.svar = props.description;
-            newCookies.mockType = 'svar';
-            url = '/api/v1/interview/createInterviewBySvarAdmin';
-            redirect = '/live';
-        }
-
-        if (url === '') {
-            return toast.error('Interview type not found');
-        }
-
-        removeCookies.forEach(cookie => Cookies.remove(cookie));
-        Object.entries(newCookies).forEach(([key, value]) => Cookies.set(key, value));
-        localStorage.setItem('jd', props.description);
-
-
-        await instance.post(url, {interviewId: props._id}); // todo: fix response NOT used
-        navigate(redirect);
     }
 
     return (<Card className="m-4 h-fit w-1/4">

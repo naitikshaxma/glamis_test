@@ -73,10 +73,6 @@ export default function ReviewBoard() {
         fetchInterviewStatusCount();
     }, [search.get('page'), search.get('limit')]);
 
-    useEffect(() => {
-        fetchInterviewStatusCount();
-    }, []);
-
     return (
         <div>
             <div className="flex flex-col p-6 bg-white rounded-lg">

@@ -3,7 +3,7 @@ import connectDB from "./db/index.js";
 import app from "./app.js";
 import logger from 'log-timestamp';
 
-dotenv.config()
+dotenv.config({ override: true })
 
 // set log-timestamp in current time zone
 logger(() => (`\x1b[35m \[${new Date().toLocaleString()}\]\x1b[0m` + ' %s'))

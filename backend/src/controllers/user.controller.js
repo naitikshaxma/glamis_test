@@ -54,7 +54,7 @@ const signup = asyncHandler(async (req, res) => {
         user.password = password;
         await user.save();
         const otp = createOtp();
-        sendMail(email_id, "OTP Verification", OTPTemplate(otp))
+        await sendMail(email_id, "OTP Verification", OTPTemplate(otp))
 
 
 
@@ -76,7 +76,7 @@ const signup = asyncHandler(async (req, res) => {
 
     const otp = createOtp();
 
-    sendMail(email_id, "OTP Verification", OTPTemplate(otp))
+    await sendMail(email_id, "OTP Verification", OTPTemplate(otp))
 
 
 
@@ -309,7 +309,7 @@ const resendOTP = asyncHandler(async (req, res) => {
 
     const otp = createOtp();
 
-    sendMail(email, "OTP Verification", OTPTemplate(otp))
+    await sendMail(email, "OTP Verification", OTPTemplate(otp))
 
     const redisClient = await connectRedis()
 
@@ -417,7 +417,7 @@ const forgotPassword = asyncHandler(async (req,res)=>{
     
     const otp = createOtp();
 
-    sendMail(email, "Password Reset OTP", `You are receiving the otp because you requested for password reset OTP: ${otp}`)
+    await sendMail(email, "Password Reset OTP", `You are receiving the otp because you requested for password reset OTP: ${otp}`)
 
     // push otp to redis cache
     let redisClient;

@@ -1,10 +1,11 @@
 const asyncHandler = (fnToExecute) => {
     return async (req, res, next) => {
         try {
-            fnToExecute(req, res, next)
+            await fnToExecute(req, res, next)
         } catch (error) {
             console.error(new Date().toLocaleString(), error.message)
-            res.status(error.code || 500).json({
+            const statusCode = typeof error.code === 'number' && error.code >= 100 && error.code <= 599 ? error.code : 500;
+            res.status(statusCode).json({
                 success: false,
                 message: error.message
             })

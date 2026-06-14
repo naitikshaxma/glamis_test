@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
     Input,
     Button,
@@ -44,6 +46,7 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function SubjectInterview() {
+    const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [interviewName, setInterviewName] = useState("");
     const [subjectName, setSubjectName] = useState("");
@@ -57,8 +60,18 @@ export default function SubjectInterview() {
     const [emailObject, setEmailObject] = useState([]);
 
     const handleNext = () => {
-        if (currentStep === 1 && interviewName && subjectName && date && noOfQuestions) {
+        if (currentStep === 1 && interviewName && subjectName && date && duration.from && duration.to && noOfQuestions) {
+            if (duration.from >= duration.to) {
+                toast.error("End time must be after start time!");
+                return;
+            }
+            if (!emailObject || emailObject.length === 0) {
+                toast.error("Please upload a CSV with student emails first!");
+                return;
+            }
             setCurrentStep(2);
+        } else if (currentStep === 1) {
+            toast.error("Please fill all required fields in Step 1");
         }
     };
 
@@ -76,9 +89,9 @@ export default function SubjectInterview() {
                 from: duration.from,
                 to: duration.to,
                 no_of_questions: noOfQuestions,
-                easy,
-                medium,
-                hard,
+                easy: Number(easy) || 0,
+                medium: Number(medium) || 0,
+                hard: Number(hard) || 0,
                 questions,
                 students: emailObject,
                 type: "subject"
@@ -86,9 +99,11 @@ export default function SubjectInterview() {
                 headers: { "Content-Type": "application/json" }
             });
             console.log("Form submitted successfully:", response.data);
-            alert("Interview Created successfully");
+            toast.success('Interview Created Successfully! 🎉');
+            navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
+            toast.error(error?.response?.data?.message || 'Failed to create interview');
         }
     };
 
@@ -113,7 +128,7 @@ export default function SubjectInterview() {
                 const emailRegex = /([a-zA-Z0-9._-]+)@(gla.ac.in|glamis.in)/g;
                 const emailIds = contents.match(emailRegex);
                 console.log(emailIds)
-                setEmailObject(emailIds);
+                setEmailObject(emailIds || []);
             };
             reader.readAsText(file);
         }

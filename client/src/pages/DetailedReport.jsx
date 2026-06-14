@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { Svar, SvarCard } from '../components/detailed_report/Svar';
+import { Written, WrittenCard } from '../components/detailed_report/Written';
 
 
 
@@ -83,7 +84,7 @@ const DetailedReport = () => {
             setActiveTab('verbal')
         } else if (response.data.interviewType === 'written') {
             setVarTab1('Written Skills');
-            setActiveTab('Written Skills')
+            setActiveTab('written')
             setVarTab2('Content Information');
         } else if (response.data.interviewType === 'Svar'){
             setVarTab1('Svar')
@@ -310,6 +311,61 @@ const DetailedReport = () => {
                     </div>
     
                     )
+            case 'written':
+                return (
+                    <div className='w-full flex justify-around mb-5'>
+                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
+                            <div className="flex flex-col space-y-4">
+                                {
+                                    result.map((item, index) => (
+                                        <Link
+                                            key={index}
+                                            to={`#question-${index}`}
+                                            smooth={true}
+                                            duration={500}
+                                            className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            onClick={() => handleQuestionClick(index)}
+                                        >
+                                            Q{index + 1}
+                                        </Link>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                        <div
+                            className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            id="scroll-container"
+                            ref={scrollContainerRef}
+                        >
+                            {
+                                result.map((item, index) => (
+                                    <div id={`question-${index}`} key={index}>
+                                        <WrittenCard
+                                            prompt={item.question}
+                                            userEssay={item.answer}
+                                            overallScore={item.overallPerformance}
+                                            grammarScore={item.grammar}
+                                            vocabularyScore={item.vocabulary}
+                                            contentExplanation={{
+                                                Pros: item.technicalExplanation?.[0] || "",
+                                                Cons: item.technicalExplanation?.[1] || ""
+                                            }}
+                                            vocabularyExplanation={{
+                                                Pros: item.vocabularyExplanation?.[0] || "",
+                                                Cons: item.vocabularyExplanation?.[1] || ""
+                                            }}
+                                            grammarExplanation={{
+                                                Pros: item.grammarExplanation?.[0] || "",
+                                                Cons: item.grammarExplanation?.[1] || ""
+                                            }}
+                                            expectedEssay={item.expectedAnswer}
+                                        />
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                );
             default:
                 return (
                     <>Technical</>
@@ -376,6 +432,16 @@ const DetailedReport = () => {
                               { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.correctness, 0) / result.length }
                             ]} 
                           />
+                            : activeTab === 'written' ?
+                            <>
+                                <Written data={[
+                                    { name: 'Score', score: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
+                                ]} />
+                                <Verbal data={[
+                                    { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
+                                    { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                                ]} varTab2={varTab2} />
+                            </>
                             :
                             <>
                                 <Technical technicalScore={[
