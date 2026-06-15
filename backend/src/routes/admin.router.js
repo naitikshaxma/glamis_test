@@ -10,9 +10,12 @@ import {
   downloadAttendance,
   createSvarInterview,
   fetchInterviewByID,
-  fetchDashboardStats
+  fetchDashboardStats,
+  getAdminProfile,
+  updateAdminProfile
 } from "../controllers/admin.controller.js";
 import updateFeedback from "../middlewares/updateFeedback.js";
+import isAuthenticated from "../middlewares/auth.middleware.js";
 
 
 const router = Router();
@@ -28,5 +31,8 @@ router.post("/interview/fetchInterviewDetails", fetchInterviewDetails);
 router.get("/interview/downloadAttendance", downloadAttendance);
 router.post("/interview/fetchSvarInterviewById", fetchInterviewByID)
 router.post("/dashboard/stats", fetchDashboardStats)
+
+router.get("/me", isAuthenticated, getAdminProfile);
+router.put("/updateProfile", isAuthenticated, updateAdminProfile);
 
 export default router;

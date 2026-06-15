@@ -756,3 +756,35 @@ export const fetchDashboardStats = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 }
+
+export const getAdminProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      name: user.name,
+      email: user.email_id,
+      phone: user.phone,
+      role: user.is_admin ? "Super Administrator" : "Admin",
+      joinDate: user.createdAt
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export const updateAdminProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name },
+      { new: true }
+    ).select("-password -refreshToken");
+    res.status(200).json({ 
+      message: "Profile updated successfully",
+      name: user.name 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}

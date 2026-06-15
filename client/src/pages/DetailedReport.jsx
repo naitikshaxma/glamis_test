@@ -63,18 +63,30 @@ const DetailedReport = () => {
 
 
     const fetchResultData = async () => {
-        const interviewId = window.location.pathname.split('/').pop();
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/result/interviewresult`, { interviewId },
+        let interviewId = window.location.pathname.split('/').pop();
+        
+        // If undefined or empty from URL, fallback to Cookies
+        if (!interviewId || interviewId === 'undefined') {
+            interviewId = Cookies.get("interviewId");
+        }
 
-            {
-                headers: {
+        // If still undefined, redirect and show error
+        if (!interviewId || interviewId === 'undefined') {
+            alert("Interview ID missing. Redirecting...");
+            navigate('/admin/dashboard');
+            return;
+        }
 
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${Cookies.get('accessToken')}`
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/result/interviewresult`, { interviewId },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${Cookies.get('accessTokenAdmin') || Cookies.get('accessToken')}`
+                    }
                 }
-            }
-        );
-        console.log(response.data);
+            );
+            console.log(response.data);
         if(response.data.studentName){
             setStudentName(response.data.studentName);
         }
@@ -96,6 +108,9 @@ const DetailedReport = () => {
         } else if (response.data.interviewType === 'company') {
             setVarTab1('Technical')
             setActiveTab('technical')
+        }
+        } catch (error) {
+            console.error("Error fetching results", error);
         }
     }
 
@@ -222,14 +237,15 @@ const DetailedReport = () => {
                             <div className='flex w-full justify-between'>
                                 <div className="flex flex-col space-y-2 w-1/3">What went well</div>
                                 <div className="flex flex-col space-y-2 w-2/3">
-                                    <ul className="list-disc">
-                                        <li>
-                                            You have a good vocabulary and have used it effectively in the conversation.
-                                        </li>
-                                        <li>
-                                            You are able to express your thoughts clearly and concisely.
-                                        </li>
-
+                                    <ul className="list-disc pl-5">
+                                        {result.map((item, index) => 
+                                            item.behavioralExplanation && item.behavioralExplanation[0] ? (
+                                                <li key={index}>{item.behavioralExplanation[0]}</li>
+                                            ) : null
+                                        )}
+                                        {result.every(item => !item.behavioralExplanation || !item.behavioralExplanation[0]) && (
+                                            <li>Good communication demonstrated.</li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
@@ -237,18 +253,22 @@ const DetailedReport = () => {
                             <div className='flex w-full justify-between'>
                                 <div className="flex flex-col space-y-2 w-1/3">Areas for improvement</div>
                                 <div className="flex flex-col space-y-2 w-2/3">
-                                    <ul className="list-disc">
-                                        <li>
-                                            You can improve your fluency and pronunciation.
-                                        </li>
+                                    <ul className="list-disc pl-5">
+                                        {result.map((item, index) => 
+                                            item.behavioralExplanation && item.behavioralExplanation[1] ? (
+                                                <li key={index}>{item.behavioralExplanation[1]}</li>
+                                            ) : null
+                                        )}
+                                        {result.every(item => !item.behavioralExplanation || !item.behavioralExplanation[1]) && (
+                                            <li>Work on conciseness.</li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
                             <hr />
                         </div>
                     </div>
-
-                )
+                );
                 case 'Svar': 
                     return( 
                        
