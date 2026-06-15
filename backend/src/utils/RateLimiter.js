@@ -2,8 +2,8 @@ import rateLimit from "express-rate-limit";
 
 const RateLimiter15mins = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 8,
-    message: "You have exceeded the 8 requests in 15 minutes limit!",
+    max: 300, // Raised from 8 to 300 to prevent blocking normal users taking mock interviews
+    message: "You have exceeded the 300 requests in 15 minutes limit!",
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false,
 });

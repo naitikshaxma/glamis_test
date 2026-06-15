@@ -79,7 +79,7 @@ const interviewQuestionSchema = new mongoose.Schema({
     overallPerformance: {
         type: Number
     },
-    pronounciation: {
+    pronunciation: {
         type: Number
     },
     correctness: {
@@ -144,12 +144,8 @@ const interviewByCoreSubjects = new mongoose.Schema({
 }, { timestamps: true })
 
 
-const adminCompanyInterview = new mongoose.Schema({
+const adminInterviewSchema = new mongoose.Schema({
     name: {
-        type: String,
-        required: true
-    },
-    company: {
         type: String,
         required: true
     },
@@ -165,18 +161,12 @@ const adminCompanyInterview = new mongoose.Schema({
         type: String,
         required: true
     },
-    job_description: {
-        type: String,
-        required: true
-    },
     students: {
         type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
         ref: "Student"
     },
     interview: {
         type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
         ref: "Interview"
     },
     is_active: {
@@ -185,6 +175,27 @@ const adminCompanyInterview = new mongoose.Schema({
     },
     no_of_questions: {
         type: Number,
+        required: true
+    },
+    questions: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "InterviewQuestionByAdmin"
+    },
+    link: {
+        type: String,
+        required: true
+    }
+}, { timestamps: true });
+
+export const AdminInterview = mongoose.model('AdminInterview', adminInterviewSchema);
+
+const adminCompanyInterviewSchema = new mongoose.Schema({
+    company: {
+        type: String,
+        required: true
+    },
+    job_description: {
+        type: String,
         required: true
     },
     easy_remaining: {
@@ -199,61 +210,17 @@ const adminCompanyInterview = new mongoose.Schema({
         type: Number,
         required: true
     },
-    questions: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "InterviewQuestionByAdmin"
-    },
     position: {
         type: String,
         required: true
-    },
-    link: {
-        type: String,
-        required: true
     }
-},
-    { timestamps: true }
-);
+});
 
-const adminSubjectInterview = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
+const adminSubjectInterviewSchema = new mongoose.Schema({
     subject: {
         type: String,
         required: true
     },
-    date: {
-        type: Date,
-        required: true
-    },
-    from: {
-        type: String,
-        required: true
-    },
-    to: {
-        type: String,
-        required: true
-    },
-    students: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Student"
-    },
-    interview: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Interview"
-    },
-    is_active: {
-        type: Boolean,
-        default: true
-    },
-    no_of_questions: {
-        type: Number,
-        required: true
-    },
     easy: {
         type: Number,
         required: true
@@ -265,48 +232,10 @@ const adminSubjectInterview = new mongoose.Schema({
     hard: {
         type: Number,
         required: true
-    },
-    questions: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "InterviewQuestionByAdmin"
-    },
-    link: {
-        type: String,
-        required: true
     }
-},
-    { timestamps: true }
-);
+});
 
-export const AdminSubjectInterview = mongoose.model('AdminSubjectInterview', adminSubjectInterview);
-
-const adminVerbalInterview = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    from: {
-        type: String,
-        required: true
-    },
-    to: {
-        type: String,
-        required: true
-    },
-    students: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Student"
-    },
-    interview: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Interview"
-    },
+const adminVerbalInterviewSchema = new mongoose.Schema({
     easy: {
         type: Number,
         required: true
@@ -318,33 +247,10 @@ const adminVerbalInterview = new mongoose.Schema({
     hard: {
         type: Number,
         required: true
-    },
-    is_active: {
-        type: Boolean,
-        default: true
-    },
-    no_of_questions: {
-        type: Number,
-        required: true
-    },
-    questions: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "InterviewQuestionByAdmin"
-    },
-    link: {
-        type: String,
-        required: true
     }
-},
-    { timestamps: true }
-);
+});
 
-
-const adminWrittenInterview = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
+const adminWrittenInterviewSchema = new mongoose.Schema({
     fillInTheBlanks: {
         type: Number,
         required: true
@@ -355,36 +261,6 @@ const adminWrittenInterview = new mongoose.Schema({
     },
     domain: {
         type: String,
-        required: true
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    from: {
-        type: String,
-        required: true
-    },
-    to: {
-        type: String,
-        required: true
-    },
-    students: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Student"
-    },
-    interview: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Interview"
-    },
-    is_active: {
-        type: Boolean,
-        default: true
-    },
-    no_of_questions: {
-        type: Number,
         required: true
     },
     essay: {
@@ -398,39 +274,10 @@ const adminWrittenInterview = new mongoose.Schema({
     errorDetection: {
         type: Number,
         required: true
-    },
-    questions: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "InterviewQuestionByAdmin"
-    },
-    link: {
-        type: String,
-        required: true
     }
-},{ timestamps: true });
+});
 
-
-const adminSvarInterview = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    from: {
-        type: String,
-        required: true
-    },
-    to: {
-        type: String,
-        required: true
-    },
-    no_of_questions: {
-        type: Number,
-        required: true
-    },
+const adminSvarInterviewSchema = new mongoose.Schema({
     reading: {
         type: Number,
         required: true
@@ -451,37 +298,17 @@ const adminSvarInterview = new mongoose.Schema({
         type: Number,
         required: true
     },
-    questions: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "InterviewQuestionByAdmin"
-    },
-    students: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Student"
-    },
     type: {
         type: String,
         required: true
-    },
-    interview: {
-        type: [mongoose.Schema.Types.ObjectId],
-        // required : true,
-        ref: "Interview"
-    },
-    is_active: {
-        type: Boolean,
-        default: true
-    },
-    link: {
-        type: String,
-        required: true
     }
-},
-    { timestamps: true }
-);
+});
 
-
+export const AdminCompanyInterview = AdminInterview.discriminator('AdminCompanyInterview', adminCompanyInterviewSchema);
+export const AdminSubjectInterview = AdminInterview.discriminator('AdminSubjectInterview', adminSubjectInterviewSchema);
+export const AdminVerbalInterview = AdminInterview.discriminator('AdminVerbalInterview', adminVerbalInterviewSchema);
+export const AdminWrittenInterview = AdminInterview.discriminator('AdminWrittenInterview', adminWrittenInterviewSchema);
+export const AdminSvarInterview = AdminInterview.discriminator('AdminSvarInterview', adminSvarInterviewSchema);
 
 const interviewQuestionByAdmin = new mongoose.Schema({
     question: {
@@ -516,10 +343,6 @@ const SessionQuestion = new mongoose.Schema({
 export const InterviewQuestionsByAdmin = mongoose.model('InterviewQuestionByAdmin', interviewQuestionByAdmin);
 export const Interview = mongoose.model('Interview', interviewSchema);
 export const InterviewQuestion = mongoose.model('InterviewQuestion', interviewQuestionSchema);
-export const AdminCompanyInterview = mongoose.model('AdminCompanyInterview', adminCompanyInterview);
-export const AdminVerbalInterview = mongoose.model('AdminVerbalInterview', adminVerbalInterview);
-export const AdminSvarInterview = mongoose.model('AdminSvarInterview', adminSvarInterview);
-export const AdminWrittenInterview = mongoose.model('AdminWrittenInterview', adminWrittenInterview);
 export const SessionQuestions = mongoose.model('SessionQuestions', SessionQuestion);
 export const InterviewByJD = mongoose.model('InterviewByJD', interviewByJD);
 export const InterviewByResume = mongoose.model('InterviewByResume', interviewByResume);

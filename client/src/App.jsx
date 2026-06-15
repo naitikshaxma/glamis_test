@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import Dashboard from "./pages/dashboards/Dashboard.jsx";
@@ -10,18 +10,18 @@ import Sidebar from "./components/global_components/Sidebar";
 import LiveInterview from "./pages/LiveInterview";
 import EvaluationResult from "./pages/EvaluationResult";
 import CreateInterview from "./pages/CreateInterview";
+import SystemCheck from "./pages/SystemCheck";
 import { resultPopupState } from "./store/atoms/resultPopup";
 import { useRecoilValue } from "recoil";
 import Result from "./pages/Result";
 import DetailedReport from "./pages/DetailedReport";
 import Otp from "./pages/Otp";
-import { useEffect } from "react";
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import WrittenInterview from "./pages/WrittenInterview";
 import WrittenReport from "./pages/WrittenReport";
 import Feedback from "./pages/Feedback";
-import Cookies from 'js-cookie';
 import ProtectedRoute from "./pages/Protectedroute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -45,6 +45,7 @@ const response = {
 };
 
 // Layout component that includes Sidebar
+// eslint-disable-next-line react/prop-types
 const MainLayout = ({ children }) => (
     <div style={{ display: 'flex' }}>
         <Sidebar />
@@ -59,34 +60,35 @@ const MainLayout = ({ children }) => (
 
 const App = () => {
 
-    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-    document.onkeydown = function (e) {
-        if (e.ctrlKey && (e.keyCode === 73 || e.keyCode === 85)) {
-            return false;
-        }
-        // disable F12 key
-        if (e.keyCode === 123) {
-            return false;
-        }
-        //disable right click
-        if (e.button == 2) {
-            return false;
-        }
-    }
+
     useEffect(() => {
-        // Function to disable right-click
+        const handleKeyDown = (e) => {
+            const ev = e || window.event;
+            if (!ev) return;
+            if (ev.ctrlKey && (ev.keyCode === 73 || ev.keyCode === 85)) {
+                ev.preventDefault();
+                return false;
+            }
+            // disable F12 key
+            if (ev.keyCode === 123) {
+                ev.preventDefault();
+                return false;
+            }
+        };
+
         const handleContextMenu = (e) => {
             e.preventDefault(); // Prevents the context menu from appearing
         };
 
-        // Attach the event listener to the document
+        document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('contextmenu', handleContextMenu);
 
-        // Clean up the event listener on component unmount
         return () => {
+            document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('contextmenu', handleContextMenu);
         };
     }, []);
+
     const resultPopup = useRecoilValue(resultPopupState);
     return (
 
@@ -99,12 +101,20 @@ const App = () => {
                 <Route path="/reset" element={<ResetPassword />} />
                 <Route
                     path="/dashboard"
-                    element={ <ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>}
+                    element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>}
 
                 />
                 <Route
                     path="/myInterview"
                     element={<ProtectedRoute><MainLayout><Interviews /></MainLayout></ProtectedRoute>}
+                />
+                <Route
+                    path="/create-interview"
+                    element={<ProtectedRoute><MainLayout><CreateInterview /></MainLayout></ProtectedRoute>}
+                />
+                <Route
+                    path="/system-check"
+                    element={<ProtectedRoute><SystemCheck /></ProtectedRoute>}
                 />
                 <Route
                     path="/profile"
@@ -125,21 +135,19 @@ const App = () => {
                 />
                 <Route
                     path="/history/detailed"
-                    element={ <ProtectedRoute>
-
-                        <DetailedReport />
+                    element={<ProtectedRoute>
+                        <MainLayout><DetailedReport /></MainLayout>
                     </ProtectedRoute>
                     }
                 />
                 <Route
                     path="/history/detailed/:id"
                     element={<ProtectedRoute>
-
-                        <DetailedReport />
+                        <MainLayout><DetailedReport /></MainLayout>
                     </ProtectedRoute>
                     }
                 />
-                <Route path="/history/detailed-written" element={<ProtectedRoute><WrittenReport /></ProtectedRoute>} />
+                <Route path="/history/detailed-written" element={<ProtectedRoute><MainLayout><WrittenReport /></MainLayout></ProtectedRoute>} />
                 <Route
                     path="/live"
                     element={<LiveInterview />}
@@ -155,15 +163,15 @@ const App = () => {
                 </div>} />
                 <Route
                     path="/team"
-                    element={ <ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
+                    element={<ProtectedRoute><MainLayout><Team /></MainLayout></ProtectedRoute>}
 
                 />
 
-                <Route path="/dashboard/company" element={<CompanyDashboard />} />
-                <Route path="/dashboard/subject" element={<SubjectDashboard />} />
-                <Route path="/dashboard/svar" element={<SvarDashboard />} />
-                <Route path="/dashboard/written" element={<WrittenDashboard />} />
-                <Route path="/dashboard/verbal" element={<VerbalDashboard />} />
+                <Route path="/dashboard/company" element={<ProtectedRoute><MainLayout><CompanyDashboard /></MainLayout></ProtectedRoute>} />
+                <Route path="/dashboard/subject" element={<ProtectedRoute><MainLayout><SubjectDashboard /></MainLayout></ProtectedRoute>} />
+                <Route path="/dashboard/svar" element={<ProtectedRoute><MainLayout><SvarDashboard /></MainLayout></ProtectedRoute>} />
+                <Route path="/dashboard/written" element={<ProtectedRoute><MainLayout><WrittenDashboard /></MainLayout></ProtectedRoute>} />
+                <Route path="/dashboard/verbal" element={<ProtectedRoute><MainLayout><VerbalDashboard /></MainLayout></ProtectedRoute>} />
 
 
             </Routes>

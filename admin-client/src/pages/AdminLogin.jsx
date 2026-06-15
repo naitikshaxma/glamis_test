@@ -47,7 +47,7 @@ const AdminLogin = () => {
     event.preventDefault();
     console.log("entering", login);
     if (login.email === '' || login.password === '') {
-      alert.error('Please fill all the fields')
+      toast.error('Please fill all the fields')
       console.log("exiting");
       return
     }
@@ -65,7 +65,7 @@ const AdminLogin = () => {
 
     if (response.status == 201) {
       if(!response.data.data.isAdmin){
-        alert("You are not an admin")
+        toast.error("You are not an admin")
         return;
       }
       Cookies.set('accessTokenAdmin', response.data.data.accessToken);
@@ -73,7 +73,7 @@ const AdminLogin = () => {
       navigate('/admin/dashboard')
       return;
     }
-    alert("something went wrong")
+    toast.error("something went wrong")
   };
 
   return (

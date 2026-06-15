@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Smile } from 'lucide-react';
-import Sidebar from '../../components/global_components/Sidebar.jsx';
+
+
 import { bearerInstance } from '../../helpers/instance.js';
 import Cookies from 'js-cookie'
 
@@ -42,58 +42,31 @@ const SubjectDashboard = () => {
     { name: 'Cyber Security', score: 4.4 },
   ];
 
-  const skillsData = [
-    { category: '1', Vocabulary: 25, Grammar: 45, 'Domain Knowledge': 90 },
-    { category: '2', Vocabulary: 35, Grammar: 75, 'Domain Knowledge': 20 },
-    { category: '3', Vocabulary: 45, Grammar: 65, 'Domain Knowledge': 85 },
-    { category: '4', Vocabulary: 55, Grammar: 35, 'Domain Knowledge': 70 },
-    { category: '5', Vocabulary: 20, Grammar: 85, 'Domain Knowledge': 95 }
-  ];
-
-  const performanceData = [
-    { month: 1, Easy: 80, Medium: 35, Hard: 45 },
-    { month: 2, Easy: 65, Medium: 75, Hard: 30 },
-    { month: 3, Easy: 70, Medium: 68, Hard: 85 },
-    { month: 4, Easy: 45, Medium: 80, Hard: 65 },
-    { month: 5, Easy: 85, Medium: 85, Hard: 70 },
-    { month: 6, Easy: 90, Medium: 82, Hard: 88 }
-  ];
-
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
-      {/* Sidebar Section */}
-      <div className="w-full md:w-1/4">
-        <Sidebar />
-      </div>
-
-      {/* Main Content Section */}
-      <div className="flex-1  overflow-auto">
-        <div className="w-full md:w-4/5 p-7">
-          <header className="flex justify-between items-center ">
-            <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">{Cookies.get('fullName')}</span>, welcome back!
-            </h2>
-
+    <div className="w-full overflow-auto">
+      <div className="w-full p-7">
+        <header className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">
+            Hello <span className="text-black">{Cookies.get('fullName')}</span>, welcome back!
+          </h2>
+          <div className="flex items-center">
+            <i className="fas fa-bell text-gray-500 mr-5"></i>
             <div className="flex items-center">
-              <i className="fas fa-bell text-gray-500 mr-5"></i>
-              <div className="flex items-center ">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
-                  alt="User"
-                  height="40"
-                  width="40"
-                  className="h-8 w-8 rounded-full border-green-600 border-2 mr-2"
-                />
-                <span>{Cookies.get('fullName')}</span>
-              </div>
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+                alt="User"
+                height="40"
+                width="40"
+                className="h-8 w-8 rounded-full border-green-600 border-2 mr-2"
+              />
+              <span>{Cookies.get('fullName')}</span>
             </div>
-          </header>
+          </div>
+        </header>
+      </div>
+      <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
 
-
-        </div>
-        <h3 className="text-xl font-bold mb-5 ml-7">My Mock</h3>
-
-        <div className="bg-yellow-400 rounded-xl p-8 text-white">
+      <div className="bg-yellow-400 rounded-xl p-8 text-white">
           <div className="grid grid-cols-3 gap-8">
             {/* Monthly Performance Chart */}
 
@@ -211,7 +184,6 @@ const SubjectDashboard = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

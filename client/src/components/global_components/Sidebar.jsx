@@ -9,16 +9,44 @@ import { SidebarContext } from "../../hooks/SideBarContextHook";
 
 import avatar from "../../assets/avatar.jpeg";
 import Cookies from "js-cookie";
-import { useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { tokenState } from "../../store/atoms/token";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 
 
 export default function Sidebar() {
 
     const navigate = useNavigate();
-    const tokenLeft = useRecoilValue(tokenState);
+    const [tokenLeft, setTokenLeft] = useRecoilState(tokenState);
+    const [userAvatar, setUserAvatar] = React.useState('');
+
+    React.useEffect(() => {
+        const fetchToken = async () => {
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/get-user-data-profile`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${Cookies.get('accessToken')}`
+                    }
+                });
+                if (response.data?.data) {
+                    setTokenLeft(response.data.data.token);
+                    setUserAvatar(response.data.data.avatar || '');
+                }
+            } catch (err) {
+                console.error("Error fetching token left in Sidebar:", err);
+            }
+        };
+        fetchToken();
+    }, [setTokenLeft]);
+
+    const getAvatarSrc = () => {
+        if (userAvatar && userAvatar !== 'path/to/avatar.png') {
+            return `${import.meta.env.VITE_BACKEND_URL}${userAvatar}`;
+        }
+        return 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+    };
     const [openAlert, setOpenAlert] = React.useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
@@ -57,7 +85,7 @@ export default function Sidebar() {
         icon: <InboxIcon className="h-5 w-5" />,
         href: '/team'
     },
-    
+
     ]
 
     return (
@@ -106,7 +134,7 @@ export default function Sidebar() {
                         <div className="my-3">
                             <div className="flex justify-between items-center gap-2 px-2">
                                 <div className="flex items-center gap-2 my-3">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2" />
+                                    <img src={getAvatarSrc()} alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2 object-cover" />
                                     <div>
                                         <Typography color="blue-gray" className="font-semibold ml-2">
                                             {Cookies.get("fullName")}

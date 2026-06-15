@@ -8,7 +8,7 @@ import {
     Textarea,
 } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
-import axios from "axios";
+import api from "../../../helpers/api";
 
 
 
@@ -55,7 +55,7 @@ export default function VerbalInterview() {
     const handleSubmit = async () => {
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/verbal/create`, {
+            const response = await api.post(`/api/v1/admin/interview/verbal/create`, {
                 name: interviewName,
                 date,
                 from: duration.from,

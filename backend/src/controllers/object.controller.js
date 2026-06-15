@@ -8,7 +8,7 @@ const getAudioFile = asyncHandler(async (req, res) => {
     try {
         const { filename } = req.params;
         const filePath = path.resolve("../objectStore", filename);
-        if (!fs.existsSync(filePath || !fs.lstatSync(filePath).isFile())) {
+        if (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isFile()) {
             return res.status(404).json(
                 new ApiResponse(404, null, "File not found")
             );

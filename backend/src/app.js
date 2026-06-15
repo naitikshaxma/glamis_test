@@ -8,7 +8,7 @@ import resultRouter from './routes/result.router.js';
 import objectRouter from './routes/object.router.js';
 import adminRouter from './routes/admin.router.js';
 import dashboardRouter from './routes/dashboard.router.js';
-// import { RateLimiter15mins } from "./utils/RateLimiter.js";
+import { RateLimiter15mins } from "./utils/RateLimiter.js";
 
 
 const app = express()
@@ -17,12 +17,25 @@ const objectStorePath = path.resolve("../objectStore");
 
 // Serve static files from the 'objectStore' directory
 app.use("/api/v1/objectStore", express.static(objectStorePath));
+// Serve static files from the 'public' directory
+app.use("/public", express.static(path.resolve("./public")));
 
-app.use(cors())
+app.use(cors({
+  origin: [
+    'https://glamis.in',
+    'https://admin.glamis.in',
+    'http://localhost:3000',
+    'http://localhost:4000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:4000'
+  ],
+  credentials: true
+}));
 
-app.use(express.json({ limit : "1gb" }))
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended : true, limit : "16kb" }))
 app.use(cookieParser())
+app.use(RateLimiter15mins)
 
 // Routes Import
 

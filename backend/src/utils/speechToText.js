@@ -3,7 +3,7 @@ import OpenAI from "openai";
 
 
 async function speechToText(audio) {
-    const openai = new OpenAI();
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const transcription = await openai.audio.transcriptions.create({
         file: fs.createReadStream(audio),
         model: "whisper-1",

@@ -90,8 +90,18 @@ const WrittenInterview = () => {
 
         let url;
         let data;
+        const mockType = Cookies.get('mockType');
 
-        if (subject) {
+        if (mockType === 'student-written') {
+            url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWritten`;
+            data = {
+                subject: subject,
+                interviewId: Cookies.get('interviewId'),
+                answer: ansMetaData.answer,
+                score: ansMetaData.score,
+                questionNo: currentQuestion,
+            };
+        } else if (subject) {
             url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/generateQuestionForWrittenAdmin`;
             data = {
                 subject: subject,
@@ -131,10 +141,13 @@ const WrittenInterview = () => {
     }, [currentQuestion]);
 
     useEffect(() => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.warn('Media devices not supported or secure context required.');
+            return;
+        }
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
             .then((stream) => {
                 localVideoRef.current.srcObject = stream;
-                setLocalVideoTrack(window.URL.createObjectURL(stream));
             })
             .catch((error) => {
                 console.error('Error accessing media devices.', error);
