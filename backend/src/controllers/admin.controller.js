@@ -701,9 +701,15 @@ export const fetchDashboardStats = async (req, res) => {
     // Upcoming interviews (pending, sorted by nearest date)
     const upcomingInterviews = allInterviews
       .map(interview => {
-        const dateStr = new Date(interview.date).toISOString().split('T')[0];
+        let dateStr;
+        try {
+            dateStr = new Date(interview.date).toISOString().split('T')[0];
+        } catch(e) {
+            dateStr = interview.date; // fallback if invalid
+        }
         const startTime = new Date(dateStr + 'T' + interview.from);
         const endTime = new Date(dateStr + 'T' + interview.to);
+        const status = (currentTime >= startTime && currentTime <= endTime) ? 'Active' : 'Upcoming';
         return {
           _id: interview._id,
           name: interview.name,
@@ -711,34 +717,40 @@ export const fetchDashboardStats = async (req, res) => {
           date: dateStr,
           from: interview.from,
           to: interview.to,
-          candidates: interview.students.length,
+          candidates: interview.students?.length || 0,
           isPending: currentTime < endTime,
+          status,
           startTime
         };
       })
       .filter(i => i.isPending)
       .sort((a, b) => a.startTime - b.startTime)
-      .slice(0, 5)
+      .slice(0, 50)
       .map(({ startTime, isPending, ...rest }) => rest);
 
-    // Recent interviews (last 5 ended)
+    // Recent interviews (last 50 ended)
     const recentInterviews = allInterviews
       .map(interview => {
-        const dateStr = new Date(interview.date).toISOString().split('T')[0];
+        let dateStr;
+        try {
+            dateStr = new Date(interview.date).toISOString().split('T')[0];
+        } catch(e) {
+            dateStr = interview.date; // fallback if invalid
+        }
         const endTime = new Date(dateStr + 'T' + interview.to);
         return {
           _id: interview._id,
           name: interview.name,
           company: interview.company || interview.subject || interview.domain || 'N/A',
           date: dateStr,
-          candidates: interview.students.length,
+          candidates: interview.students?.length || 0,
           isEnded: currentTime > endTime,
           endTime
         };
       })
       .filter(i => i.isEnded)
       .sort((a, b) => b.endTime - a.endTime)
-      .slice(0, 5)
+      .slice(0, 50)
       .map(({ endTime, isEnded, ...rest }) => rest);
 
     res.status(200).json({

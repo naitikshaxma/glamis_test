@@ -12,6 +12,18 @@ import axios from "axios";
 
 export default function Sidebar() {
   const [adminName, setAdminName] = React.useState("Loading...");
+  const [sidebarAvatar, setSidebarAvatar] = React.useState(
+    localStorage.getItem('adminAvatar') || avatar
+  );
+
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem('adminAvatar');
+      if (updated) setSidebarAvatar(updated);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
   const location = useLocation();
 
   React.useEffect(() => {
@@ -165,7 +177,7 @@ export default function Sidebar() {
           {/* Bottom: Admin Profile + Logout */}
           <div className="border-t border-gray-100 px-4 py-4">
             <div className="flex items-center gap-3 mb-3 px-1">
-              <img src={avatar} alt="profile" className="h-9 w-9 rounded-full border-2 border-green-600 object-cover" />
+              <img src={sidebarAvatar} alt="profile" className="h-9 w-9 rounded-full border-2 border-green-600 object-cover" />
               <div className="flex-1 min-w-0">
                 <Typography className="font-semibold text-sm text-gray-800 truncate">
                   {adminName}
