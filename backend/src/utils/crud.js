@@ -1,7 +1,5 @@
 import {
-  AdminCompanyInterview,
-  AdminSubjectInterview, AdminSvarInterview,
-  AdminVerbalInterview, AdminWrittenInterview,
+  AdminInterview,
   SessionQuestions
 } from "../models/interview.models.js";
 
@@ -26,6 +24,9 @@ export const getSessionQuestions = async (interviewId, questionNo) => {
     interview: interviewId,
     questionNo
   });
+  if (!sessionQuestion) {
+    throw new Error("Session question not found");
+  }
   return sessionQuestion.question;
 }
 
@@ -35,21 +36,11 @@ export const deleteSessionQuestions = async (interviewId) => {
 
 
 export const getAllAdminInterviews = async (query) => {
-    const adminCompanyInterview = await AdminCompanyInterview.find(query);
-  const adminSubjectInterview = await AdminSubjectInterview.find(query);
-  const adminVerbalInterview = await AdminVerbalInterview.find(query);
-  const adminWrittenInterview = await AdminWrittenInterview.find(query);
-  const adminSvarInterview = await AdminSvarInterview.find(query);
-  return adminCompanyInterview.concat(adminSubjectInterview, adminVerbalInterview, adminWrittenInterview, adminSvarInterview);
+  return await AdminInterview.find(query);
 }
 
 export const getAdminInterview = async (query) => {
-  const adminCompanyInterview = await AdminCompanyInterview.findOne(query);
-  const adminSubjectInterview = await AdminSubjectInterview.findOne(query);
-  const adminVerbalInterview = await AdminVerbalInterview.findOne(query);
-  const adminWrittenInterview = await AdminWrittenInterview.findOne(query);
-  const adminSvarInterview = await AdminSvarInterview.findOne(query);
-  return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview || adminSvarInterview;
+  return await AdminInterview.findOne(query);
 }
 
 

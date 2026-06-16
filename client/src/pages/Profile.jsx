@@ -41,13 +41,13 @@ const ProfilePage = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'personal':
-                return <PersonalDetails name={userData.user?.name || ''} emailId={userData.user?.email_id || ''} phoneNo={userData.user?.phone || ''} address={userData.address || ''} rollNo={userData.rollNo || ''} />;
+                return <PersonalDetails name={userData.user?.name || ''} emailId={userData.user?.email_id || ''} phoneNo={userData.user?.phone || ''} address={userData.address || ''} rollNo={userData.rollNo || ''} avatar={userData.avatar || ''} onUpdate={getUserData} />;
             case 'education':
                 return <EducationalDetails semester={userData.semester || ''} section={userData.section || ''} course={userData.course || ''} branch={userData.branch} />;
             case 'resume':
-                return <Resume />;
+                return <Resume resume={userData.resume || ''} onUpdate={getUserData} />;
             default:
-                return <PersonalDetails />;
+                return <PersonalDetails name={userData.user?.name || ''} emailId={userData.user?.email_id || ''} phoneNo={userData.user?.phone || ''} address={userData.address || ''} rollNo={userData.rollNo || ''} avatar={userData.avatar || ''} onUpdate={getUserData} />;
         }
     };
 

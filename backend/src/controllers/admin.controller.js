@@ -1,4 +1,5 @@
 import {
+  AdminInterview,
   AdminCompanyInterview,
   AdminSubjectInterview,
   AdminSvarInterview,
@@ -15,7 +16,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { getAllAdminInterviews } from "../utils/crud.js";
 import {attendancePipeline} from "../pipelines/attendance.pipeline.js";
-const link = `https://glamis.in/myInterview/`;
+const link = process.env.INTERVIEW_BASE_URL || `https://glamis.in/myInterview/`;
 
 
 // ---------------------- Create Company Interview ----------------------
@@ -389,7 +390,8 @@ export const createSvarInterview = async (req, res) => {
           await interview.save();
 
           student.interview_taken.push(interview._id);
-          student.save();
+          await student.save();
+
           interviewIds.push(interview._id);
           try {
             await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, "Svar", link, date + ' at ' + from));
@@ -442,24 +444,16 @@ export const createSvarInterview = async (req, res) => {
 }
 
 
-// ---------------------- Fetch Interview by Interview ID ----------------------
-
-
 export const fetchAdminInterviewbyinterviewId = async (req, res) => {
   try {
     const { interviewId } = req.body;
 
-    let admin = await AdminCompanyInterview.findOne({ interview: { $in: interviewId } });
+    // Ensure interviewId is treated as array for $in operator
+    const interviewIdArray = Array.isArray(interviewId) ? interviewId : [interviewId];
+    const admin = await AdminInterview.findOne({ interview: { $in: interviewIdArray } });
 
     if (!admin) {
-      admin = await AdminSubjectInterview.findOne({ interview: { $in: interviewId } });
-    }
-    if (!admin) {
-      admin = await AdminWrittenInterview.findOne({ interview: { $in: interviewId } });
-    }
-
-    if (!admin) {
-      admin = await AdminVerbalInterview.findOne({ interview: { $in: interviewId } });
+      return res.status(404).json({ message: "Interview not found" });
     }
 
     console.log(admin);
@@ -477,59 +471,23 @@ export const fetchAdminInterviewbyinterviewId = async (req, res) => {
 
 export const fetchInterviewStatusCount = async (req, res) => {
   try {
-    //add the count of all the interviews
+    const allInterviews = await AdminInterview.find({});
+    const totalInterviews = allInterviews.length;
 
-    const companyInterviews = await AdminCompanyInterview.find({});
-    const subjectInterviews = await AdminSubjectInterview.find({});
-    const verbalInterviews = await AdminVerbalInterview.find({});
-    const writtenInterviews = await AdminWrittenInterview.find({});
-    const totalInterviews = companyInterviews.length + subjectInterviews.length + verbalInterviews.length + writtenInterviews.length;
-
-    // check the count of all the interviews that have ended
     let endedInterview = 0;
+    const currentTime = new Date();
 
-    for (let i = 0; i < companyInterviews.length; i++) {
-      const interview = companyInterviews[i];
-      const currentTime = new Date();
-      const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
-      // console.log(endTime);
-
-
-      if (currentTime > endTime) {
-        endedInterview++;
-      }
-    }
-
-    for (let i = 0; i < subjectInterviews.length; i++) {
-      const interview = subjectInterviews[i];
-      const currentTime = new Date();
-      const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
-      if (currentTime > endTime) {
-        endedInterview++;
-      }
-    }
-
-    for (let i = 0; i < verbalInterviews.length; i++) {
-      const interview = verbalInterviews[i];
-      const currentTime = new Date();
-      const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
-      if (currentTime > endTime) {
-        endedInterview++;
-      }
-    }
-
-    for (let i = 0; i < writtenInterviews.length; i++) {
-      const interview = writtenInterviews[i];
-      const currentTime = new Date();
-      const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
-      if (currentTime > endTime) {
-        endedInterview++;
+    for (let i = 0; i < allInterviews.length; i++) {
+      const interview = allInterviews[i];
+      if (interview.date && interview.to) {
+        const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
+        if (currentTime > endTime) {
+          endedInterview++;
+        }
       }
     }
 
     let pendingInterviews = totalInterviews - endedInterview;
-
-    // console.log(totalInterviews, endedInterview, pendingInterviews);
 
     res.status(200).json({ totalInterviews, endedInterview, pendingInterviews });
 
@@ -594,7 +552,7 @@ export const fetchInterviewByID = async (req, res) => {
       return res.status(400).json(ApiError(404, "Interview ID not sent"))
     }
 
-    const interview = await AdminSvarInterview.findOne({
+    const interview = await AdminInterview.findOne({
       interview: interviewId
     })
 
@@ -612,12 +570,7 @@ export const fetchInterviewByID = async (req, res) => {
 // ---------------------- CRUD Operations ----------------------
 
 export async function getInterviewByID(interviewId) {
-  const adminCompanyInterview = await AdminCompanyInterview.findById(interviewId);
-  const adminSubjectInterview = await AdminSubjectInterview.findById(interviewId);
-  const adminVerbalInterview = await AdminVerbalInterview.findById(interviewId);
-  const adminWrittenInterview = await AdminWrittenInterview.findById(interviewId);
-  const adminSvarInterview = await AdminSvarInterview.findById(interviewId);
-  return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview || adminSvarInterview;
+  return await AdminInterview.findById(interviewId);
 }
 
 // ---------------------- Download Attendance ----------------------

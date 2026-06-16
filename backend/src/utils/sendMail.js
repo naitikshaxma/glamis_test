@@ -3,6 +3,11 @@ import nodemailer from 'nodemailer';
 
 const sendMail = async (toEmail, subject, body) => {
   try {
+    // Validate email
+    if (!toEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
+      throw new Error("Invalid email address");
+    }
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -14,16 +19,17 @@ const sendMail = async (toEmail, subject, body) => {
 
     // send mail
     const info = await transporter.sendMail({
-      from: `GLAMIS`,
+      from: process.env.SMTP_FROM_NAME || `GLAMIS <${process.env.SMTP_EMAIL}>`,
       to: toEmail,
       subject: subject,
       html: body,
     });
 
-    return info;
+    return { success: true, info };
   } catch (err) {
     // clgDev(err.message);
-    throw err;
+    console.error("Email sending error:", err.message);
+    return { success: false, error: err.message };
   }
 };
 

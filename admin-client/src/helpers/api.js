@@ -1,24 +1,16 @@
 import axios from 'axios';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 
-
-const instance = axios.create({
+const api = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-export const bearerInstance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
-
-bearerInstance.interceptors.request.use(
+api.interceptors.request.use(
     (config) => {
-        const token = Cookies.get('accessToken');
+        const token = Cookies.get('accessTokenAdmin');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
@@ -29,4 +21,4 @@ bearerInstance.interceptors.request.use(
     }
 );
 
-export default instance;
+export default api;

@@ -1,4 +1,4 @@
-const mlPrompt = `
+export const mlPrompt = (question, answer) => `
     You are an interviewer for a Machine Learning exam. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
 
     Here is the question: "${question}"
@@ -29,7 +29,7 @@ const mlPrompt = `
     Ensure the keys are exactly "question", "userAnswer", "overallScore", "technicalAccuracyScore", "clarityScore", "depthScore", "technicalExplanation", "clarityExplanation", and "depthExplanation". All scores should be integers.
     `;
 
-const dsapPrompt = `
+export const dsapPrompt = (question, answer) => `
     You are an interviewer for a Data Structures and Algorithms exam. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
 
     Here is the question: "${question}"
@@ -60,7 +60,7 @@ const dsapPrompt = `
     Ensure the keys are exactly "question", "userAnswer", "overallScore", "correctnessScore", "efficiencyScore", "clarityScore", "correctnessExplanation", "efficiencyExplanation", and "clarityExplanation". All scores should be integers.
     `;
 
-const cnPrompt = `
+export const cnPrompt = (question, answer) => `
     You are an interviewer for a Computer Networks exam. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
 
     Here is the question: "${question}"
@@ -91,7 +91,7 @@ const cnPrompt = `
     Ensure the keys are exactly "question", "userAnswer", "overallScore", "accuracyScore", "clarityScore", "completenessScore", "accuracyExplanation", "clarityExplanation", and "completenessExplanation". All scores should be integers.
     `;
 
-const osPrompt = `
+export const osPrompt = (question, answer) => `
         You are an interviewer for an Operating Systems exam. I will provide you with a question and its answer. Your task is to evaluate the answer on a scale of 0 to 100 and provide constructive feedback.
 
         Here is the question: "${question}"
@@ -121,4 +121,3 @@ const osPrompt = `
 
         Ensure the keys are exactly "question", "userAnswer", "overallScore", "knowledgeScore", "clarityScore", "depthScore", "knowledgeExplanation", "clarityExplanation", and "depthExplanation". All scores should be integers.
         `;
-

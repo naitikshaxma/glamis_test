@@ -46,26 +46,6 @@ const mockMenuItems = [
   },
 ];
 
-// const UpcomingItem = ({icon, title, time}) => (
-//   <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl">
-//     <div className="flex items-center gap-4">
-//       <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-//         {icon}
-//       </div>
-//       <div>
-//         <h4 className="font-medium text-gray-900">{title}</h4>
-//         <p className="text-sm text-gray-500">{time}</p>
-//       </div>
-//     </div>
-//     <button className="text-gray-400">
-//       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-//               d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-//       </svg>
-//     </button>
-//   </div>
-// );
-
 const ActivityBar = ({day, height = "h-20", active = false}) => (
   <div className="flex flex-col items-center gap-2">
     <div className={`w-8 ${height} ${active ? 'bg-green-700' : 'bg-gray-200'} rounded-full`}></div>
@@ -106,16 +86,59 @@ const MockCard = ({title, lessons, progress, color, image, onClick}) => (
 
 const Dashboard = () => {
   const [overallPercenatge, setOverallPercenatge] = React.useState(0);
+  const [stats, setStats] = React.useState({
+    completed: 0,
+    inProgress: 0,
+    activity: [
+      { day: 'Mon', count: 0 },
+      { day: 'Tues', count: 0 },
+      { day: 'Wed', count: 0 },
+      { day: 'Thurs', count: 0 },
+      { day: 'Fri', count: 0 },
+      { day: 'Sat', count: 0 },
+      { day: 'Sun', count: 0 },
+    ]
+  });
 
   const fetchData = async () => {
-    const res = await instance.get('/api/v1/dashboard/');
-    setOverallPercenatge(res.data);
+    try {
+      const res = await instance.get('/api/v1/dashboard/');
+      setOverallPercenatge(res.data);
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+    }
+  }
+
+  const fetchStats = async () => {
+    try {
+      const res = await instance.get('/api/v1/dashboard/stats');
+      setStats(res.data);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
   }
 
   React.useEffect(() => {
     fetchData();
+    fetchStats();
   }, []);
 
+  // Calculate max activity count for scaling bar heights
+  const maxActivity = Math.max(...stats.activity.map(a => a.count), 1);
+
+  // Get height class based on count relative to max
+  const getBarHeight = (count) => {
+    if (count === 0) return 'h-8';
+    const ratio = count / maxActivity;
+    if (ratio > 0.8) return 'h-40';
+    if (ratio > 0.6) return 'h-32';
+    if (ratio > 0.4) return 'h-24';
+    if (ratio > 0.2) return 'h-16';
+    return 'h-12';
+  };
+
+  // Format number with leading zero
+  const formatCount = (n) => String(n).padStart(2, '0');
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -125,12 +148,11 @@ const Dashboard = () => {
           Hello <span>{Cookies.get("fullName")}</span>, welcome back!
         </h1>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
-                 alt="Profile"
-                 className="w-12 h-12 rounded-full"/> {/* Increased from w-10 h-10 to w-12 h-12 */}
-            <span className="font-medium">{Cookies.get("fullName")}</span>
-          </div>
+          <Link to="/create-interview">
+            <button className="bg-green-700 text-white font-semibold py-2.5 px-5 rounded-xl hover:bg-green-800 transition-all transform hover:scale-[1.02] shadow-md text-sm">
+              Start Practice Interview
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -154,35 +176,6 @@ const Dashboard = () => {
               ))}
             </div>
           </section>
-
-          {/* Upcoming Section */}
-          {/*<section>*/}
-          {/*  <div className="flex justify-between items-center mb-4">*/}
-          {/*    <h2 className="text-xl font-bold">Upcoming</h2>*/}
-          {/*    <div className="flex items-center gap-2">*/}
-          {/*      <i className="fas fa-calendar-alt w-8 h-8 text-gray-500" aria-label="Calendar"></i>*/}
-          {/*      /!* Increased from w-6 h-6 to w-8 h-8 *!/*/}
-          {/*      <span className="text-blue-500">21 October 2024</span>*/}
-          {/*    </div>*/}
-          {/*  </div>*/}
-          {/*  <div className="space-y-4">*/}
-          {/*    <UpcomingItem*/}
-          {/*      icon="📖"*/}
-          {/*      title="Reading - Beginner"*/}
-          {/*      time="8:00 AM - 10:00 AM"*/}
-          {/*    />*/}
-          {/*    <UpcomingItem*/}
-          {/*      icon="🎧"*/}
-          {/*      title="Listening - Intermediate"*/}
-          {/*      time="03:00 PM - 04:00 PM"*/}
-          {/*    />*/}
-          {/*    <UpcomingItem*/}
-          {/*      icon="🗣️"*/}
-          {/*      title="Speaking - Beginner"*/}
-          {/*      time="8:00 AM - 12:00 PM"*/}
-          {/*    />*/}
-          {/*  </div>*/}
-          {/*</section>*/}
         </div>
 
         {/* Right Sidebar */}
@@ -193,11 +186,11 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="text-gray-500 text-sm mb-2">Interview Completed</h3>
-                <p className="text-3xl font-bold">02</p>
+                <p className="text-3xl font-bold">{formatCount(stats.completed)}</p>
               </div>
               <div>
                 <h3 className="text-gray-500 text-sm mb-2">Interview In Progress</h3>
-                <p className="text-3xl font-bold">03</p>
+                <p className="text-3xl font-bold">{formatCount(stats.inProgress)}</p>
               </div>
             </div>
           </div>
@@ -230,13 +223,14 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex justify-between items-end">
-              <ActivityBar day="Mon"/>
-              <ActivityBar day="Tues"/>
-              <ActivityBar day="Wed"/>
-              <ActivityBar day="Thurs" height="h-40" active={true}/>
-              <ActivityBar day="Fri"/>
-              <ActivityBar day="Sat"/>
-              <ActivityBar day="Sun"/>
+              {stats.activity.map((item, index) => (
+                <ActivityBar
+                  key={index}
+                  day={item.day}
+                  height={getBarHeight(item.count)}
+                  active={item.count > 0}
+                />
+              ))}
             </div>
           </div>
         </div>

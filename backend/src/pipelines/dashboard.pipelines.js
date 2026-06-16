@@ -259,11 +259,11 @@ export const SvarPipeline = (user) => [
       Pronounciation: {
         $avg: {
           $map: {
-            input: "$Questions",
-            as: "item",
-            in: "$$item.pronounciation"
-          }
-        }
+             input: "$Questions",
+             as: "item",
+             in: "$$item.pronunciation"
+           }
+         }
       },
       Correctness: {
         $avg: {

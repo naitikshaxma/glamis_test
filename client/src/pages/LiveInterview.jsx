@@ -255,6 +255,16 @@ const LiveInterview = () => {
         questionNo: currentQuestion,
       };
     }
+    if (mockType === 'student-subject') {
+      url = `/api/v1/interview/generateQuestion`;
+      data = {
+        subject: subject,
+        interviewId: Cookies.get('interviewId'),
+        answer: ansMetaData.answer,
+        score: ansMetaData.score,
+        questionNo: currentQuestion,
+      };
+    }
     if (mockType === 'company') {
       url = `/api/v1/interview/generateQuestionForJDAdmin`;
       data = {
@@ -265,6 +275,18 @@ const LiveInterview = () => {
         answer: ansMetaData.answer,
         score: ansMetaData.score,
         adminInterviewId: Cookies.get('adminInterviewId'),
+        questionNo: currentQuestion,
+      };
+    }
+    if (mockType === 'student-company') {
+      url = `/api/v1/interview/generateQuestionForJD`;
+      data = {
+        selectedCompany: selectedCompany,
+        jobTitle: jobTitle,
+        jdDetails: localStorage.getItem('jd') || '',
+        interviewId: Cookies.get('interviewId'),
+        answer: ansMetaData.answer,
+        score: ansMetaData.score,
         questionNo: currentQuestion,
       };
     }
@@ -296,6 +318,16 @@ const LiveInterview = () => {
         interviewId: Cookies.get('interviewId'),
         questionNo: currentQuestion,
         adminInterviewId: Cookies.get('adminInterviewId'),
+      };
+    }
+    if (mockType === 'student-resume') {
+      url = `/api/v1/interview/generateQuestionForResume`;
+      data = {
+        resumeText: localStorage.getItem('resumeText') || '',
+        interviewId: Cookies.get('interviewId'),
+        answer: ansMetaData.answer,
+        score: ansMetaData.score,
+        questionNo: currentQuestion,
       };
     }
     if (url === '') {
@@ -335,10 +367,13 @@ const LiveInterview = () => {
 
   // Initialize media devices for local video
   useEffect(() => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.warn('Media devices not supported or secure context required.');
+      return;
+    }
     navigator.mediaDevices.getUserMedia({video: true, audio: true})
       .then((stream) => {
         localVideoRef.current.srcObject = stream;
-        setLocalVideoTrack(window.URL.createObjectURL(stream));
       })
       .catch((error) => {
         console.error('Error accessing media devices.', error);
@@ -541,6 +576,7 @@ const LiveInterview = () => {
           console.log('Exiting fullscreen...');
           Cookies.remove('subject');
           Cookies.remove('interviewId');
+          localStorage.removeItem('resumeText');
           window.location.href = '/dashboard';
         }
       };

@@ -6,6 +6,11 @@ const getResultsByInterviewId = async (req, res) => {
         const interviewResults = await InterviewQuestion.find({ interview: req.body.interviewId });
         const interview = await Interview.findById(req.body.interviewId);
 
+        // Check if results exist
+        if (interviewResults.length === 0) {
+            return res.status(404).json({ message: "No results found for this interview" });
+        }
+
         // Step 2: Extract the student ID from the first question
         const studentId = interviewResults[0]?.student;
 

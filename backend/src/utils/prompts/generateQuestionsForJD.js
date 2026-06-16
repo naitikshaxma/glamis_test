@@ -213,6 +213,54 @@ const generateQuestionsPromptForJD = (selectedCompany, jobTitle, historyPrompt, 
         }
     }
 
+    if (!JD || JD.trim() === '') {
+        const titleLower = (jobTitle || '').toLowerCase();
+        if (titleLower.includes("backend")) {
+            JD = `
+                Design, develop, and maintain server-side logic using modern programming languages (e.g., Java, Python, Node.js, Go).
+                Implement secure and high-performance APIs, data storage solutions, and business logic.
+                Optimize database queries, design scalable architectures, and handle performance tuning.
+                Collaborate with frontend engineers to integrate services.
+            `;
+        } else if (titleLower.includes("frontend")) {
+            JD = `
+                Develop interactive and responsive user interfaces using HTML, CSS, JavaScript, and modern frameworks (e.g., React, Angular, Vue).
+                Optimize web performance, cross-browser compatibility, and accessibility.
+                Collaborate with UX/UI designers to turn wireframes into interactive features.
+            `;
+        } else if (titleLower.includes("full stack") || titleLower.includes("fullstack")) {
+            JD = `
+                Work on both frontend interfaces and backend services.
+                Design and develop end-to-end web applications from database schemas to client-side layouts.
+                Integrate APIs, manage state, and deploy high-performance applications.
+            `;
+        } else if (titleLower.includes("devops")) {
+            JD = `
+                Build and maintain CI/CD pipelines, automate deployments, and manage cloud infrastructure.
+                Collaborate with development and operations teams to optimize release cycles, monitoring, and alerts.
+                Manage containers and orchestration (e.g., Docker, Kubernetes).
+            `;
+        } else if (titleLower.includes("ml") || titleLower.includes("ai") || titleLower.includes("machine learning") || titleLower.includes("artificial intelligence")) {
+            JD = `
+                Design, build, train, and deploy machine learning models and AI algorithms.
+                Perform data preprocessing, feature engineering, model evaluation, and parameter tuning.
+                Integrate AI/ML solutions into production web and cloud environments.
+            `;
+        } else if (titleLower.includes("software engineer") || titleLower.includes("developer") || titleLower.includes("programmer")) {
+            JD = `
+                Design, write, test, and maintain efficient, reusable, and reliable code.
+                Demonstrate strong understanding of data structures, algorithms, object-oriented design, and software engineering best practices.
+                Debug complex systems and participate in the entire development lifecycle.
+            `;
+        } else {
+            JD = `
+                Perform technical duties, write and debug code, and analyze requirements for the role of ${jobTitle || 'Technical Associate'}.
+                Collaborate with development teams to design and implement features.
+                Demonstrate strong problem-solving skills, code quality consciousness, and willingness to learn.
+            `;
+        }
+    }
+
     // Generating questions based on conversation history length
     if (conversationHistory.length == 1) {
         // First three questions: Straightforward, concept-based (non-coding)

@@ -61,3 +61,83 @@ export const home = asyncHandler(async (req, res) => {
   }
   res.json(data);
 })
+
+export const homeStats = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  // Get completed and in-progress interview counts
+  const statsResult = await Student.aggregate([
+    { $match: { user: user._id } },
+    {
+      $lookup: {
+        from: "interviews",
+        localField: "interview_taken",
+        foreignField: "_id",
+        as: "interviews"
+      }
+    },
+    { $unwind: { path: "$interviews", preserveNullAndEmptyArrays: true } },
+    {
+      $group: {
+        _id: null,
+        completed: {
+          $sum: { $cond: [{ $eq: ["$interviews.is_active", false] }, 1, 0] }
+        },
+        inProgress: {
+          $sum: { $cond: [{ $eq: ["$interviews.is_active", true] }, 1, 0] }
+        }
+      }
+    }
+  ]);
+
+  const completed = statsResult[0]?.completed || 0;
+  const inProgress = statsResult[0]?.inProgress || 0;
+
+  // Get activity for current week (interviews completed per day of week)
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+  startOfWeek.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+  const activityResult = await Student.aggregate([
+    { $match: { user: user._id } },
+    {
+      $lookup: {
+        from: "interviews",
+        localField: "interview_taken",
+        foreignField: "_id",
+        as: "interviews"
+      }
+    },
+    { $unwind: { path: "$interviews", preserveNullAndEmptyArrays: true } },
+    {
+      $match: {
+        "interviews.is_active": false,
+        "interviews.createdAt": { $gte: startOfWeek, $lt: endOfWeek }
+      }
+    },
+    {
+      $group: {
+        _id: { $dayOfWeek: "$interviews.createdAt" }, // 1=Sun, 2=Mon, ..., 7=Sat
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  // Map to Mon-Sun format (dayOfWeek: 1=Sun -> index 6, 2=Mon -> index 0, etc.)
+  const dayNames = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'];
+  const activity = dayNames.map((day, i) => {
+    const mongoDay = i === 6 ? 1 : i + 2; // Convert index to MongoDB dayOfWeek
+    const found = activityResult.find(a => a._id === mongoDay);
+    return { day, count: found?.count || 0 };
+  });
+
+  res.json({
+    completed,
+    inProgress,
+    activity
+  });
+})
+

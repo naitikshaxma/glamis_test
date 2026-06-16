@@ -74,17 +74,17 @@ const WrittenReport = () => {
         switch (activeTab) {
             case 'technical':
                 return (
-                    <div className='w-full flex justify-around mb-5'>
-                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                            <div className="flex flex-col space-y-4">
+                    <div className='w-full flex gap-3 mb-5'>
+                        <div className="w-16 shrink-0 p-2 rounded-lg shadow-lg sticky top-0 h-fit">
+                            <div className="flex flex-col space-y-2">
                                 {
                                     result.map((item, index) => (
                                         <Link
                                             key={index}
-                                            to={`#question-${index}`}  // Updated: include '#' to match with the id
+                                            to={`#question-${index}`}
                                             smooth={true}
                                             duration={500}
-                                            className={`flex w-full flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            className={`flex w-full flex-col items-center p-2 cursor-pointer rounded text-sm ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : 'hover:bg-gray-100'}`}
                                             onClick={() => handleQuestionClick(index)}
                                         >
                                             Q{index + 1}
@@ -94,13 +94,13 @@ const WrittenReport = () => {
                             </div>
                         </div>
                         <div
-                            className="w-7/8 w-full p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            className="flex-1 p-4 rounded-lg shadow-lg h-[80vh] overflow-y-auto"
                             id="scroll-container"
                             ref={scrollContainerRef}
                         >
                             {
                                 result.map((item, index) => (
-                                    <div id={`question-${index}`} key={index}>  {/* Updated: Added id to each question */}
+                                    <div id={`question-${index}`} key={index} className="mb-4">
                                         <TechnicalCard
                                             qno={index}
                                             question={item.question}
@@ -121,10 +121,9 @@ const WrittenReport = () => {
 
             case 'verbal':
                 return (
-                    <div className='w-full flex justify-around mb-5'>
-                        <div className="w-1/8 mr-3 p-4 rounded-lg shadow-lg sticky top-0">
-                            <div className="flex flex-col space-y-4">
-
+                    <div className='w-full flex gap-3 mb-5'>
+                        <div className="w-16 shrink-0 p-2 rounded-lg shadow-lg sticky top-0 h-fit">
+                            <div className="flex flex-col space-y-2">
                                 {
                                     result.map((item, index) => (
                                         <Link
@@ -132,7 +131,7 @@ const WrittenReport = () => {
                                             to={`question-${index}`}
                                             smooth={true}
                                             duration={500}
-                                            className={`flex flex-col space-y-2 p-3 cursor-pointer rounded ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : ''}`}
+                                            className={`flex flex-col items-center p-2 cursor-pointer rounded text-sm ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : 'hover:bg-gray-100'}`}
                                             onClick={() => handleQuestionClick(index)}
                                         >
                                             Q{index + 1}
@@ -142,24 +141,25 @@ const WrittenReport = () => {
                             </div>
                         </div>
                         <div
-                            className="w-7/8 p-4 bg-lightBlue-500 rounded-lg shadow-lg h-[80vh] overflow-y-scroll"
+                            className="flex-1 p-4 rounded-lg shadow-lg h-[80vh] overflow-y-auto"
                             id="scroll-container"
                             ref={scrollContainerRef}
                         >
                             {
                                 result.map((item, index) => (
-                                    <VerbalCard
-                                        key={index}
-                                        qno={index}
-                                        question={item.question}
-                                        answer={item.answer}
-                                        feedback={{
-                                            good: [item.grammarExplanation[0]],
-                                            improvement: [item.grammarExplanation[1]]
-                                        }}
-                                        grammarScore={item.grammar}
-                                        vocabularyScore={item.vocabulary}
-                                    />
+                                    <div key={index} className="mb-4">
+                                        <VerbalCard
+                                            qno={index}
+                                            question={item.question}
+                                            answer={item.answer}
+                                            feedback={{
+                                                good: [item.grammarExplanation[0]],
+                                                improvement: [item.grammarExplanation[1]]
+                                            }}
+                                            grammarScore={item.grammar}
+                                            vocabularyScore={item.vocabulary}
+                                        />
+                                    </div>
                                 ))
                             }
                         </div>
@@ -214,7 +214,7 @@ const WrittenReport = () => {
     }
 
     return (
-        <div className="w-[80%] mx-auto">
+        <div className="w-full px-6">
             <div className="header bg-green-100 w-full flex justify-between p-4 border-b-0 border-2 border-green-900">
                 <div className="flex">
                     <div className="avatar w-20">
