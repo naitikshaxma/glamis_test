@@ -10,7 +10,7 @@ import avatar from "../../assets/avatar.jpeg";
 import Cookies from "js-cookie";
 import axios from "axios";
 
-export default function Sidebar() {
+export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   const [adminName, setAdminName] = React.useState("Loading...");
   const [sidebarAvatar, setSidebarAvatar] = React.useState(
     localStorage.getItem('adminAvatar') || avatar
@@ -49,7 +49,6 @@ export default function Sidebar() {
   };
 
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   const navItems = [
     {
@@ -88,12 +87,16 @@ export default function Sidebar() {
   }, [isScheduleActive]);
 
   return (
-    <div className="flex">
-      {isSidebarOpen && (
-        <div className="w-full max-w-[16.5rem] h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col z-40">
-          
-          {/* Brand Header */}
-          <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+    <>
+      <div 
+        className={`w-full max-w-[16.5rem] h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        
+        {/* Brand Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
             <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-9 w-9" />
             <div>
               <Typography variant="h5" className="font-bold text-gray-800 leading-tight">
@@ -104,8 +107,14 @@ export default function Sidebar() {
               </Typography>
             </div>
           </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="text-gray-500 hover:text-gray-800 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        </div>
 
-          {/* Navigation */}
+        {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-3 py-4">
             <Typography variant="small" className="text-gray-400 font-semibold text-[11px] uppercase tracking-wider px-3 mb-2">
               Main
@@ -201,8 +210,7 @@ export default function Sidebar() {
               Logout
             </Button>
           </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -27,13 +27,13 @@ const Written = ({ data }) => {
     );
 }
 
-const WrittenCard = ({ prompt, userEssay, overallScore, grammarScore, vocabularyScore, contentExplanation, vocabularyExplanation, grammarExplanation, expectedEssay }) => {
+const WrittenCard = ({ prompt, userEssay, overallScore, grammarScore, vocabularyScore, contentScore, structureScore, contentExplanation, vocabularyExplanation, grammarExplanation, structureExplanation, expectedEssay }) => {
     const renderFeedback = (feedback) => (
         <div className="flex w-full justify-between">
             <div className="flex flex-col space-y-2 w-1/3">Pros</div>
             <div className="flex flex-col space-y-2 w-2/3">
                 <ul className='list-disc'>
-                    {feedback?.Pros?.split('\n').map((line, i) => (
+                    {feedback.Pros.split('\n').map((line, i) => (
                         <li key={i}>
                             {line}
                         </li>
@@ -43,7 +43,7 @@ const WrittenCard = ({ prompt, userEssay, overallScore, grammarScore, vocabulary
             <div className="flex flex-col space-y-2 w-1/3">Cons</div>
             <div className="flex flex-col space-y-2 w-2/3">
                 <ul className='list-disc'>
-                    {feedback?.Cons?.split('\n').map((line, i) => (
+                    {feedback.Cons.split('\n').map((line, i) => (
                         <li key={i}>
                             {line}
                         </li>
@@ -54,37 +54,41 @@ const WrittenCard = ({ prompt, userEssay, overallScore, grammarScore, vocabulary
     );
 
     return (
-        <div className="flex flex-col bg-lightBlue-500 rounded-lg p-4 mb-4">
+        <div className="flex flex-col bg-lightBlue-500 rounded-lg p-4">
             <div className="flex flex-col space-y-2 font-semibold mb-4">
                 <Typography variant="h5">Essay Prompt:</Typography>
-                <p className="text-lg font-semibold p-4 h-fit max-h-[40vh] text-justify overflow-y-auto bg-gray-100 rounded">{prompt}</p>
+                <p className="text-lg font-semibold p-8 h-fit max-h-[40vh] text-justify">{prompt}</p>
             </div>
-            <div className="flex gap-4 my-2 flex-wrap">
-                <p className="font-semibold p-2 bg-green-100 rounded">Overall Score: {overallScore}/100</p>
-                <p className="font-semibold p-2 bg-blue-100 rounded">Grammar: {grammarScore}/100</p>
-                <p className="font-semibold p-2 bg-yellow-100 rounded">Vocabulary: {vocabularyScore}/100</p>
-            </div>
-            <div className="flex flex-col space-y-2 mt-4">
+            <p className="font-semibold my-2">Overall Score: {overallScore}/100</p>
+            <p className="font-semibold my-2">Grammar Score: {grammarScore}/100</p>
+            <p className="font-semibold my-2">Vocabulary Score: {vocabularyScore}/100</p>
+            <p className="font-semibold my-2">Content Score: {contentScore}/100</p>
+            <p className="font-semibold my-2">Structure Score: {structureScore}/100</p>
+            <div className="flex flex-col space-y-2">
                 <Typography variant="h5">User Essay:</Typography>
-                <div className="flex flex-col space-y-2 p-3 bg-gray-800 rounded-lg text-white max-h-[30vh] overflow-y-auto">
+                <div className="flex flex-col space-y-2 p-3 bg-lightBlue-900 rounded-lg text-white">
                     {userEssay}
                 </div>
-                <Typography variant="h5" className="mt-4">Expected Essay / Feedback Guidance:</Typography>
-                <div className="flex flex-col space-y-2 p-3 bg-gray-800 rounded-lg text-white max-h-[30vh] overflow-y-auto">
+                <Typography variant="h5" className="mt-4">Expected Essay:</Typography>
+                <div className="flex flex-col space-y-2 p-3 bg-lightBlue-900 rounded-lg text-white">
                     {expectedEssay}
                 </div>
-                <div className="flex flex-col space-y-4 bg-gray-100 rounded-lg p-4 mt-4 text-gray-900">
-                    <Typography variant="h5" color="blue-gray">Content Feedback</Typography>
-                    <hr className="border-gray-300" />
+                <div className="flex flex-col space-y-4 bg-lightblue-900 rounded-lg p-3 mt-4">
+                    <Typography variant="h5">Content Feedback</Typography>
+                    <hr />
                     {renderFeedback(contentExplanation)}
-                    <hr className="border-gray-300" />
-                    <Typography variant="h5" color="blue-gray">Vocabulary Feedback</Typography>
-                    <hr className="border-gray-300" />
+                    <hr />
+                    <Typography variant="h5">Vocabulary Feedback</Typography>
+                    <hr />
                     {renderFeedback(vocabularyExplanation)}
-                    <hr className="border-gray-300" />
-                    <Typography variant="h5" color="blue-gray">Grammar Feedback</Typography>
-                    <hr className="border-gray-300" />
+                    <hr />
+                    <Typography variant="h5">Grammar Feedback</Typography>
+                    <hr />
                     {renderFeedback(grammarExplanation)}
+                    <hr />
+                    <Typography variant="h5">Structure Feedback</Typography>
+                    <hr />
+                    {renderFeedback(structureExplanation)}
                 </div>
             </div>
         </div>

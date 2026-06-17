@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
 import {
     Input,
     Button,
@@ -37,23 +38,31 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function SubjectInterview() {
+    useClearOnNavigate("subject_");
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(1);
-    const [interviewName, setInterviewName] = useState("");
-    const [subjectName, setSubjectName] = useState("");
-    const [date, setDate] = useState("");
-    const [duration, setDuration] = useState({ from: "", to: "" });
-    const [noOfQuestions, setNoOfQuestions] = useState("");
-    const [easy, setEasy] = useState("");
-    const [medium, setMedium] = useState("");
-    const [hard, setHard] = useState("");
-    const [questions, setQuestions] = useState([]);
-    const [emailObject, setEmailObject] = useState([]);
+    const [currentStep, setCurrentStep] = useStickyState(1, "subject_currentStep");
+    const [interviewName, setInterviewName] = useStickyState("", "subject_interviewName");
+    const [subjectName, setSubjectName] = useStickyState("", "subject_subjectName");
+    const [date, setDate] = useStickyState("", "subject_date");
+    const [duration, setDuration] = useStickyState({ from: "", to: "" }, "subject_duration");
+    const [noOfQuestions, setNoOfQuestions] = useStickyState("", "subject_noOfQuestions");
+    const [easy, setEasy] = useStickyState("", "subject_easy");
+    const [medium, setMedium] = useStickyState("", "subject_medium");
+    const [hard, setHard] = useStickyState("", "subject_hard");
+    const [questions, setQuestions] = useStickyState([], "subject_questions");
+    const [emailObject, setEmailObject] = useStickyState([], "subject_emailObject");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && subjectName && date && duration.from && duration.to && noOfQuestions) {
             if (duration.from >= duration.to) { toast.error("End time must be after start time!"); return; }
             if (!emailObject || emailObject.length === 0) { toast.error("Please upload a CSV with student emails first!"); return; }
+            
+            const totalTypes = (Number(easy) || 0) + (Number(medium) || 0) + (Number(hard) || 0);
+            if (totalTypes > Number(noOfQuestions)) {
+                toast.error("Total difficulty questions cannot exceed total No. of Questions!");
+                return;
+            }
+            
             setCurrentStep(2);
         } else if (currentStep === 1) { toast.error("Please fill all required fields in Step 1"); }
     };
@@ -68,6 +77,10 @@ export default function SubjectInterview() {
             }, { headers: { "Content-Type": "application/json" } });
             console.log("Form submitted successfully:", response.data);
             toast.success('Interview Created Successfully! 🎉');
+            clearStickyStatePrefix("subject_");
+            setCurrentStep(1); setInterviewName(""); setSubjectName(""); setDate(""); setDuration({from:"", to:""});
+            setNoOfQuestions(""); setEasy(""); setMedium(""); setHard("");
+            setQuestions([]); setEmailObject([]);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);

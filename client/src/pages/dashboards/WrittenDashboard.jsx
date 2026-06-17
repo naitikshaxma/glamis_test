@@ -1,7 +1,7 @@
 import React from 'react';
-import {BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer} from 'recharts';
+import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer} from 'recharts';
 // import {Smile} from 'lucide-react';
-import Sidebar from '../../components/global_components/Sidebar.jsx';
+
 import {bearerInstance as instance} from "../../helpers/instance.js";
 import Cookies from "js-cookie";
 
@@ -139,40 +139,29 @@ const WrittenDashboard = () => {
   );
 
   return (
-    <div className="flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <div className="w-full md:w-1/4">
-        <Sidebar/>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1  overflow-auto">
-        <div className="w-full md:w-4/5 p-7">
-          <header className="flex justify-between items-center ">
-            <h2 className="text-2xl font-bold">
-              Hello <span className="text-black">{Cookies.get("fullName")}</span>, welcome back!
-            </h2>
-
+    <div className="w-full overflow-auto">
+      <div className="w-full p-7">
+        <header className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">
+            Hello <span className="text-black">{Cookies.get("fullName")}</span>, welcome back!
+          </h2>
+          <div className="flex items-center">
+            <i className="fas fa-bell text-gray-500 mr-5"></i>
             <div className="flex items-center">
-              <i className="fas fa-bell text-gray-500 mr-5"></i>
-              <div className="flex items-center ">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
-                  alt="User"
-                  height="40"
-                  width="40"
-                  className="h-8 w-8 rounded-full border-green-600 border-2 mr-2"
-                />
-                <span>{Cookies.get("fullName")}</span>
-              </div>
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+                alt="User"
+                height="40"
+                width="40"
+                className="h-8 w-8 rounded-full border-green-600 border-2 mr-2"
+              />
+              <span>{Cookies.get("fullName")}</span>
             </div>
-          </header>
-
-
-        </div>
-        <h3 className="text-xl font-bold mb-5 ml-7">My Interviews</h3>
-        <ExpandedView/>
+          </div>
+        </header>
       </div>
+      <h3 className="text-xl font-bold mb-5 ml-7">My Interviews</h3>
+      <ExpandedView/>
     </div>
   );
 };

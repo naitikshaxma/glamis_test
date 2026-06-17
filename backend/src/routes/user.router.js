@@ -7,11 +7,19 @@ const router = Router()
 
 import multer from 'multer'
 
+import fs from "fs";
+
 const storage = multer.diskStorage({
-    destination:"public/user-photos",
+    destination:(req,file,cb)=>{
+        const dir = file.fieldname === "resume" ? "public/resumes" : "public/user-photos";
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
     filename:(req,file,cb)=>{
-        console.log(req.user);
-        cb(null,`${req.user.email_id}_${Date.now()}.png`);
+        const ext = file.originalname.split('.').pop();
+        cb(null,`${req.user._id}_${Date.now()}.${ext}`);
     }
 })
 
@@ -29,7 +37,10 @@ router.route("/forgot-password").post( forgotPassword)
 router.route("/reset-password").post(resetPassword)
 router.route("/get-user-data-profile").post(getUserDataForProfile)
 router.route("/update-student-data-profile").post(updateStudentData) 
-router.route("/update-student-personal-data-profile").post(updatePersonalData)
+router.route("/update-student-personal-data-profile").post(isAuthenticated, upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "resume", maxCount: 1 }
+]), updatePersonalData)
 router.route("/feedback").post(feedback)
 router.route("/save-photo").post(isAuthenticated,upload.single("image"),savePhoto)
 

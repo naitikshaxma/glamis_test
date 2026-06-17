@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import axios from "axios";
@@ -17,25 +18,33 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function WrittenInterview() {
+    useClearOnNavigate("written_");
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(1);
-    const [interviewName, setInterviewName] = useState("");
-    const [domainName, setDomainName] = useState("");
-    const [date, setDate] = useState("");
-    const [duration, setDuration] = useState({ from: "", to: "" });
-    const [noOfQuestions, setNoOfQuestions] = useState("");
-    const [essay, setEssay] = useState("");
-    const [errorDetection, setErrorDetection] = useState("");
-    const [fillInTheBlanks, setFillInTheBlanks] = useState("");
-    const [synonymsAndAntonyms, setSynonymsAndAntonyms] = useState("");
-    const [jumbled, setJumbled] = useState("");
-    const [questions, setQuestions] = useState([]);
-    const [emailObject, setEmailObject] = useState([]);
+    const [currentStep, setCurrentStep] = useStickyState(1, "written_currentStep");
+    const [interviewName, setInterviewName] = useStickyState("", "written_interviewName");
+    const [domainName, setDomainName] = useStickyState("", "written_domainName");
+    const [date, setDate] = useStickyState("", "written_date");
+    const [duration, setDuration] = useStickyState({ from: "", to: "" }, "written_duration");
+    const [noOfQuestions, setNoOfQuestions] = useStickyState("", "written_noOfQuestions");
+    const [essay, setEssay] = useStickyState("", "written_essay");
+    const [errorDetection, setErrorDetection] = useStickyState("", "written_errorDetection");
+    const [fillInTheBlanks, setFillInTheBlanks] = useStickyState("", "written_fillInTheBlanks");
+    const [synonymsAndAntonyms, setSynonymsAndAntonyms] = useStickyState("", "written_synonymsAndAntonyms");
+    const [jumbled, setJumbled] = useStickyState("", "written_jumbled");
+    const [questions, setQuestions] = useStickyState([], "written_questions");
+    const [emailObject, setEmailObject] = useStickyState([], "written_emailObject");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && domainName && date && duration.from && duration.to && noOfQuestions) {
             if (duration.from >= duration.to) { toast.error("End time must be after start time!"); return; }
             if (!emailObject || emailObject.length === 0) { toast.error("Please upload a CSV with student emails first!"); return; }
+            
+            const totalTypes = (Number(essay) || 0) + (Number(errorDetection) || 0) + (Number(fillInTheBlanks) || 0) + (Number(synonymsAndAntonyms) || 0) + (Number(jumbled) || 0);
+            if (totalTypes > Number(noOfQuestions)) {
+                toast.error("Total questions from types cannot exceed total No. of Questions!");
+                return;
+            }
+            
             setCurrentStep(2);
         } else if (currentStep === 1) { toast.error("Please fill all required fields in Step 1"); }
     };
@@ -51,6 +60,10 @@ export default function WrittenInterview() {
             }, { headers: { "Content-Type": "application/json" } });
             console.log("Form submitted successfully:", response.data);
             toast.success('Interview Created Successfully! 🎉');
+            clearStickyStatePrefix("written_");
+            setCurrentStep(1); setInterviewName(""); setDomainName(""); setDate(""); setDuration({from:"", to:""});
+            setNoOfQuestions(""); setEssay(""); setErrorDetection(""); setFillInTheBlanks("");
+            setSynonymsAndAntonyms(""); setJumbled(""); setQuestions([]); setEmailObject([]);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);

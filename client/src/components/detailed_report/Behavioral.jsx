@@ -7,7 +7,19 @@ import {
 } from 'recharts';
 
 
-const Behavioral = ({ data }) => {
+const data = [
+  {
+    name: "Intonation", score: 80
+  },
+  {
+    name: "Clarity", score: 70
+  },
+  {
+    name: "Fluency", score: 35
+  }
+]
+
+const Behavioral = () => {
   return (
     <div className="flex w-1/3 flex-col lg:flex-row gap-6 m-3">
       <Card className="w-full h-full rounded-lg shadow-md">

@@ -14,9 +14,11 @@ import dashboardRouter from './routes/dashboard.router.js';
 const app = express()
 
 const objectStorePath = path.resolve("../objectStore");
+const publicPath = path.resolve("public");
 
-// Serve static files from the 'objectStore' directory
+// Serve static files
 app.use("/api/v1/objectStore", express.static(objectStorePath));
+app.use("/public", express.static(publicPath));
 
 app.use(cors())
 

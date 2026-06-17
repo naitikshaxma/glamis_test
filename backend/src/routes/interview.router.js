@@ -20,10 +20,19 @@ import {
     evaluateAnswerSvar,
     fetchInterviewForSvar,
     interviewQuestionCount, tabSwitch, continueInterview,
+    parsePDFController,
+    parseSavedResumeController,
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
-// import { RateLimiter1min } from "../utils/RateLimiter.js";
+import multer from "multer";
+import fs from "fs";
+
+const uploadTempDir = "public/temp/";
+if (!fs.existsSync(uploadTempDir)) {
+    fs.mkdirSync(uploadTempDir, { recursive: true });
+}
+const uploadTemp = multer({ dest: uploadTempDir });
 
 const router = Router()
 
@@ -53,6 +62,8 @@ router.route("/createInterviewBySvarAdmin").post(isAuthenticated, createIntervie
 router.route("/interviewQuestion/count").post(isAuthenticated, interviewQuestionCount);
 router.route("/proc").post(isAuthenticated, tabSwitch);
 router.route("/proc/continue").post(isAuthenticated, continueInterview);
+router.route("/parse-pdf").post(isAuthenticated, uploadTemp.single("resume"), parsePDFController);
+router.route("/parse-saved-resume").post(isAuthenticated, parseSavedResumeController);
 
 export default router;
 

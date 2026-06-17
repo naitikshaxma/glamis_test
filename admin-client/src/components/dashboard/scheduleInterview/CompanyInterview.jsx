@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
 import {
     Input,
     Button,
@@ -44,20 +45,21 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function CompanyInterview() {
+    useClearOnNavigate("company_");
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(1);
-    const [interviewName, setInterviewName] = useState("");
-    const [companyName, setCompanyName] = useState("");
-    const [date, setDate] = useState("");
-    const [duration, setDuration] = useState({ from: "", to: "" });
-    const [noOfQuestions, setNoOfQuestions] = useState("");
-    const [position, setPosition] = useState("");
-    const [easy, setEasy] = useState("");
-    const [medium, setMedium] = useState("");
-    const [hard, setHard] = useState("");
-    const [jobDescription, setJobDescription] = useState("");
-    const [questions, setQuestions] = useState([]);
-    const [emailObject, setEmailObject] = useState([]);
+    const [currentStep, setCurrentStep] = useStickyState(1, "company_currentStep");
+    const [interviewName, setInterviewName] = useStickyState("", "company_interviewName");
+    const [companyName, setCompanyName] = useStickyState("", "company_companyName");
+    const [date, setDate] = useStickyState("", "company_date");
+    const [duration, setDuration] = useStickyState({ from: "", to: "" }, "company_duration");
+    const [noOfQuestions, setNoOfQuestions] = useStickyState("", "company_noOfQuestions");
+    const [position, setPosition] = useStickyState("", "company_position");
+    const [easy, setEasy] = useStickyState("", "company_easy");
+    const [medium, setMedium] = useStickyState("", "company_medium");
+    const [hard, setHard] = useStickyState("", "company_hard");
+    const [jobDescription, setJobDescription] = useStickyState("", "company_jobDescription");
+    const [questions, setQuestions] = useStickyState([], "company_questions");
+    const [emailObject, setEmailObject] = useStickyState([], "company_emailObject");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && companyName && date && duration.from && duration.to && noOfQuestions && position) {
@@ -69,6 +71,13 @@ export default function CompanyInterview() {
                 toast.error("Please upload a CSV with student emails first!");
                 return;
             }
+
+            const totalTypes = (Number(easy) || 0) + (Number(medium) || 0) + (Number(hard) || 0);
+            if (totalTypes > Number(noOfQuestions)) {
+                toast.error("Total difficulty questions cannot exceed total No. of Questions!");
+                return;
+            }
+
             setCurrentStep(2);
         } else if (currentStep === 1) {
             toast.error("Please fill all required fields in Step 1");
@@ -103,6 +112,10 @@ export default function CompanyInterview() {
             });
             console.log("Form submitted successfully:", response.data);
             toast.success('Interview Created Successfully! 🎉');
+            clearStickyStatePrefix("company_");
+            setCurrentStep(1); setInterviewName(""); setCompanyName(""); setDate(""); setDuration({from:"", to:""});
+            setNoOfQuestions(""); setPosition(""); setEasy(""); setMedium(""); setHard("");
+            setJobDescription(""); setQuestions([]); setEmailObject([]);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);

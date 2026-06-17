@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import axios from "axios";
@@ -15,24 +16,32 @@ const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
 export default function SwarInterview() {
+    useClearOnNavigate("svar_");
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(1);
-    const [interviewName, setInterviewName] = useState("");
-    const [date, setDate] = useState("");
-    const [duration, setDuration] = useState({ from: "", to: "" });
-    const [noOfQuestions, setNoOfQuestions] = useState("");
-    const [reading, setReading] = useState("");
-    const [short, setShort] = useState("");
-    const [jumbled, setJumbled] = useState("");
-    const [comprehension, setComprehension] = useState("");
-    const [repeating, setRepeating] = useState("");
-    const [questions, setQuestions] = useState([]);
-    const [emailObject, setEmailObject] = useState([]);
+    const [currentStep, setCurrentStep] = useStickyState(1, "svar_currentStep");
+    const [interviewName, setInterviewName] = useStickyState("", "svar_interviewName");
+    const [date, setDate] = useStickyState("", "svar_date");
+    const [duration, setDuration] = useStickyState({ from: "", to: "" }, "svar_duration");
+    const [noOfQuestions, setNoOfQuestions] = useStickyState("", "svar_noOfQuestions");
+    const [reading, setReading] = useStickyState("", "svar_reading");
+    const [short, setShort] = useStickyState("", "svar_short");
+    const [jumbled, setJumbled] = useStickyState("", "svar_jumbled");
+    const [comprehension, setComprehension] = useStickyState("", "svar_comprehension");
+    const [repeating, setRepeating] = useStickyState("", "svar_repeating");
+    const [questions, setQuestions] = useStickyState([], "svar_questions");
+    const [emailObject, setEmailObject] = useStickyState([], "svar_emailObject");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && date && duration.from && duration.to && noOfQuestions) {
             if (duration.from >= duration.to) { toast.error("End time must be after start time!"); return; }
             if (!emailObject || emailObject.length === 0) { toast.error("Please upload a CSV with student emails first!"); return; }
+            
+            const totalTypes = (Number(reading) || 0) + (Number(short) || 0) + (Number(jumbled) || 0) + (Number(comprehension) || 0) + (Number(repeating) || 0);
+            if (totalTypes > Number(noOfQuestions)) {
+                toast.error("Total questions from types cannot exceed total No. of Questions!");
+                return;
+            }
+            
             setCurrentStep(2);
         } else if (currentStep === 1) { toast.error("Please fill all required fields in Step 1"); }
     };
@@ -48,6 +57,10 @@ export default function SwarInterview() {
             }, { headers: { "Content-Type": "application/json" } });
             console.log("Form submitted successfully:", response.data);
             toast.success('Interview Created Successfully! 🎉');
+            clearStickyStatePrefix("svar_");
+            setCurrentStep(1); setInterviewName(""); setDate(""); setDuration({from:"", to:""});
+            setNoOfQuestions(""); setReading(""); setShort(""); setJumbled("");
+            setComprehension(""); setRepeating(""); setQuestions([]); setEmailObject([]);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);

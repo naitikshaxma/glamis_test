@@ -1,6 +1,9 @@
 import fs from "fs";
 import OpenAI from "openai";
 import path from "path";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdf = require('pdf-parse');
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
@@ -1684,6 +1687,15 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
 // ---------------------------- Helper Functions ----------------------------
 
+const safeJSONParse = (str) => {
+  if (typeof str !== "string") return str;
+  let cleaned = str.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  }
+  return JSON.parse(cleaned);
+}
+
 const generateUniqueKey = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
@@ -1809,7 +1821,7 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
         }], model: "gpt-4o-mini", max_tokens: 1000,
       });
 
-      const json = JSON.parse(completion.choices[0].message.content);
+      const json = safeJSONParse(completion.choices[0].message.content);
 
       break;
     } catch (error) {
@@ -1883,7 +1895,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
     // let feedback = await evaluateAnswerWithPrompt(answer, question);
 
-    feedback = JSON.parse(feedback);
+    feedback = safeJSONParse(feedback);
 
     if (interview.type === "Svar") {
       console.log("svar ke liye create hone me ghus gaye")
@@ -1999,7 +2011,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
       }], model: "gpt-4o-mini", max_tokens: 1000,
     });
 
-    const completionData = JSON.parse(completion.choices[0].message.content);
+    const completionData = safeJSONParse(completion.choices[0].message.content);
 
     await InterviewQuestion.create({
       question: question,
@@ -2024,7 +2036,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
 
 export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
   try {
-    const { question, interviewId } = req.body
+    const { question, interviewId, difficulty } = req.body
     let answer = req.extractedAnswer
 
     if (answer === undefined) {
@@ -2036,7 +2048,7 @@ export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
       return res.status(500).json(ApiError(500, "Failed to evaluate answer"));
     }
 
-    evaluatePrompt = JSON.parse(evaluatePrompt);
+    evaluatePrompt = safeJSONParse(evaluatePrompt);
 
     await InterviewQuestion.create({
       question: question,
@@ -2044,9 +2056,9 @@ export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
       expectedAnswer: evaluatePrompt.expectedAnswer,
       interview: interviewId,
       student: req.user._id,
-      overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : feedback.overallScore,
+      overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : evaluatePrompt.overallScore,
       grammar: evaluatePrompt.grammarScore,
-      pronunciation: evaluatePrompt.pronunciationScore,
+      pronounciation: evaluatePrompt.pronunciationScore,
       pronunciationExplanation: [evaluatePrompt.pronunciationExplanation.Pros, evaluatePrompt.pronunciationExplanation.Cons],
       correctnessExplanation: [evaluatePrompt.correctnessExplanation.Pros, evaluatePrompt.correctnessExplanation.Cons],
       grammarExplanation: [evaluatePrompt.grammarExplanation.Pros, evaluatePrompt.grammarExplanation.Cons],
@@ -2054,7 +2066,7 @@ export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
 
     console.log("answer added successfully ####");
 
-    return res.status(200).json(new ApiResponse(200, JSON.parse(evaluatePrompt), "Answer evaluated successfully"));
+    return res.status(200).json(new ApiResponse(200, evaluatePrompt, "Answer evaluated successfully"));
   } catch (err) {
     return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
   }
@@ -2253,3 +2265,58 @@ export const continueInterview = async (req, res) => {
 
   return res.json(details);
 }
+
+
+export const parsePDFController = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json(new ApiResponse(400, null, "No resume file uploaded"));
+  }
+
+  try {
+    const filePath = req.file.path;
+    const dataBuffer = fs.readFileSync(filePath);
+    const parsedData = await pdf(dataBuffer);
+    
+    // Clean up temp file
+    fs.unlinkSync(filePath);
+
+    return res.status(200).json(new ApiResponse(200, {
+      text: parsedData.text
+    }, "PDF parsed successfully"));
+  } catch (err) {
+    // Clean up temp file if it exists
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    return res.status(500).json(new ApiResponse(500, null, err.message || "Failed to parse PDF"));
+  }
+});
+
+
+export const parseSavedResumeController = asyncHandler(async (req, res) => {
+  try {
+    const student = await Student.findOne({ user: req.user._id });
+    if (!student || !student.resume || student.resume === 'path/to/resume.pdf') {
+      return res.status(400).json(new ApiResponse(400, null, "No resume found in profile. Please check if you uploaded it in your profile."));
+    }
+
+    let relativePath = student.resume;
+    if (relativePath.startsWith("/")) {
+      relativePath = relativePath.slice(1);
+    }
+    
+    const absolutePath = path.resolve(relativePath);
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json(new ApiResponse(404, null, "Saved resume file not found on disk. Please upload it again."));
+    }
+
+    const dataBuffer = fs.readFileSync(absolutePath);
+    const parsedData = await pdf(dataBuffer);
+
+    return res.status(200).json(new ApiResponse(200, {
+      text: parsedData.text
+    }, "Saved resume parsed successfully"));
+  } catch (err) {
+    return res.status(500).json(new ApiResponse(500, null, err.message || "Failed to parse saved resume"));
+  }
+});

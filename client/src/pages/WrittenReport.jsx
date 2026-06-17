@@ -8,20 +8,14 @@ import { useRef } from 'react';
 import avatar from "../assets/avatar.jpeg"
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import { Svar, SvarCard } from '../components/detailed_report/Svar';
 
 
 
-const DetailedReport = () => {
-    const navigate = useNavigate();
+const WrittenReport = () => {
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(null);
-    const [activeTab, setActiveTab] = useState('');
-    const [varTab1, setVarTab1] = useState('Technical Skills');
-    const [varTab2, setVarTab2] = useState('Verbal Skills');
-    const [studentName,setStudentName] = useState(Cookies.get("fullName"));
+    const [activeTab, setActiveTab] = useState('technical');
+    const [varTab, setVarTab] = useState('Technical Skills');
 
     const handleOpen = (value) => {
         setOpen(open === value ? null : value);
@@ -39,25 +33,6 @@ const DetailedReport = () => {
             containerId: 'scroll-container'
         });
     };
-    // const reportTemplateRef = useRef(null);
-
-    // const handleGeneratePdf = () => {
-	// 	const doc = new jsPDF({
-	// 		format: 'a4',
-	// 		unit: 'px',
-	// 	});
-
-	// 	// Adding the fonts.
-	// 	doc.setFont('Inter-Regular', 'normal');
-
-	// 	doc.html(reportTemplateRef.current, {
-	// 		async callback(doc) {
-	// 			await doc.save('report.pdf');
-	// 		},
-	// 	});
-	// };
-
-
 
 
 
@@ -74,27 +49,10 @@ const DetailedReport = () => {
             }
         );
         console.log(response.data);
-        if(response.data.studentName){
-            setStudentName(response.data.studentName);
-        }
+
         setResult(response.data.interviewResults);
         if (response.data.interviewType === 'verbal') {
-            // setVarTab1('verbal'); no need to set this to verbal 
-            setActiveTab('verbal')
-        } else if (response.data.interviewType === 'written') {
-            setVarTab1('Written Skills');
-            setActiveTab('Written Skills')
-            setVarTab2('Content Information');
-        } else if (response.data.interviewType === 'Svar'){
-            setVarTab1('Svar')
-            setActiveTab('Svar')
-            setVarTab2('')
-        } else if (response.data.interviewType === 'Subject') {
-            setVarTab1('Technical Skills')
-            setActiveTab('Technical Skills')
-        } else if (response.data.interviewType === 'company') {
-            setVarTab1('Technical')
-            setActiveTab('technical')
+            setVarTab('Relevancy Score');
         }
     }
 
@@ -151,7 +109,7 @@ const DetailedReport = () => {
                                                 good: [item.technicalExplanation[0]],
                                                 improvement: [item.technicalExplanation[1]]
                                             }}
-                                            score={item.overallPerformance}
+                                            score={item.overallPerformance <= 40 ? 0 : item.overallPerformance}
                                             expectedAnswer={item.expectedAnswer}
                                         />
                                     </div>
@@ -248,64 +206,6 @@ const DetailedReport = () => {
                     </div>
 
                 )
-                case 'Svar': 
-                    return( 
-                    <div className='w-full flex gap-3 mb-5'>
-                        <div className="w-16 shrink-0 p-2 rounded-lg shadow-lg sticky top-0 h-fit">
-                            <div className="flex flex-col space-y-2">
-                            {
-                                result?.map((item, index) => (
-                                    <Link
-                                        key={index}
-                                        to={`question-${index}`}
-                                        smooth={true}
-                                        duration={500}
-                                        className={`flex w-full justify-center items-center p-2 cursor-pointer rounded text-sm ${selectedQuestion === index ? 'bg-[#2b6030] text-white' : 'hover:bg-gray-100'}`}
-                                        onClick={() => handleQuestionClick(index)}
-                                    >
-                                        Q{index + 1}
-                                    </Link>
-                                ))
-                            }
-                            </div>
-                        </div>
-                        <div
-                            className="flex-1 p-4 rounded-lg shadow-lg h-[80vh] overflow-y-auto"
-                            id="scroll-container"
-                            ref={scrollContainerRef}
-                        >
-                            {
-                                result.map((item, index) => (
-                                    <div id={`question-${index}`} key={index} className="mb-4">
-                                        <SvarCard
-                                            qno={index}
-                                            question={item.question}
-                                            answer={item.answer}
-                                            feedback={{
-                                                pronounciation: {
-                                                    good: [item.pronunciationExplanation[0]],
-                                                    improvement: [item.pronunciationExplanation[1]]
-                                                },
-                                                correctness: {
-                                                    good: [item.correctnessExplanation[0]],
-                                                    improvement: [item.correctnessExplanation[1]]
-                                                },
-                                                grammar: {
-                                                    good: [item.grammarExplanation[0]],
-                                                    improvement: [item.grammarExplanation[1]]
-                                                }}}
-                                            score={item.overallPerformance}
-                                            expectedAnswer={item.expectedAnswer}
-                                            grammar={item.grammar}
-                                            correctness={item.correctness}
-                                            pronounciation={item.pronounciation}
-                                        />
-                                    </div>
-                                ))
-                            }
-                        </div>
-                    </div>
-                    )
             default:
                 return (
                     <>Technical</>
@@ -313,22 +213,8 @@ const DetailedReport = () => {
         }
     }
 
-    const downlowdReport = () => {
-        // ctrl + p -> save as pdf
-        window.print();
-    }
-
     return (
         <div className="w-full px-6">
-            {/* two buttons 1 for home and 2 for downlowd report */}
-            <div className="flex justify-between my-4 print:hidden relative z-50">
-                <button className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg cursor-pointer transition-colors"
-                onClick={() => navigate('/dashboard')}
-                >Home</button>
-                <button className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg cursor-pointer transition-colors"
-                onClick={downlowdReport}
-                >Download Report</button>
-            </div>
             <div className="header bg-green-100 w-full flex justify-between p-4 border-b-0 border-2 border-green-900">
                 <div className="flex">
                     <div className="avatar w-20">
@@ -338,17 +224,17 @@ const DetailedReport = () => {
                         <div className="font-semibold text-lg">GLAMIS</div>
                         <div className="font-semibold text-sm">G.L.A. University</div>
                         <div className="font-semibold text-sm">Mathura, Uttar Pradesh</div>
-                        <div className="font-semibold text-sm">India, 281406</div>
+                        <div className="font-semibold text-sm">India, 250909</div>
                     </div>
                 </div>
                 <div className="flex items-center">
                     <div className="flex flex-col mr-4">
-                        <div className="font-semibold text-lg text-right">{studentName}</div>
+                        <div className="font-semibold text-lg text-right">{Cookies.get("fullName")}</div>
                         <div className="font-semibold text-sm text-right">2115000000</div>
-                        <div className="font-semibold text-sm text-right">Mock Interview Results</div>
+                        <div className="font-semibold text-sm text-right">Data Structures and Algorithms</div>
                     </div>
                     <div className="avatar w-20 border-2 border-green-900">
-                        <img src="https://static.vecteezy.com/system/resources/thumbnails/000/439/863/small/Basic_Ui__28186_29.jpg" alt="" />
+                        <img src={avatar} alt="" />
                     </div>
                 </div>
             </div>
@@ -358,36 +244,17 @@ const DetailedReport = () => {
                         <span>Analysis</span>
                     </div>
                     <div className='flex w-full'>
-                        {activeTab === 'Svar' ? 
-                        <Svar pronounciationScore={[
-                            { name: 'Score', value: result.reduce((acc, item) => acc + item.pronounciation, 0) / result.length },
-                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.pronounciation, 0) / result.length }
-                          ]} 
-                          grammarScore={[
-                              { name: 'Score', value: result.reduce((acc, item) => acc + item.grammar, 0) / result.length },
-                              { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
-                            ]} 
-                            correctnessScore={[
-                              { name: 'Score', value: result.reduce((acc, item) => acc + item.correctness, 0) / result.length },
-                              { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.correctness, 0) / result.length }
-                            ]} 
-                          />
-                            :
-                            <>
-                                <Technical technicalScore={[
-                                    { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
-                                    { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
-                                ]} varTab1={varTab1}
-                                />
-                                <Verbal data={
-                                    [
-                                        { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
-                                        { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
-                                    ]
-                                } varTab2={varTab2} />
-                            </>
-                    }
-                        
+                        <Technical technicalScore={[
+                            { name: 'Score', value: result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length },
+                            { name: 'Remaining', value: 100 - result.reduce((acc, item) => acc + item.overallPerformance, 0) / result.length }
+                        ]} varTab={varTab}
+                        />
+                        <Verbal data={
+                            [
+                                { name: 'Vocabulary', score: result.reduce((acc, item) => acc + item.vocabulary, 0) / result.length },
+                                { name: 'Grammar', score: result.reduce((acc, item) => acc + item.grammar, 0) / result.length }
+                            ]
+                        } />
                     </div>
                 </div>
                 <div className="report mt-4">
@@ -397,13 +264,13 @@ const DetailedReport = () => {
                     <div className="w-full shadow">
                         <div className="flex border-b mb-6">
                             <button className={`py-2 px-4 ${activeTab === 'technical' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`} onClick={() => setActiveTab('technical')} >
-                                {varTab1}
+                                {varTab}
                             </button>
                             <button
                                 className={`py-2 px-4 ${activeTab === 'verbal' ? 'border-b-2 border-[#2b6030] text-[#2b6030]' : 'text-gray-600'}`}
                                 onClick={() => setActiveTab('verbal')}
                             >
-                                {varTab2}
+                                Verbal Skills
                             </button>
                         </div>
                         <div className="flex">
@@ -416,4 +283,4 @@ const DetailedReport = () => {
     );
 };
 
-export default DetailedReport;
+export default WrittenReport;

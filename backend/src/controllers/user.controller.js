@@ -532,36 +532,42 @@ const updateStudentData = asyncHandler(async (req, res) => {
 })
 
 const updatePersonalData = asyncHandler(async (req, res) => {
-    const accessToken  = req.header("Authorization").replace("Bearer ","");
-
-    if (!accessToken) {
-        return res.status(400).json(ApiError(400, "Access token not present"))
-    }
-
     try {
-        const { rollNo, address } = req.body; 
+        const { rollNo, address, deleteResume } = req.body;
+        const hasAvatar = req.files && req.files.avatar && req.files.avatar[0];
+        const hasResume = req.files && req.files.resume && req.files.resume[0];
 
-        if (isEmpty(rollNo) && isEmpty(address)) {
+        const isDeletingResume = deleteResume === "true" || deleteResume === true;
+
+        if (isEmpty(rollNo) && isEmpty(address) && !hasAvatar && !hasResume && !isDeletingResume) {
             return res.status(400).json(ApiError(400, "Empty data"))
-        }; 
+        };
 
-        const updateFields = {}; 
+        const updateFields = {};
 
-        if (rollNo) updateFields.rollNo = rollNo 
-        if (address) updateFields.address = address 
+        if (rollNo) updateFields.rollNo = rollNo;
+        if (address) updateFields.address = address;
 
-        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET); 
-        const updateStudent = await Student.findOneAndUpdate({user: decodedToken._id}, updateFields, {new: true}); 
+        if (hasAvatar) {
+            updateFields.avatar = `/public/user-photos/${req.files.avatar[0].filename}`;
+        }
+        if (hasResume) {
+            updateFields.resume = `/public/resumes/${req.files.resume[0].filename}`;
+        } else if (isDeletingResume) {
+            updateFields.resume = "path/to/resume.pdf";
+        }
+
+        const updateStudent = await Student.findOneAndUpdate({ user: req.user._id }, updateFields, { new: true });
 
         if (!updateStudent) {
             return res.status(400).json(ApiError(400, "Student not updated"))
         }
 
-        return res.status(200).json(new ApiResponse(200, updateStudent, "Student Updated")); 
+        return res.status(200).json(new ApiResponse(200, updateStudent, "Student Updated"));
 
     } catch (err) {
         console.log(err)
-        return res.status(500).json(ApiError(500, "Internal Server Error")); 
+        return res.status(500).json(ApiError(500, "Internal Server Error"));
     }
 })
 
