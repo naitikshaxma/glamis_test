@@ -1,5 +1,5 @@
 import { useEffect, useContext } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import Dashboard from "./pages/dashboards/Dashboard.jsx";
 import Signup from "./pages/Signup";
@@ -49,6 +49,18 @@ const response = {
 // eslint-disable-next-line react/prop-types
 const MainLayout = ({ children }) => {
     const { isOpen, toggleSidebar } = useContext(SidebarContext);
+    const location = useLocation();
+    const isActive = (path) => location.pathname === path;
+
+    const navItems = [
+        { name: 'Dashboard', href: '/dashboard' },
+        { name: 'Profile', href: '/profile' },
+        { name: 'My Interviews', href: '/myInterview' },
+        { name: 'History', href: '/history' },
+        { name: 'Feedback', href: '/feedback' },
+        { name: 'Our Team', href: '/team' }
+    ];
+
     return (
         <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
@@ -75,6 +87,23 @@ const MainLayout = ({ children }) => {
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Horizontal Nav Links */}
+                        <div className="flex items-center gap-1">
+                            {navItems.map((item, idx) => (
+                                <Link 
+                                    to={item.href} 
+                                    key={idx}
+                                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                                        isActive(item.href) 
+                                            ? 'bg-green-50 text-green-700 font-semibold' 
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
                         </div>
                     </div>
                 )}
