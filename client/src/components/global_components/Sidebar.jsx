@@ -140,22 +140,30 @@ export default function Sidebar() {
                 {/* Bottom Alert and Profile Section */}
                 <div className="mt-auto p-4 border-t border-gray-100 bg-gray-50/50">
                     {openAlert && (
-                        <Alert open={openAlert} onClose={() => setOpenAlert(false)} className="mb-4 bg-gray-950 text-white rounded-xl p-4">
-                            <Typography variant="h6" className="mb-1 text-sm font-bold text-white">
+                        <div className="mb-4 bg-gray-900 text-white rounded-xl p-4 relative shadow-md">
+                            <button 
+                                onClick={() => setOpenAlert(false)} 
+                                className="absolute top-2 right-2 text-white/70 hover:text-white"
+                            >
+                                <svg xmlns="http://www.w3.org/2050/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <h4 className="mb-1 text-sm font-bold text-white">
                                 GLAMIS - Notify
-                            </Typography>
-                            <Typography variant="small" className="font-normal opacity-85 text-xs text-white">
-                                🚀 We have 4 modules live for v1 ! Accelrate your career with this software. 🌟💼
-                            </Typography>
-                            <div className="mt-2 flex gap-3">
+                            </h4>
+                            <p className="text-white/85 text-xs font-normal">
+                                🚀 We have 4 modules live for v1! Accelerate your career with this software. 🌟💼
+                            </p>
+                            <div className="mt-3">
                                 <button
-                                    className="font-semibold text-xs opacity-90 text-white underline hover:opacity-100"
+                                    className="font-semibold text-xs text-white underline hover:text-white/80 transition-colors"
                                     onClick={() => setOpenAlert(false)}
                                 >
                                     Dismiss
                                 </button>
                             </div>
-                        </Alert>
+                        </div>
                     )}
 
                     <div className="border-t border-gray-100/10 pt-2">
