@@ -1,60 +1,53 @@
 import React, { useState } from "react";
-import {
-    Input,
-    Button,
-    Typography,
-    Select,
-    Option,
-    Textarea,
-} from "@material-tailwind/react";
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
+import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import api from "../../../helpers/api";
-import { toast } from "react-toastify";
 
 const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) => (
-    <div className="flex flex-col mb-6">
-        <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-            {label}
-        </Typography>
-        <Input
-            type={type}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            max={max}
-            className="!border-blue-gray-200 focus:!border-gray-900 py-2 px-3 rounded-md"
-        />
+    <div className="flex flex-col mb-5">
+        <Typography variant="small" className="mb-2 font-medium text-gray-700">{label}</Typography>
+        <Input type={type} value={value} onChange={onChange} placeholder={placeholder} max={max} className="!border-gray-200 focus:!border-green-700 rounded-lg" />
     </div>
 );
 
 const sampleCSV = `email\nanikroy@gla.ac.in\nshubh@gla.ac.in\nadmin@gla.ac.in`;
 
-export default function WrittenInterview() {
-    const [currentStep, setCurrentStep] = useState(1);
-    const [interviewName, setInterviewName] = useState("");
-    const [date, setDate] = useState("");
-    const [duration, setDuration] = useState({ from: "", to: "" });
-    const [noOfQuestions, setNoOfQuestions] = useState("");
-    const [reading, setReading] = useState("");
-    const [short, setShort] = useState("");
-    const [jumbled, setJumbled] = useState("");
-    const [comprehension, setComprehension] = useState("");
-    const [repeating, setRepeating] = useState("");
-    const [questions, setQuestions] = useState([]);
-    const [emailObject, setEmailObject] = useState([]);
+export default function SwarInterview() {
+    useClearOnNavigate("svar_");
+    const navigate = useNavigate();
+    const [currentStep, setCurrentStep] = useStickyState(1, "svar_currentStep");
+    const [interviewName, setInterviewName] = useStickyState("", "svar_interviewName");
+    const [date, setDate] = useStickyState("", "svar_date");
+    const [duration, setDuration] = useStickyState({ from: "", to: "" }, "svar_duration");
+    const [noOfQuestions, setNoOfQuestions] = useStickyState("", "svar_noOfQuestions");
+    const [reading, setReading] = useStickyState("", "svar_reading");
+    const [short, setShort] = useStickyState("", "svar_short");
+    const [jumbled, setJumbled] = useStickyState("", "svar_jumbled");
+    const [comprehension, setComprehension] = useStickyState("", "svar_comprehension");
+    const [repeating, setRepeating] = useStickyState("", "svar_repeating");
+    const [questions, setQuestions] = useStickyState([], "svar_questions");
+    const [emailObject, setEmailObject] = useStickyState([], "svar_emailObject");
 
     const handleNext = () => {
-        if (currentStep === 1 && interviewName && date && noOfQuestions) {
+        if (currentStep === 1 && interviewName && date && duration.from && duration.to && noOfQuestions) {
+            if (duration.from >= duration.to) { toast.error("End time must be after start time!"); return; }
+            if (!emailObject || emailObject.length === 0) { toast.error("Please upload a CSV with student emails first!"); return; }
+            
+            const totalTypes = (Number(reading) || 0) + (Number(short) || 0) + (Number(jumbled) || 0) + (Number(comprehension) || 0) + (Number(repeating) || 0);
+            if (totalTypes > Number(noOfQuestions)) {
+                toast.error("Total questions from types cannot exceed total No. of Questions!");
+                return;
+            }
+            
             setCurrentStep(2);
-        }
+        } else if (currentStep === 1) { toast.error("Please fill all required fields in Step 1"); }
     };
-
-    const handlePrevious = () => {
-        setCurrentStep(currentStep - 1);
-    };
+    const handlePrevious = () => { setCurrentStep(currentStep - 1); };
 
     const handleSubmit = async () => {
-
         try {
             const response = await api.post(`/api/v1/admin/interview/svar/create`, {
                 name: interviewName,
@@ -62,11 +55,11 @@ export default function WrittenInterview() {
                 from: duration.from,
                 to: duration.to,
                 no_of_questions: noOfQuestions,
-                reading,
-                repeating,
-                short,
-                jumbled,
-                comprehension,
+                reading: Number(reading) || 0,
+                repeating: Number(repeating) || 0,
+                short: Number(short) || 0,
+                jumbled: Number(jumbled) || 0,
+                comprehension: Number(comprehension) || 0,
                 questions,
                 students: emailObject,
                 type: "Svar"
@@ -74,25 +67,20 @@ export default function WrittenInterview() {
                 headers: { "Content-Type": "application/json" }
             });
             console.log("Form submitted successfully:", response.data);
-            toast.success("Interview scheduled successfully");
-            alert("Interview Created successfully");
-
+            toast.success('Interview Created Successfully! 🎉');
+            clearStickyStatePrefix("svar_");
+            setCurrentStep(1); setInterviewName(""); setDate(""); setDuration({from:"", to:""});
+            setNoOfQuestions(""); setReading(""); setShort(""); setJumbled("");
+            setComprehension(""); setRepeating(""); setQuestions([]); setEmailObject([]);
+            navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
+            toast.error(error?.response?.data?.message || 'Failed to create interview');
         }
     };
 
-    const handleAddQuestion = () => {
-        if (questions.length < parseInt(noOfQuestions)) {
-            setQuestions([...questions, { question: "", questionType: "reading" }]);
-        }
-    };
-
-    const handleQuestionChange = (index, field, value) => {
-        const updatedQuestions = [...questions];
-        updatedQuestions[index][field] = value;
-        setQuestions(updatedQuestions);
-    };
+    const handleAddQuestion = () => { if (questions.length < parseInt(noOfQuestions)) { setQuestions([...questions, { question: "", questionType: "reading" }]); } };
+    const handleQuestionChange = (index, field, value) => { const u = [...questions]; u[index][field] = value; setQuestions(u); };
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
@@ -102,220 +90,105 @@ export default function WrittenInterview() {
                 const contents = e.target.result;
                 const emailRegex = /([a-zA-Z0-9._-]+)@(gla.ac.in|glamis.in)/g;
                 const emailIds = contents.match(emailRegex);
-                console.log(emailIds)
+                console.log(emailIds);
                 setEmailObject(emailIds);
             };
             reader.readAsText(file);
         }
     };
-
-    const handleDownloadSampleCSV = () => {
-        const blob = new Blob([sampleCSV], { type: 'text/csv;charset=utf-8' });
-        saveAs(blob, 'sample.csv');
-    };
+    const handleDownloadSampleCSV = () => { const blob = new Blob([sampleCSV], { type: 'text/csv;charset=utf-8' }); saveAs(blob, 'sample.csv'); };
 
     return (
-        <div className="flex flex-col h-screen w-full bg-gray-100">
-            <div className="flex-grow flex flex-col p-8 bg-white">
-                <div className="mb-6 flex justify-between items-center border-b pb-4">
-                    <Typography variant="h4" color="blue-gray" className="font-semibold">
-                        Svar
-                    </Typography>
+        <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="flex items-center gap-3 mb-6">
+                <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+                </button>
+                <div>
+                    <Typography variant="h4" className="font-bold text-gray-800">Schedule Svar Interview</Typography>
+                    <Typography variant="small" className="text-gray-500">Fill in the details to schedule a new interview</Typography>
                 </div>
+            </div>
 
-                <div className="flex-grow overflow-hidden">
-                    {/* Combined Form: Basic Information and Duration */}
-                                        {currentStep === 1 && (
-                                            <>
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                                    <FormInput
-                                                        label="Interview Name"
-                                                        value={interviewName}
-                                                        onChange={(e) => setInterviewName(e.target.value)}
-                                                        placeholder="Interview Name"
-                                                    />
-                                                    <FormInput
-                                                        label="Date"
-                                                        type="date"
-                                                        value={date}
-                                                        onChange={(e) => setDate(e.target.value)}
-                                                    />
-                                                     <FormInput
-                                                        label="Duration (From)"
-                                                        type="time"
-                                                        value={duration.from}
-                                                        onChange={(e) => setDuration({ ...duration, from: e.target.value })}
-                                                    />
-
-                                                </div>
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                                   <FormInput
-                                                        label="Duration (To)"
-                                                        type="time"
-                                                        value={duration.to}
-                                                        onChange={(e) => setDuration({ ...duration, to: e.target.value })}
-                                                    />
-                                                    <FormInput
-                                                        label="No. of Questions"
-                                                        type="number"
-                                                        value={noOfQuestions}
-                                                        onChange={(e) => setNoOfQuestions(e.target.value)}
-                                                        placeholder="Number of Questions"
-                                                        max={20}
-                                                    />
-                                                     <FormInput
-                                                        label="No of Reading questions"
-                                                        type="number"
-                                                        value={reading}
-                                                        onChange={(e) => setReading(e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                                   <FormInput
-                                                        label="No of Repeating Sentences"
-                                                        type="number"
-                                                        value={repeating}
-                                                        onChange={(e) => setRepeating(e.target.value)}
-                                                    />
-                                                    <FormInput
-                                                        label="No of Short questions"
-                                                        type="number"
-                                                        value={short}
-                                                        onChange={(e) => setShort(e.target.value)}
-                                                    />
-                                                     <FormInput
-                                                        label="No of Jumbled Sentences"
-                                                        type="number"
-                                                        value={jumbled}
-                                                        onChange={(e) => setJumbled(e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                                   <FormInput
-                                                        label="No of Passage Comprehension"
-                                                        type="number"
-                                                        value={comprehension}
-                                                        onChange={(e) => setComprehension(e.target.value)}
-                                                    />
-                                                    </div>
-                                                <div className="flex space-x-4 mb-6">
-                                                    <div className="flex flex-col">
-                                                        <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                            Upload Student EmailIDs
-                                                        </Typography>
-                                                        <input
-                                                            type="file"
-                                                            accept=".csv"
-                                                            onChange={handleFileUpload}
-                                                            className="file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 file:rounded-md file:text-sm file:font-semibold file:bg-[#2c6031] file:text-white hover:file:bg-[#1f4d26]"
-                                                        />
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                            Download Sample CSV
-                                                        </Typography>
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={handleDownloadSampleCSV}
-                                                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                                                        >
-                                                            Show Sample CSV
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
-
-                    {/* Step 2: Job Description, Add Questions, and Upload Record */}
-                    {currentStep === 2 && (
+            <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                    {currentStep === 1 && (
                         <>
-                            <div className="space-y-6 mb-6">
-                                <div className="overflow-y-auto max-h-[400px]">
-                                    {questions.map((q, index) => (
-                                        <div key={index} className="flex justify-between mb-4">
-                                            <div className="flex flex-col flex-1">
-                                                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                    Add New Question (Optional)
-                                                </Typography>
-                                                <Input
-                                                    value={q.question}
-                                                    onChange={(e) => handleQuestionChange(index, "question", e.target.value)}
-                                                    placeholder="Enter question"
-                                                    className="w-full"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col ml-4">
-                                                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-                                                    Set Question types
-                                                </Typography>
-                                                <Select
-                                                    value={q.questionType}
-                                                    onChange={(value) => handleQuestionChange(index, "questionType", value)}
-                                                    className="w-full"
-                                                >
-                                                    <Option value="essay">Essay</Option>
-                                                    <Option value="jumbled">Jumbled</Option>
-                                                    <Option value="errorDetection">Error Detection</Option>
-                                                    <Option value="fillInTheBlanks">Fill in the Blanks</Option>
-                                                    <Option value="synonymsAndAntonyms">Synonyms and Antonyms</Option>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {questions.length < parseInt(noOfQuestions) && (
-                                        <>
-                                        <Button
-                                            size="sm"
-                                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                                            onClick={handleAddQuestion}
-                                        >
-                                            +
-                                        </Button>
+                            <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Interview Details</Typography>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FormInput label="Interview Name" value={interviewName} onChange={(e) => setInterviewName(e.target.value)} placeholder="Interview Name" />
+                                <FormInput label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <FormInput label="Duration (From)" type="time" value={duration.from} onChange={(e) => setDuration({ ...duration, from: e.target.value })} />
+                                <FormInput label="Duration (To)" type="time" value={duration.to} onChange={(e) => setDuration({ ...duration, to: e.target.value })} />
+                                <FormInput label="No. of Questions" type="number" value={noOfQuestions} onChange={(e) => setNoOfQuestions(e.target.value)} placeholder="Number of Questions" max={20} />
+                            </div>
 
-                                        <Button
-                                            size="sm"
-                                            className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-300 ml-2"
-                                            onClick={() => setQuestions(questions.slice(0, -1))}
-                                        >
-                                            -
-                                        </Button>
-                                        </>
-                                    )}
+                            <hr className="my-6 border-gray-200" />
+                            <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Question Type Distribution</Typography>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <FormInput label="Reading" type="number" value={reading} onChange={(e) => setReading(e.target.value)} />
+                                <FormInput label="Repeating Sentences" type="number" value={repeating} onChange={(e) => setRepeating(e.target.value)} />
+                                <FormInput label="Short Questions" type="number" value={short} onChange={(e) => setShort(e.target.value)} />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <FormInput label="Jumbled Sentences" type="number" value={jumbled} onChange={(e) => setJumbled(e.target.value)} />
+                                <FormInput label="Passage Comprehension" type="number" value={comprehension} onChange={(e) => setComprehension(e.target.value)} />
+                            </div>
+
+                            <hr className="my-6 border-gray-200" />
+                            <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Students</Typography>
+                            <div className="flex items-end gap-6">
+                                <div className="flex flex-col">
+                                    <Typography variant="small" className="mb-2 font-medium text-gray-700">Upload Student EmailIDs</Typography>
+                                    <input type="file" accept=".csv" onChange={handleFileUpload} className="file:mr-4 file:py-2 file:px-4 file:border-0 file:rounded-lg file:text-sm file:font-semibold file:bg-[#2c6031] file:text-white hover:file:bg-[#1f4d26] file:cursor-pointer text-sm text-gray-500" />
                                 </div>
+                                <Button size="sm" variant="outlined" color="gray" onClick={handleDownloadSampleCSV} className="rounded-lg text-xs">Show Sample CSV</Button>
                             </div>
                         </>
                     )}
-                </div>
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-auto p-4 border-t border-gray-300">
-                    {currentStep > 1 && (
-                        <Button
-                            size="lg"
-                            onClick={handlePrevious}
-                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                        >
-                            Previous
-                        </Button>
+                    {currentStep === 2 && (
+                        <>
+                            <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Questions</Typography>
+                            <div className="overflow-y-auto max-h-[400px] space-y-4">
+                                {questions.map((q, index) => (
+                                    <div key={index} className="flex gap-4 items-end p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                        <div className="flex flex-col flex-1">
+                                            <Typography variant="small" className="mb-2 font-medium text-gray-700">Question {index + 1} (Optional)</Typography>
+                                            <Input value={q.question} onChange={(e) => handleQuestionChange(index, "question", e.target.value)} placeholder="Enter question" className="!border-gray-200 focus:!border-green-700 rounded-lg" />
+                                        </div>
+                                        <div className="flex flex-col w-48">
+                                            <Typography variant="small" className="mb-2 font-medium text-gray-700">Type</Typography>
+                                            <Select value={q.questionType} onChange={(value) => handleQuestionChange(index, "questionType", value)} className="!border-gray-200">
+                                                <Option value="reading">Reading</Option>
+                                                <Option value="repeating">Repeating</Option>
+                                                <Option value="short">Short</Option>
+                                                <Option value="jumbled">Jumbled</Option>
+                                                <Option value="comprehension">Comprehension</Option>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                ))}
+                                {questions.length < parseInt(noOfQuestions) && (
+                                    <div className="flex gap-2">
+                                        <Button size="sm" className="bg-[#2c6031] hover:bg-[#1f4d26] rounded-lg" onClick={handleAddQuestion}>+</Button>
+                                        <Button size="sm" className="bg-red-500 hover:bg-red-600 rounded-lg" onClick={() => setQuestions(questions.slice(0, -1))}>−</Button>
+                                    </div>
+                                )}
+                            </div>
+                        </>
                     )}
-                    {currentStep < 2 ? (
-                        <Button
-                            size="lg"
-                            onClick={handleNext}
-                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                        >
-                            Next
-                        </Button>
-                    ) : (
-                        <Button
-                            size="lg"
-                            onClick={handleSubmit}
-                            className="bg-[#2c6031] text-white hover:bg-[#1f4d26] transition-colors duration-300"
-                        >
-                            Submit
-                        </Button>
-                    )}
+
+                    <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+                        {currentStep > 1 ? (<Button variant="outlined" color="gray" onClick={handlePrevious} className="rounded-lg px-8 py-3">Previous</Button>) : <div />}
+                        {currentStep < 2 ? (
+                            <Button onClick={handleNext} className="bg-[#2c6031] hover:bg-[#1f4d26] rounded-lg px-8 py-3">Next</Button>
+                        ) : (
+                            <Button onClick={handleSubmit} className="bg-[#2c6031] hover:bg-[#1f4d26] rounded-lg px-8 py-3">Submit</Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

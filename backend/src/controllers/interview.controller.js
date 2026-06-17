@@ -1,11 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config({ override: true });
 import fs from "fs";
 import OpenAI from "openai";
 import path from "path";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { PDFParse } = require('pdf-parse');
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const { PDFParse } = require("pdf-parse");
 import sanitizeHtml from 'sanitize-html';
 import {
   AdminInterview,
@@ -17,7 +19,6 @@ import {
   InterviewQuestion,
 } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
-import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
 import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
@@ -502,6 +503,30 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      timer = 45; // default for custom question
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
+
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question,
+        timer,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
 
   console.log('wow')
   let difficulty = '';
@@ -722,13 +747,34 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
   const adminInterview = await AdminInterview.findOne({ interview: interviewId }).populate('interview');
 
-
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
-  console.log('wow')
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
 
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question,
+        timer,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
+  console.log('wow')
   console.log(questionNo);
 
   let difficulty = '';
@@ -961,6 +1007,31 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
+
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      timer = 20 * 60; // 20 minutes
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
+
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question,
+        timer,
+        audioFileName: audioFileName
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
   let difficulty;
   const essay = adminInterview.essay || 0;
   const jumbled = adminInterview.jumbled || 0;
@@ -1253,6 +1324,30 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     return res.status(404).json(ApiError(404, "Interview not found"));
   }
 
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      const audioFileName = `question-${generateUniqueKey()}.mp3`;
+      const audioFilePath = path.join(objectStorePath, audioFileName);
+      const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+      await textToSpeech(cleanedQuestion, audioFilePath);
+
+      if (!fs.existsSync(audioFilePath)) {
+        return res.status(500).json({ error: 'Failed to generate audio' });
+      }
+
+      const dataToSend = {
+        question: question,
+        audioFileName: audioFileName,
+        difficulty: customQuestion.difficulty || "Medium",
+        timer: timerObject[customQuestion.difficulty || "Medium"] || 90
+      };
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
+  }
+
   let difficulty;
   const easy = adminInterview.easy || 0;
   const medium = adminInterview.medium || 0;
@@ -1406,9 +1501,39 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }).join("\n");
 
 
-  const adminInterview = await AdminInterview.findOne({ interview: interviewId }).populate('interview');
-  if (adminInterview === null) {
+  const adminInterview = await AdminSvarInterview.findOne({ interview: interviewId }).populate('interview');
+  if (adminInterview == null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
+  }
+
+  // Serve custom questions first
+  if (adminInterview.questions && adminInterview.questions.length > 0 && questionNo < adminInterview.questions.length) {
+    const customQuestion = await InterviewQuestionsByAdmin.findById(adminInterview.questions[questionNo]);
+    if (customQuestion) {
+      const question = customQuestion.question;
+      timer = 30; // 30 seconds for reading
+
+      const dataToSend = {
+        question,
+        difficulty: customQuestion.difficulty || 'reading',
+        timer
+      };
+      
+      // if audio is needed, generate it
+      if (dataToSend.difficulty !== 'reading') {
+        const audioFileName = `question-${generateUniqueKey()}.mp3`;
+        const audioFilePath = path.join(objectStorePath, audioFileName);
+        const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+        await textToSpeech(cleanedQuestion, audioFilePath);
+
+        if (!fs.existsSync(audioFilePath)) {
+          return res.status(500).json({ error: 'Failed to generate audio' });
+        }
+        dataToSend.audioFileName = audioFileName;
+      }
+
+      return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
+    }
   }
 
   let difficulty = '';
@@ -1627,6 +1752,15 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
 
 // ---------------------------- Helper Functions ----------------------------
 
+const safeJSONParse = (str) => {
+  if (typeof str !== "string") return str;
+  let cleaned = str.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  }
+  return JSON.parse(cleaned);
+}
+
 const generateUniqueKey = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
@@ -1752,7 +1886,7 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
          }], model: "gpt-4o-mini", max_tokens: 1000,
        });
 
-       const json = sanitizeObject(JSON.parse(completion.choices[0].message.content));
+      const json = sanitizeObject(safeJSONParse(completion.choices[0].message.content));
 
        break;
      } catch (error) {
@@ -1826,7 +1960,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
 
     // let feedback = await evaluateAnswerWithPrompt(answer, question);
 
-    feedback = JSON.parse(feedback);
+    feedback = safeJSONParse(feedback);
 
     if (interview.type === "Svar") {
       console.log("svar ke liye create hone me ghus gaye")
@@ -1942,7 +2076,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
        }], model: "gpt-4o-mini", max_tokens: 1000,
      });
 
-     const completionData = sanitizeObject(JSON.parse(completion.choices[0].message.content));
+    const completionData = sanitizeObject(safeJSONParse(completion.choices[0].message.content));
 
      await InterviewQuestion.create({
        question: question,
@@ -1967,7 +2101,7 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
 
 export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
   try {
-    const { question, interviewId } = req.body
+    const { question, interviewId, difficulty } = req.body
     let answer = req.extractedAnswer
 
     if (answer === undefined) {
@@ -1979,7 +2113,7 @@ export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
       return res.status(500).json(ApiError(500, "Failed to evaluate answer"));
     }
 
-    evaluatePrompt = JSON.parse(evaluatePrompt);
+    evaluatePrompt = safeJSONParse(evaluatePrompt);
 
     await InterviewQuestion.create({
       question: question,
@@ -1987,9 +2121,9 @@ export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
       expectedAnswer: evaluatePrompt.expectedAnswer,
       interview: interviewId,
       student: req.user._id,
-      overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : feedback.overallScore,
+      overallPerformance: evaluatePrompt.overallScore <= 30 ? 0 : evaluatePrompt.overallScore,
       grammar: evaluatePrompt.grammarScore,
-      pronunciation: evaluatePrompt.pronunciationScore,
+      pronounciation: evaluatePrompt.pronunciationScore,
       pronunciationExplanation: [evaluatePrompt.pronunciationExplanation.Pros, evaluatePrompt.pronunciationExplanation.Cons],
       correctnessExplanation: [evaluatePrompt.correctnessExplanation.Pros, evaluatePrompt.correctnessExplanation.Cons],
       grammarExplanation: [evaluatePrompt.grammarExplanation.Pros, evaluatePrompt.grammarExplanation.Cons],
@@ -1997,7 +2131,7 @@ export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
 
     console.log("answer added successfully ####");
 
-    return res.status(200).json(new ApiResponse(200, JSON.parse(evaluatePrompt), "Answer evaluated successfully"));
+    return res.status(200).json(new ApiResponse(200, evaluatePrompt, "Answer evaluated successfully"));
   } catch (err) {
     return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
   }
@@ -2025,7 +2159,7 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
     // await deleteSessionQuestions(interviewId);
 
 
-    return res.status(200).json(new ApiResponse(200, {}, "Result saved successfully"));
+    return res.status(200).json(new ApiResponse(200, { interviewId }, "Result saved successfully"));
   } catch (err) {
     console.log(err.message)
     return res.status(500).json(ApiError(500, err.message));
@@ -2119,16 +2253,22 @@ export const interviewQuestionCount = asyncHandler(async (req, res) => {
     const { interviewId } = req.body;
 
     if (!interviewId) {
-      return res.status(400).json(ApiError(404, "Interview ID not sent"))
+      return res.status(400).json(ApiError(400, "Interview ID not sent"))
     }
 
-    const interview = await getAdminInterview({ interview: interviewId });
+    const adminInterview = await getAdminInterview({ interview: interviewId });
 
-    if (!interview) {
-      return res.status(400).json(ApiError(400, "Interview not found!"));
+    if (!adminInterview) {
+      const studentInterview = await Interview.findById(interviewId);
+      if (!studentInterview) {
+        return res.status(400).json(ApiError(400, "Interview not found!"));
+      }
+      const count = studentInterview.totalQuestions || 5;
+      const currentQuestion = studentInterview.attemptedQuestions || 0;
+      return res.status(200).json(new ApiResponse(200, { count, currentQuestion }, "Interview Fetched Successfully"));
     }
 
-    const count = interview.no_of_questions;
+    const count = adminInterview.no_of_questions;
     const currentQuestion = (await Interview.findById(interviewId)).attemptedQuestions;
     return res.status(200).json(new ApiResponse(200, { count, currentQuestion }, "Interview Fetched Successfully"));
   } catch (err) {
@@ -2191,69 +2331,60 @@ export const continueInterview = async (req, res) => {
   return res.json(details);
 }
 
-export const parsePdf = asyncHandler(async (req, res) => {
+export const parsePDFController = asyncHandler(async (req, res) => {
   if (!req.file) {
-    return res.status(400).json(ApiError(400, "No file uploaded"));
+    return res.status(400).json(new ApiResponse(400, null, "No resume file uploaded"));
   }
 
-  const parser = new PDFParse({ data: fs.readFileSync(req.file.path) });
   try {
-    const data = await parser.getText();
-    const text = data.text;
+    const filePath = req.file.path;
+    const dataBuffer = fs.readFileSync(filePath);
+    const parser = new PDFParse({ data: dataBuffer });
+    const parsedData = await parser.getText();
     await parser.destroy();
     
     // Clean up temp file
-    try {
-      fs.unlinkSync(req.file.path);
-    } catch (unlinkErr) {
-      console.error("Error deleting temp file:", unlinkErr);
-    }
+    fs.unlinkSync(filePath);
 
-    return res.status(200).json(new ApiResponse(200, { text }, "PDF parsed successfully"));
-  } catch (error) {
-    console.error("PDF Parsing Error:", error);
-    try {
-      await parser.destroy();
-    } catch (e) {}
+    return res.status(200).json(new ApiResponse(200, {
+      text: parsedData.text
+    }, "PDF parsed successfully"));
+  } catch (err) {
+    // Clean up temp file if it exists
     if (req.file && fs.existsSync(req.file.path)) {
-      try {
-        fs.unlinkSync(req.file.path);
-      } catch (e) {}
+      fs.unlinkSync(req.file.path);
     }
-    return res.status(500).json(ApiError(500, error.message || "Failed to parse PDF resume"));
+    return res.status(500).json(new ApiResponse(500, null, err.message || "Failed to parse PDF"));
   }
 });
 
-export const parseSavedResume = asyncHandler(async (req, res) => {
-  const student = await Student.findOne({ user: req.user._id });
-  if (!student) {
-    return res.status(404).json(ApiError(404, "Student profile not found"));
-  }
-  if (!student.resume || student.resume === "path/to/resume.pdf") {
-    return res.status(400).json(ApiError(400, "Please upload your resume in the profile section first"));
-  }
-
-  let resumePath = student.resume;
-  if (resumePath.startsWith('/')) {
-    resumePath = resumePath.substring(1);
-  }
-
-  if (!fs.existsSync(resumePath)) {
-    return res.status(404).json(ApiError(404, "Saved resume file not found on server"));
-  }
-
-  const parser = new PDFParse({ data: fs.readFileSync(resumePath) });
+export const parseSavedResumeController = asyncHandler(async (req, res) => {
   try {
-    const data = await parser.getText();
-    const text = data.text;
+    const student = await Student.findOne({ user: req.user._id });
+    if (!student || !student.resume || student.resume === 'path/to/resume.pdf') {
+      return res.status(400).json(new ApiResponse(400, null, "No resume found in profile. Please check if you uploaded it in your profile."));
+    }
+
+    let relativePath = student.resume;
+    if (relativePath.startsWith("/")) {
+      relativePath = relativePath.slice(1);
+    }
+    
+    const absolutePath = path.resolve(relativePath);
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json(new ApiResponse(404, null, "Saved resume file not found on disk. Please upload it again."));
+    }
+
+    const dataBuffer = fs.readFileSync(absolutePath);
+    const parser = new PDFParse({ data: dataBuffer });
+    const parsedData = await parser.getText();
     await parser.destroy();
-    return res.status(200).json(new ApiResponse(200, { text }, "Saved resume parsed successfully"));
-  } catch (error) {
-    console.error("Saved resume parse error:", error);
-    try {
-      await parser.destroy();
-    } catch (e) {}
-    return res.status(500).json(ApiError(500, error.message || "Failed to parse saved resume"));
+
+    return res.status(200).json(new ApiResponse(200, {
+      text: parsedData.text
+    }, "Saved resume parsed successfully"));
+  } catch (err) {
+    return res.status(500).json(new ApiResponse(500, null, err.message || "Failed to parse saved resume"));
   }
 });
 

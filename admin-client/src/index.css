@@ -35,3 +35,12 @@ select:focus {
     height: 20px;
     animation: spin 1s linear infinite forwards;
 }
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.progress-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 2s linear infinite;
+}

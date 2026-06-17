@@ -14,11 +14,11 @@ import { RateLimiter15mins } from "./utils/RateLimiter.js";
 const app = express()
 
 const objectStorePath = path.resolve("../objectStore");
+const publicPath = path.resolve("public");
 
-// Serve static files from the 'objectStore' directory
+// Serve static files
 app.use("/api/v1/objectStore", express.static(objectStorePath));
-// Serve static files from the 'public' directory
-app.use("/public", express.static(path.resolve("./public")));
+app.use("/public", express.static(publicPath));
 
 app.use(cors({
   origin: [

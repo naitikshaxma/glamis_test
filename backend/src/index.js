@@ -1,8 +1,10 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ override: true });
 import connectDB from "./db/index.js";
 import connectRedis from "./db/redis.connect.js";
 import app from "./app.js";
 import logger from 'log-timestamp';
+
 
 // set log-timestamp in current time zone
 logger(() => (`\x1b[35m \[${new Date().toLocaleString()}\]\x1b[0m` + ' %s'))

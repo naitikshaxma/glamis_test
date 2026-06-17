@@ -96,7 +96,9 @@ export const homeStats = asyncHandler(async (req, res) => {
   // Get activity for current week (interviews completed per day of week)
   const now = new Date();
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+  const dayOfWeek = now.getDay();
+  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // adjust when day is sunday
+  startOfWeek.setDate(diff);
   startOfWeek.setHours(0, 0, 0, 0);
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 7);
@@ -115,12 +117,12 @@ export const homeStats = asyncHandler(async (req, res) => {
     {
       $match: {
         "interviews.is_active": false,
-        "interviews.createdAt": { $gte: startOfWeek, $lt: endOfWeek }
+        "interviews.updatedAt": { $gte: startOfWeek, $lt: endOfWeek }
       }
     },
     {
       $group: {
-        _id: { $dayOfWeek: "$interviews.createdAt" }, // 1=Sun, 2=Mon, ..., 7=Sat
+        _id: { $dayOfWeek: "$interviews.updatedAt" }, // 1=Sun, 2=Mon, ..., 7=Sat
         count: { $sum: 1 }
       }
     }

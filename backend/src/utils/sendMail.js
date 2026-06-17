@@ -8,6 +8,16 @@ const sendMail = async (toEmail, subject, body) => {
       throw new Error("Invalid email address");
     }
 
+    // Check if SMTP is configured
+    if (!process.env.SMTP_HOST || !process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
+      console.log(`\n\n=== [DEV MODE] EMAIL INTERCEPTED ===`);
+      console.log(`To: ${toEmail}`);
+      console.log(`Subject: ${subject}`);
+      console.log(`Body (Contains OTP):\n${body}`);
+      console.log(`====================================\n\n`);
+      return { messageId: 'dev-mode-no-email' };
+    }
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -28,7 +38,7 @@ const sendMail = async (toEmail, subject, body) => {
     return { success: true, info };
   } catch (err) {
     // clgDev(err.message);
-    console.error("Email sending error:", err.message);
+    console.error(`[EMAIL ERROR] Failed to send email to ${toEmail}:`, err.message);
     return { success: false, error: err.message };
   }
 };

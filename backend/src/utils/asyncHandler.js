@@ -13,7 +13,6 @@ const asyncHandler = (fnToExecute) => {
             } else if (typeof error.statusCode === 'number' && error.statusCode >= 100 && error.statusCode < 600) {
                 statusCode = error.statusCode;
             }
-
             res.status(statusCode).json({
                 success: false,
                 message: error.message || "Internal Server Error"

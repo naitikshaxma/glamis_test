@@ -118,6 +118,9 @@ dist
 .pnp.*
 
 public/uploads/answer*
+public/resumes/
+public/user-photos/
+
 
 # User uploaded assets
 public/resumes/

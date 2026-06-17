@@ -41,7 +41,7 @@ export const createCompanyInterview = async (req, res) => {
     } = req.body;
     // if not login then first login then redisect to this page
     // const link = `https://glamis.in/myInterviews/`;
-    const studentEmails = students;
+    const studentEmails = students.map(s => s.email || s);
     const studentIds = [];
     const interviewIds = [];
     for (let i = 0; i < studentEmails.length; i++) {
@@ -79,12 +79,14 @@ export const createCompanyInterview = async (req, res) => {
     const firstQuestion = new InterviewQuestionsByAdmin({ question: "Tell me about yourself", difficulty: "Easy" });
     await firstQuestion.save();
     for (let i = 0; i < questions.length; i++) {
-      const newQuestion = new InterviewQuestionsByAdmin({
-        question: questions[i].question,
-        difficulty: questions[i].difficulty
-      });
-      await newQuestion.save();
-      questionIds.push(newQuestion._id);
+      if (questions[i].question && questions[i].question.trim() !== "") {
+        const newQuestion = new InterviewQuestionsByAdmin({
+          question: questions[i].question,
+          difficulty: questions[i].difficulty
+        });
+        await newQuestion.save();
+        questionIds.push(newQuestion._id);
+      }
     }
 
 
@@ -123,7 +125,7 @@ export const createSubjectInterview = async (req, res) => {
 
     // const link = `https://glamis.in/myInterviews/`;
     ;
-    const studentEmails = students;
+    const studentEmails = students.map(s => s.email || s);
     const studentIds = [];
     const interviewIds = [];
     for (let i = 0; i < studentEmails.length; i++) {
@@ -159,12 +161,14 @@ export const createSubjectInterview = async (req, res) => {
     console.log(students);
     const questionIds = [];
     for (let i = 0; i < questions.length; i++) {
-      const newQuestion = new InterviewQuestionsByAdmin({
-        question: questions[i].question,
-        difficulty: questions[i].difficulty
-      });
-      await newQuestion.save();
-      questionIds.push(newQuestion._id);
+      if (questions[i].question && questions[i].question.trim() !== "") {
+        const newQuestion = new InterviewQuestionsByAdmin({
+          question: questions[i].question,
+          difficulty: questions[i].difficulty
+        });
+        await newQuestion.save();
+        questionIds.push(newQuestion._id);
+      }
     }
 
     const newSubjectInterview = new AdminSubjectInterview({
@@ -195,7 +199,7 @@ export const createVerbalInterview = async (req, res) => {
     const { name, date, from, to, no_of_questions, type, easy, medium, hard, questions, students } = req.body;
 
     // const link = `https://glamis.in/myInterviews/`;
-    const studentEmails = students;
+    const studentEmails = students.map(s => s.email || s);
 
     const studentIds = [];
     const interviewIds = [];
@@ -234,13 +238,15 @@ export const createVerbalInterview = async (req, res) => {
 
     const questionIds = [];
     for (let i = 0; i < questions.length; i++) {
-      const newQuestion = new InterviewQuestionsByAdmin({
-        question: questions[i].question,
-        difficulty: questions[i].difficulty
-      });
-      await newQuestion.save();
-      questionIds.push(newQuestion._id);
-      console.log(newQuestion);
+      if (questions[i].question && questions[i].question.trim() !== "") {
+        const newQuestion = new InterviewQuestionsByAdmin({
+          question: questions[i].question,
+          difficulty: questions[i].difficulty
+        });
+        await newQuestion.save();
+        questionIds.push(newQuestion._id);
+        console.log(newQuestion);
+      }
     }
 
     console.log(name, date, from, to, no_of_questions, easy, medium, hard, questionIds, students, interviewIds, link);
@@ -277,7 +283,7 @@ export const createWrittenInterview = async (req, res) => {
     } = req.body;
     // const link = `https://glamis.in/myInterviews/`;
 
-    const studentEmails = students;
+    const studentEmails = students.map(s => s.email || s);
 
     const studentIds = [];
     const interviewIds = [];
@@ -315,12 +321,14 @@ export const createWrittenInterview = async (req, res) => {
 
     const questionIds = [];
     for (let i = 0; i < questions.length; i++) {
-      const newQuestion = new InterviewQuestionsByAdmin({
-        question: questions[i].question,
-        difficulty: questions[i].questionType
-      });
-      await newQuestion.save();
-      questionIds.push(newQuestion._id);
+      if (questions[i].question && questions[i].question.trim() !== "") {
+        const newQuestion = new InterviewQuestionsByAdmin({
+          question: questions[i].question,
+          difficulty: questions[i].questionType
+        });
+        await newQuestion.save();
+        questionIds.push(newQuestion._id);
+      }
     }
 
     const newWrittenInterview = new AdminWrittenInterview({
@@ -370,7 +378,7 @@ export const createSvarInterview = async (req, res) => {
     } = req.body;
     // const link = `https://glamis.in/myInterviews/`;
 
-    const studentEmails = students;
+    const studentEmails = students.map(s => s.email || s);
 
     const studentIds = [];
     const interviewIds = [];
@@ -407,12 +415,14 @@ export const createSvarInterview = async (req, res) => {
     console.log("came till here")
     const questionIds = [];
     for (let i = 0; i < questions.length; i++) {
-      const newQuestion = new InterviewQuestionsByAdmin({
-        question: questions[i].question,
-        difficulty: questions[i].questionType
-      });
-      await newQuestion.save();
-      questionIds.push(newQuestion._id);
+      if (questions[i].question && questions[i].question.trim() !== "") {
+        const newQuestion = new InterviewQuestionsByAdmin({
+          question: questions[i].question,
+          difficulty: questions[i].questionType
+        });
+        await newQuestion.save();
+        questionIds.push(newQuestion._id);
+      }
     }
     console.log("came till here")
     const newWrittenInterview = new AdminSvarInterview({
@@ -455,6 +465,10 @@ export const fetchAdminInterviewbyinterviewId = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: "Interview not found" });
     }
+    
+    if (!admin) {
+      admin = await AdminSvarInterview.findOne({ interview: { $in: interviewId } });
+    }
 
     console.log(admin);
 
@@ -471,26 +485,36 @@ export const fetchAdminInterviewbyinterviewId = async (req, res) => {
 
 export const fetchInterviewStatusCount = async (req, res) => {
   try {
-    const allInterviews = await AdminInterview.find({});
+    const companyInterviews = await AdminCompanyInterview.find({});
+    const subjectInterviews = await AdminSubjectInterview.find({});
+    const verbalInterviews = await AdminVerbalInterview.find({});
+    const writtenInterviews = await AdminWrittenInterview.find({});
+    const svarInterviews = await AdminSvarInterview.find({});
+    
+    const allInterviews = [
+      ...companyInterviews,
+      ...subjectInterviews,
+      ...verbalInterviews,
+      ...writtenInterviews,
+      ...svarInterviews
+    ];
     const totalInterviews = allInterviews.length;
 
     let endedInterview = 0;
     const currentTime = new Date();
 
-    for (let i = 0; i < allInterviews.length; i++) {
-      const interview = allInterviews[i];
-      if (interview.date && interview.to) {
-        const endTime = new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, ''));
-        if (currentTime > endTime) {
-          endedInterview++;
-        }
+    for (const interview of allInterviews) {
+      // interview.date is a JS Date object from MongoDB, extract YYYY-MM-DD
+      const dateStr = new Date(interview.date).toISOString().split('T')[0];
+      const endTime = new Date(dateStr + 'T' + interview.to);
+      if (currentTime > endTime) {
+        endedInterview++;
       }
     }
 
     let pendingInterviews = totalInterviews - endedInterview;
 
     res.status(200).json({ totalInterviews, endedInterview, pendingInterviews });
-
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -499,13 +523,15 @@ export const fetchInterviewStatusCount = async (req, res) => {
 
 export const fetchInterviewDetails = async (req, res) => {
   try {
-    // take all 4 interview types and sort it by latest date and time
+    // take all 5 interview types and sort it by latest date and time
     const { page, limit } = req.body;
     const allInterviews = await getAllAdminInterviews({});
 
     allInterviews.sort((a, b) => {
-      const dateA = new Date((a.date + 'T' + a.from).replace(/T\d{2}:\d{2}/, ''));
-      const dateB = new Date((b.date + 'T' + b.from).replace(/T\d{2}:\d{2}/, ''));
+      const dateStrA = new Date(a.date).toISOString().split('T')[0];
+      const dateStrB = new Date(b.date).toISOString().split('T')[0];
+      const dateA = new Date(dateStrA + 'T' + a.from);
+      const dateB = new Date(dateStrB + 'T' + b.from);
       return dateB - dateA;
     });
 
@@ -521,19 +547,19 @@ export const fetchInterviewDetails = async (req, res) => {
     const interviews = [];
     for (let i = 0; i < latestInterviews.length; i++) {
       const interview = latestInterviews[i];
+      // interview.date is a JS Date object from MongoDB, extract YYYY-MM-DD
+      const dateStr = new Date(interview.date).toISOString().split('T')[0];
 
       interviews.push({
-        company: interview.company || interview.subject || interview.domain,
+        company: interview.company || interview.subject || interview.domain || interview.type || 'N/A',
         _id: interview._id,
         name: interview.name,
-        date: interview.date,
+        date: dateStr,
         slot: `${interview.from} to ${interview.to}`,
         candidates: interview.students.length,
-        status: new Date((interview.date + 'T' + interview.to).replace(/T\d{2}:\d{2}/, '')) > new Date() ? "Pending" : "Ended"
+        status: new Date(dateStr + 'T' + interview.to) > new Date() ? "Pending" : "Ended"
       });
     }
-
-    // console.log(interviews);
 
     res.status(200).json({ interviews });
 
@@ -616,4 +642,149 @@ export const downloadAttendance = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 
+}
+
+// ---------------------- Dashboard Stats ----------------------
+
+export const fetchDashboardStats = async (req, res) => {
+  try {
+    const companyInterviews = await AdminCompanyInterview.find({});
+    const subjectInterviews = await AdminSubjectInterview.find({});
+    const verbalInterviews = await AdminVerbalInterview.find({});
+    const writtenInterviews = await AdminWrittenInterview.find({});
+    const svarInterviews = await AdminSvarInterview.find({});
+
+    const allInterviews = [
+      ...companyInterviews,
+      ...subjectInterviews,
+      ...verbalInterviews,
+      ...writtenInterviews,
+      ...svarInterviews
+    ];
+
+    const totalInterviews = allInterviews.length;
+    const totalStudents = await Student.countDocuments({});
+    const totalUsers = await User.countDocuments({});
+    const currentTime = new Date();
+
+    let endedInterview = 0;
+    for (const interview of allInterviews) {
+      const dateStr = new Date(interview.date).toISOString().split('T')[0];
+      const endTime = new Date(dateStr + 'T' + interview.to);
+      if (currentTime > endTime) {
+        endedInterview++;
+      }
+    }
+    const pendingInterviews = totalInterviews - endedInterview;
+
+    // Interview breakdown by type
+    const interviewsByType = {
+      company: companyInterviews.length,
+      subject: subjectInterviews.length,
+      verbal: verbalInterviews.length,
+      written: writtenInterviews.length,
+      svar: svarInterviews.length
+    };
+
+    // Upcoming interviews (pending, sorted by nearest date)
+    const upcomingInterviews = allInterviews
+      .map(interview => {
+        let dateStr;
+        try {
+            dateStr = new Date(interview.date).toISOString().split('T')[0];
+        } catch(e) {
+            dateStr = interview.date; // fallback if invalid
+        }
+        const startTime = new Date(dateStr + 'T' + interview.from);
+        const endTime = new Date(dateStr + 'T' + interview.to);
+        const status = (currentTime >= startTime && currentTime <= endTime) ? 'Active' : 'Upcoming';
+        return {
+          _id: interview._id,
+          name: interview.name,
+          company: interview.company || interview.subject || interview.domain || 'N/A',
+          date: dateStr,
+          from: interview.from,
+          to: interview.to,
+          candidates: interview.students?.length || 0,
+          isPending: currentTime < endTime,
+          status,
+          startTime
+        };
+      })
+      .filter(i => i.isPending)
+      .sort((a, b) => a.startTime - b.startTime)
+      .slice(0, 50)
+      .map(({ startTime, isPending, ...rest }) => rest);
+
+    // Recent interviews (last 50 ended)
+    const recentInterviews = allInterviews
+      .map(interview => {
+        let dateStr;
+        try {
+            dateStr = new Date(interview.date).toISOString().split('T')[0];
+        } catch(e) {
+            dateStr = interview.date; // fallback if invalid
+        }
+        const endTime = new Date(dateStr + 'T' + interview.to);
+        return {
+          _id: interview._id,
+          name: interview.name,
+          company: interview.company || interview.subject || interview.domain || 'N/A',
+          date: dateStr,
+          candidates: interview.students?.length || 0,
+          isEnded: currentTime > endTime,
+          endTime
+        };
+      })
+      .filter(i => i.isEnded)
+      .sort((a, b) => b.endTime - a.endTime)
+      .slice(0, 50)
+      .map(({ endTime, isEnded, ...rest }) => rest);
+
+    res.status(200).json({
+      totalInterviews,
+      endedInterview,
+      pendingInterviews,
+      totalStudents,
+      totalUsers,
+      interviewsByType,
+      upcomingInterviews,
+      recentInterviews
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export const getAdminProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      name: user.name,
+      email: user.email_id,
+      phone: user.phone,
+      role: user.is_admin ? "Super Administrator" : "Admin",
+      joinDate: user.createdAt
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export const updateAdminProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name },
+      { new: true }
+    ).select("-password -refreshToken");
+    res.status(200).json({ 
+      message: "Profile updated successfully",
+      name: user.name 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 }

@@ -20,31 +20,20 @@ import {
     evaluateAnswerSvar,
     fetchInterviewForSvar,
     interviewQuestionCount, tabSwitch, continueInterview,
-    parsePdf,
-    parseSavedResume,
+    parsePDFController,
+    parseSavedResumeController,
     generateQuestionForResume,
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
-import multer from 'multer';
-import fs from 'fs';
+import multer from "multer";
+import fs from "fs";
 
-const resumeStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = "public/temp_resumes";
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const ext = file.originalname.split('.').pop();
-        cb(null, `temp_${req.user ? req.user._id : 'anon'}_${Date.now()}.${ext}`);
-    }
-});
-
-const uploadResume = multer({ storage: resumeStorage });
-// import { RateLimiter1min } from "../utils/RateLimiter.js";
+const uploadTempDir = "public/temp/";
+if (!fs.existsSync(uploadTempDir)) {
+    fs.mkdirSync(uploadTempDir, { recursive: true });
+}
+const uploadTemp = multer({ dest: uploadTempDir });
 
 const router = Router()
 
@@ -74,9 +63,8 @@ router.route("/createInterviewBySvarAdmin").post(isAuthenticated, createIntervie
 router.route("/interviewQuestion/count").post(isAuthenticated, interviewQuestionCount);
 router.route("/proc").post(isAuthenticated, tabSwitch);
 router.route("/proc/continue").post(isAuthenticated, continueInterview);
-
-router.route("/parse-pdf").post(isAuthenticated, uploadResume.single("resume"), parsePdf);
-router.route("/parse-saved-resume").post(isAuthenticated, parseSavedResume);
+router.route("/parse-pdf").post(isAuthenticated, uploadTemp.single("resume"), parsePDFController);
+router.route("/parse-saved-resume").post(isAuthenticated, parseSavedResumeController);
 router.route("/generateQuestionForResume").post(isAuthenticated, generateQuestionForResume);
 
 export default router;
