@@ -195,4 +195,5 @@ export default function Sidebar() {
                 </div>
             </Card>
         </>
+    );
 }
