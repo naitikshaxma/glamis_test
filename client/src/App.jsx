@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import Dashboard from "./pages/dashboards/Dashboard.jsx";
@@ -31,6 +31,7 @@ import SubjectDashboard from './pages/dashboards/SubjectDashboard.jsx';
 import SvarDashboard from './pages/dashboards/SvarDashboard.jsx';
 import WrittenDashboard from "./pages/dashboards/WrittenDashboard.jsx";
 import VerbalDashboard from "./pages/dashboards/VerbalDashboard.jsx";
+import { SidebarContext } from "./hooks/SideBarContextHook";
 
 
 
@@ -46,17 +47,34 @@ const response = {
 
 // Layout component that includes Sidebar
 // eslint-disable-next-line react/prop-types
-const MainLayout = ({ children }) => (
-    <div style={{ display: 'flex' }}>
-        <Sidebar />
-        <div style={{
-            flex: 1,
-            marginLeft: '20rem'
-        }}>
-            {children}
+const MainLayout = ({ children }) => {
+    const { isOpen, toggleSidebar } = useContext(SidebarContext);
+    return (
+        <div className="flex min-h-screen bg-gray-50">
+            <Sidebar />
+            <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isOpen ? 'ml-[20rem]' : 'ml-0'}`}>
+                {!isOpen && (
+                    <div className="h-16 px-6 bg-white shadow-sm flex items-center justify-between border-b border-gray-200 sticky top-0 z-30">
+                        <div className="flex items-center gap-4">
+                            <button 
+                                onClick={toggleSidebar}
+                                className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors focus:outline-none"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                            </button>
+                            <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">GLAMIS</h2>
+                        </div>
+                    </div>
+                )}
+                <div className="flex-1">
+                    {children}
+                </div>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const App = () => {
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Typography, List, ListItem, ListItemPrefix, Alert, Button } from "@material-tailwind/react";
 import { UserCircleIcon, InboxIcon } from "@heroicons/react/24/solid";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
 import { UisBars } from '@iconscout/react-unicons-solid';
 import { SidebarContext } from "../../hooks/SideBarContextHook";
@@ -48,7 +48,9 @@ export default function Sidebar() {
         return 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
     };
     const [openAlert, setOpenAlert] = React.useState(true);
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+    const { isOpen, toggleSidebar } = React.useContext(SidebarContext);
+    const location = useLocation();
+    const isActive = (href) => location.pathname === href;
 
 
     const navItems = [{
@@ -89,89 +91,108 @@ export default function Sidebar() {
     ]
 
     return (
-        <div className="flex">
-            {isSidebarOpen && (
-                <Card className="w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5 h-screen fixed top-0 left-0 bg-white flex flex-col">
-                    <div className="mb-2 flex items-center gap-4 p-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-8 w-8" />
-                        <Typography variant="h5" color="blue-gray">
-                            GLAMIS
-                        </Typography>
-                        <UisBars className="ml-20 cursor-pointer" />
+        <>
+            <Card className={`w-full max-w-[20rem] h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+                isOpen ? "translate-x-0" : "-translate-x-full"
+            }`}>
+                {/* Brand Header */}
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-9 w-9" />
+                        <div>
+                            <Typography variant="h5" className="font-bold text-gray-800 leading-tight">
+                                GLAMIS
+                            </Typography>
+                            <Typography variant="small" className="text-gray-500 text-xs font-medium tracking-wide">
+                                Student Portal
+                            </Typography>
+                        </div>
                     </div>
-                    <List>
+                    <button onClick={toggleSidebar} className="text-gray-500 hover:text-gray-800 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Navigation List */}
+                <nav className="flex-1 overflow-y-auto px-3 py-4">
+                    <List className="p-0 gap-1">
                         {navItems.map((item, index) => (
                             <Link to={item.href} key={index}>
-                                <ListItem>
+                                <ListItem className={`rounded-lg text-sm py-2.5 ${
+                                    isActive(item.href)
+                                        ? "border-l-4 border-green-700 bg-green-50 text-green-800 font-semibold"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-800 border-l-4 border-transparent"
+                                }`}>
                                     <ListItemPrefix>
-                                        {item.icon}
+                                        <span className={isActive(item.href) ? "text-green-700" : "text-gray-400"}>
+                                            {item.icon}
+                                        </span>
                                     </ListItemPrefix>
                                     {item.name}
                                 </ListItem>
                             </Link>
                         ))}
                     </List>
-                    <div className="mt-auto">
-                        <Alert open={openAlert} onClose={() => setOpenAlert(false)}>
-                            <Typography variant="h6" className="mb-1">
+                </nav>
+
+                {/* Bottom Alert and Profile Section */}
+                <div className="mt-auto p-4 border-t border-gray-100 bg-gray-50/50">
+                    {openAlert && (
+                        <Alert open={openAlert} onClose={() => setOpenAlert(false)} className="mb-4 bg-gray-950 text-white rounded-xl p-4">
+                            <Typography variant="h6" className="mb-1 text-sm font-bold text-white">
                                 GLAMIS - Notify
                             </Typography>
-                            <Typography variant="small" className="font-normal opacity-80">
+                            <Typography variant="small" className="font-normal opacity-85 text-xs text-white">
                                 🚀 We have 4 modules live for v1 ! Accelrate your career with this software. 🌟💼
                             </Typography>
-                            <div className="mt-4 flex gap-3">
-                                <Typography
-                                    as="a"
-                                    href="#"
-                                    variant="small"
-                                    className="font-medium opacity-80"
+                            <div className="mt-2 flex gap-3">
+                                <button
+                                    className="font-semibold text-xs opacity-90 text-white underline hover:opacity-100"
                                     onClick={() => setOpenAlert(false)}
                                 >
                                     Dismiss
-                                </Typography>
+                                </button>
                             </div>
                         </Alert>
-                        <div className="my-3">
-                            <div className="flex justify-between items-center gap-2 px-2">
-                                <div className="flex items-center gap-2 my-3">
-                                    <img src={getAvatarSrc()} alt="profile" className="h-8 w-8 rounded-full border-green-600 border-2 object-cover" />
-                                    <div>
-                                        <Typography color="blue-gray" className="font-semibold ml-2">
-                                            {Cookies.get("fullName")}
-                                        </Typography>
-                                    </div>
-                                </div>
-                                <div className="flex justify-center items-center">
-                                    <Typography color="blue-gray" className="mx-1 font-semibold p-3 flex justify-center items-center rounded-full bg-gray-300 text-gray-900 h-4 w-4">
-                                        <span className="">
-                                            {tokenLeft}
-                                        </span>
+                    )}
+
+                    <div className="border-t border-gray-100/10 pt-2">
+                        <div className="flex justify-between items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2">
+                                <img src={getAvatarSrc()} alt="profile" className="h-9 w-9 rounded-full border-green-600 border-2 object-cover" />
+                                <div className="flex-1 min-w-0">
+                                    <Typography className="font-semibold text-sm text-gray-800 truncate max-w-[7rem]">
+                                        {Cookies.get("fullName")}
                                     </Typography>
-                                    <img width="32" height="32" className="mx-1" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="stack-of-coins--v1" />
+                                    <Typography className="text-[10px] text-gray-400 font-medium">
+                                        Student
+                                    </Typography>
                                 </div>
-                                {/* show token 3 */}
                             </div>
-                            <Button
-                                color="#2b6030"
-                                className="w-full"
-                                variant="outlined"
-                                block={true}
-                                ripple="light"
-                                onClick={() => {
-                                    Cookies.remove("accessToken");
-                                    navigate("/login");
-                                    toast.success("Logout Successfully")
-                                }}
-                            >
-                                Logout
-                            </Button>
+                            <div className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-full border border-gray-200">
+                                <Typography className="text-xs font-bold text-gray-800 leading-none">
+                                    {tokenLeft}
+                                </Typography>
+                                <img width="20" height="20" src="https://img.icons8.com/fluency/48/stack-of-coins--v1.png" alt="coins" className="object-contain" />
+                            </div>
                         </div>
+                        <Button
+                            size="sm"
+                            variant="outlined"
+                            color="red"
+                            className="w-full text-xs py-2 rounded-lg"
+                            onClick={() => {
+                                Cookies.remove("accessToken");
+                                navigate("/login");
+                                toast.success("Logout Successfully");
+                            }}
+                        >
+                            Logout
+                        </Button>
                     </div>
-                </Card>
-            )}
-            {!isSidebarOpen && (
-                <UisBars className="ml-4 mt-4 cursor-pointer" onClick={() => setIsSidebarOpen(true)} />
-            )}
-        </div>
-    );
+                </div>
+            </Card>
+        </>
 }
