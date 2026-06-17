@@ -8,6 +8,7 @@ import { SidebarContext } from "../../hooks/SideBarContextHook";
 
 
 import avatar from "../../assets/avatar.jpeg";
+import logo from "../../assets/logo.png";
 import Cookies from "js-cookie";
 import { useRecoilState } from "recoil";
 import { tokenState } from "../../store/atoms/token";
@@ -53,52 +54,55 @@ export default function Sidebar() {
     const isActive = (href) => location.pathname === href;
 
 
-    const navItems = [{
-        name: 'Dashboard',
-        icon: <InboxIcon className="h-5 w-5" />,
-        href: '/dashboard'
-    },
-    {
-        name: 'Profile',
-        icon: <UserCircleIcon className="h-5 w-5" />,
-        href: '/profile'
-    },
-    {
-        name: 'My Interviews',
-        icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
-        </svg>,
-        href: '/myInterview'
-    },
-    {
-        name: 'History',
-        icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>,
-        href: '/history'
-    },
-    {
-        name: 'Feedback',
-        icon: <CubeTransparentIcon className="h-5 w-5" />,
-        href: '/feedback'
-    },
-    {
-        name: 'Our Team',
-        icon: <InboxIcon className="h-5 w-5" />,
-        href: '/team'
-    },
+    const mainItems = [
+        {
+            name: 'Dashboard',
+            icon: <InboxIcon className="h-5 w-5" />,
+            href: '/dashboard'
+        },
+        {
+            name: 'Profile',
+            icon: <UserCircleIcon className="h-5 w-5" />,
+            href: '/profile'
+        },
+        {
+            name: 'My Interviews',
+            icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+            </svg>,
+            href: '/myInterview'
+        },
+        {
+            name: 'History',
+            icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>,
+            href: '/history'
+        }
+    ];
 
-    ]
+    const actionItems = [
+        {
+            name: 'Feedback',
+            icon: <CubeTransparentIcon className="h-5 w-5" />,
+            href: '/feedback'
+        },
+        {
+            name: 'Our Team',
+            icon: <InboxIcon className="h-5 w-5" />,
+            href: '/team'
+        }
+    ];
 
     return (
         <>
-            <Card className={`w-full max-w-[20rem] h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+            <Card className={`w-full max-w-[16.5rem] h-screen fixed top-0 left-0 bg-white border-r border-gray-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
                 isOpen ? "translate-x-0" : "-translate-x-full"
             }`}>
                 {/* Brand Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS" className="h-9 w-9" />
+                        <img src={logo} alt="GLAMIS" className="h-9 w-9 object-contain" />
                         <div>
                             <Typography variant="h5" className="font-bold text-gray-800 leading-tight">
                                 GLAMIS
@@ -117,8 +121,33 @@ export default function Sidebar() {
 
                 {/* Navigation List */}
                 <nav className="flex-1 overflow-y-auto px-3 py-4">
+                    <Typography variant="small" className="text-gray-400 font-semibold text-[11px] uppercase tracking-wider px-3 mb-2">
+                        Main
+                    </Typography>
+                    <List className="p-0 gap-1 mb-5">
+                        {mainItems.map((item, index) => (
+                            <Link to={item.href} key={index}>
+                                <ListItem className={`rounded-lg text-sm py-2.5 ${
+                                    isActive(item.href)
+                                        ? "border-l-4 border-green-700 bg-green-50 text-green-800 font-semibold"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-800 border-l-4 border-transparent"
+                                }`}>
+                                    <ListItemPrefix>
+                                        <span className={isActive(item.href) ? "text-green-700" : "text-gray-400"}>
+                                            {item.icon}
+                                        </span>
+                                    </ListItemPrefix>
+                                    {item.name}
+                                </ListItem>
+                            </Link>
+                        ))}
+                    </List>
+
+                    <Typography variant="small" className="text-gray-400 font-semibold text-[11px] uppercase tracking-wider px-3 mb-2">
+                        Actions
+                    </Typography>
                     <List className="p-0 gap-1">
-                        {navItems.map((item, index) => (
+                        {actionItems.map((item, index) => (
                             <Link to={item.href} key={index}>
                                 <ListItem className={`rounded-lg text-sm py-2.5 ${
                                     isActive(item.href)

@@ -32,6 +32,7 @@ import SvarDashboard from './pages/dashboards/SvarDashboard.jsx';
 import WrittenDashboard from "./pages/dashboards/WrittenDashboard.jsx";
 import VerbalDashboard from "./pages/dashboards/VerbalDashboard.jsx";
 import { SidebarContext } from "./hooks/SideBarContextHook";
+import logo from "./assets/logo.png";
 
 
 
@@ -64,7 +65,7 @@ const MainLayout = ({ children }) => {
     return (
         <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
-            <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isOpen ? 'ml-[20rem]' : 'ml-0'}`}>
+            <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isOpen ? 'ml-[16.5rem]' : 'ml-0'}`}>
                 {!isOpen && (
                     <div className="h-16 px-6 bg-white shadow-sm flex items-center justify-between border-b border-gray-200 sticky top-0 z-30">
                         <div className="flex items-center gap-4">
@@ -77,7 +78,7 @@ const MainLayout = ({ children }) => {
                                 </svg>
                             </button>
                             <div className="flex items-center gap-3">
-                                <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS Logo" className="h-9 w-9" />
+                                <img src={logo} alt="GLAMIS Logo" className="h-9 w-9 object-contain" />
                                 <div className="text-left">
                                     <h2 className="font-bold text-gray-800 leading-tight text-sm">
                                         GLAMIS
