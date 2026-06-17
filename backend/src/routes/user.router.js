@@ -2,12 +2,11 @@ import { Router } from "express";
 import { login, logout, refreshAccessToken, signup, verifyEmail, resendOTP, addStudent, verifyUser, updateStudent,forgotPassword, resetPassword, getUserDataForProfile, updateStudentData, updatePersonalData,feedback, savePhoto } from "../controllers/user.controller.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
 import { RateLimiter15mins } from "../utils/RateLimiter.js";
+import fs from "fs";
 
 const router = Router()
 
 import multer from 'multer'
-
-import fs from "fs";
 
 const storage = multer.diskStorage({
     destination:(req,file,cb)=>{

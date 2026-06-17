@@ -10,7 +10,7 @@ import {
     Checkbox,
 } from "@material-tailwind/react";
 import {Link, useSearchParams} from 'react-router-dom';
-import axios from 'axios';
+import api from '../../helpers/api';
 
 const TABLE_HEAD = ["S.no", "Company", "Date", "Slot", "Candidates", "Status", "Action"];
 
@@ -39,11 +39,7 @@ export default function ReviewBoard() {
 
     const fetchInterviewStatusCount = async () => {
         try {
-            const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewStatusCount`, {}, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const res = await api.post(`/api/v1/admin/interview/fetchInterviewStatusCount`, {});
             setScheduledInterviews(res.data.totalInterviews);
             setCompletedInterviews(res.data.endedInterview);
             setPendingInterviews(res.data.pendingInterviews);
@@ -52,11 +48,7 @@ export default function ReviewBoard() {
                 page: search.get('page') || 1,
                 limit: search.get('limit') || 10,
             };
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/fetchInterviewDetails`, data, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const response = await api.post(`/api/v1/admin/interview/fetchInterviewDetails`, data);
 
             setInterviewDetails(response.data.interviews);
         } catch (err) {

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
-import axios from "axios";
+import api from "../../../helpers/api";
 
 const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) => (
     <div className="flex flex-col mb-5">
@@ -49,12 +49,23 @@ export default function SwarInterview() {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/svar/create`, {
-                name: interviewName, date, from: duration.from, to: duration.to,
-                no_of_questions: noOfQuestions, reading: Number(reading) || 0, repeating: Number(repeating) || 0,
-                short: Number(short) || 0, jumbled: Number(jumbled) || 0, comprehension: Number(comprehension) || 0,
-                questions, students: emailObject, type: "Svar"
-            }, { headers: { "Content-Type": "application/json" } });
+            const response = await api.post(`/api/v1/admin/interview/svar/create`, {
+                name: interviewName,
+                date,
+                from: duration.from,
+                to: duration.to,
+                no_of_questions: noOfQuestions,
+                reading: Number(reading) || 0,
+                repeating: Number(repeating) || 0,
+                short: Number(short) || 0,
+                jumbled: Number(jumbled) || 0,
+                comprehension: Number(comprehension) || 0,
+                questions,
+                students: emailObject,
+                type: "Svar"
+            }, {
+                headers: { "Content-Type": "application/json" }
+            });
             console.log("Form submitted successfully:", response.data);
             toast.success('Interview Created Successfully! 🎉');
             clearStickyStatePrefix("svar_");

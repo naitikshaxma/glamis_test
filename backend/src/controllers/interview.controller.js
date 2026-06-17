@@ -1,12 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config({ override: true });
 import fs from "fs";
 import OpenAI from "openai";
 import path from "path";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const pdf = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import sanitizeHtml from 'sanitize-html';
 import {
+  AdminInterview,
   AdminSubjectInterview,
   AdminSvarInterview,
   AdminVerbalInterview,
@@ -15,18 +19,23 @@ import {
   InterviewQuestion,
 } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
-import "dotenv/config.js";
 import { ApiError } from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
 import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
 import generateQuestionsPromptForJD from "../utils/prompts/generateQuestionsForJD.js"
+import { sanitizeText, sanitizeObject } from "../utils/helpers.js";
 import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestionsForWritten.js";
 import { AdminCompanyInterview, InterviewQuestionsByAdmin } from "../models/interview.models.js";
 import { getAdminInterview, getSessionQuestions, saveSessionQuestions } from "../utils/crud.js";
 import mongoose from "mongoose";
 
 
-const objectStorePath = path.resolve("../objectStore");
+const objectStorePath = path.resolve(process.env.OBJECT_STORE_PATH || "../objectStore");
+
+if (!fs.existsSync(objectStorePath)) {
+  fs.mkdirSync(objectStorePath, { recursive: true });
+}
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 
@@ -43,18 +52,30 @@ export const createInterview = asyncHandler(async (req, res) => {
   try {
     const { subject } = req.body;
     console.log("subject ####", subject);
+
+    const currentUser = req.user;
+    console.log("currentUser ####", currentUser);
+    const student = await Student.findOne({ user: currentUser._id });
+    console.log("student ####", student);
+
+    if (!student) {
+      return res.status(404).json(ApiError(404, "Student profile not found"));
+    }
+
+    if (student.token <= 0) {
+      return res.status(400).json(ApiError(400, "Token finished. Please wait until tokens are refreshed."));
+    }
+
     const interview = await Interview.create({
       start_time: new Date(), is_active: true, title: subject, description: subject
     })
 
     console.log("Interview created ####", interview);
 
-    const currentUser = req.user;
-    console.log("currentUser ####", currentUser);
-    const student = await Student.findOne({ user: currentUser._id });
-    console.log("student ####", student);
+    student.token -= 1;
     student.interview_taken.push(interview._id);
     await student.save();
+
     try {
       let redisClient = await connectRedis()
       await redisClient.set(String(interview._id), JSON.stringify([]));
@@ -74,17 +95,29 @@ export const createInterview = asyncHandler(async (req, res) => {
 // not explored yet
 export const createInterviewByJD = asyncHandler(async (req, res) => {
   try {
-    const { selectedCompany, jobTitle } = req.body;
-    const interview = await Interview.create({
-      start_time: new Date(), is_active: true, title: jobTitle, description: selectedCompany + " " + jobTitle,
-    });
-
-    console.log("Interview created ####", interview);
+    const { company, selectedCompany, jobTitle } = req.body;
+    const actualCompany = company || selectedCompany || "";
 
     const currentUser = req.user;
     console.log("currentUser ####", currentUser);
     const student = await Student.findOne({ user: currentUser._id });
     console.log("student ####", student);
+
+    if (!student) {
+      return res.status(404).json(ApiError(404, "Student profile not found"));
+    }
+
+    if (student.token <= 0) {
+      return res.status(400).json(ApiError(400, "Token finished. Please wait until tokens are refreshed."));
+    }
+
+    const interview = await Interview.create({
+      start_time: new Date(), is_active: true, title: jobTitle, description: actualCompany + " " + jobTitle,
+    });
+
+    console.log("Interview created ####", interview);
+
+    student.token -= 1;
     student.interview_taken.push(interview._id);
     await student.save();
 
@@ -213,15 +246,31 @@ const timerObject = {
 
 const PromptObject = ({ type, historyPrompt, difficulty }) => (
   {
-    JD: {},
-    Written: {},
+    JD: {
+      Easy: `${historyPrompt}\nGenerate a straightforward and generic question related to a job interview. Focus on core concepts without involving coding.`,
+      Medium: `${historyPrompt}\nGenerate a medium difficulty question involving coding or technical problem-solving.`,
+      Hard: `${historyPrompt}\nGenerate a scenario-based question for a senior-level position with real-world challenges.`,
+    },
+    Written: {
+      Easy: `${historyPrompt}\nGenerate a simple written question.`,
+      Medium: `${historyPrompt}\nGenerate a medium difficulty written question.`,
+      Hard: `${historyPrompt}\nGenerate a complex written question.`,
+    },
     Subject: {
       Easy: `${historyPrompt}\nGenerate a new, entirely different ${difficulty} question covering a different DSA topic without repeating previous areas of ${historyPrompt}. Limit the question to 25 words.`,
       Medium: `${historyPrompt}\nBased on the previous questions and answers, present the user with a complex and tricky code snippet that is completely different from the previous question. Ask the user to carefully analyze the code, explain the logic, and predict the output.without asking user to write any code. The question should involve intricate DSA concepts such as recursion, dynamic programming, or graph traversal:\n\n\`\`\`java\n// Complex Java code snippet here\n\`\`\``,
       Hard: `${historyPrompt}\nBased on the previous questions and answers, generate a completely new and highly challenging ${difficulty} level scenario-based question in DSA. The scenario should require the user to think critically about advanced concepts like algorithm optimization or space-time complexity analysis, and it should be distinct from any previous questions.`,
     },
-    Verbal: {},
-    Svar: {},
+    Verbal: {
+      Easy: `${historyPrompt}\nGenerate a simple verbal question about personal background.`,
+      Medium: `${historyPrompt}\nGenerate a medium difficulty verbal question exploring past experiences.`,
+      Hard: `${historyPrompt}\nGenerate a challenging verbal question exploring perspectives and critical thinking.`,
+    },
+    Svar: {
+      Easy: `${historyPrompt}\nGenerate a simple Svar question.`,
+      Medium: `${historyPrompt}\nGenerate a medium difficulty Svar question.`,
+      Hard: `${historyPrompt}\nGenerate a hard Svar question.`,
+    },
   }[type][difficulty]
 )
 
@@ -235,7 +284,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
   let redisClient = await connectRedis()
 
   // Add the current question and answer to the conversation history
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
   console.log(typeof conversationHistory, ",", conversationHistory, ",", conversationHistory.length)
   if (conversationHistory.length > 0) {
     console.log("conversationHistory ####", conversationHistory);
@@ -273,7 +322,7 @@ export const generateQuestion = asyncHandler(async (req, res) => {
     max_tokens: 1000,
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   const audioFileName = `question-${generateUniqueKey()}.mp3`;
   const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -303,7 +352,7 @@ export const generateQuestionForWritten = asyncHandler(async (req, res) => {
   let redisClient = await connectRedis();
 
   // Add the current question and answer to the conversation history
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
   if (conversationHistory.length > 0) {
     conversationHistory.push({
       subject
@@ -323,7 +372,7 @@ export const generateQuestionForWritten = asyncHandler(async (req, res) => {
     max_tokens: 1000,
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   const audioFileName = `question-${generateUniqueKey()}.mp3`;
   const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -351,7 +400,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
   let redisClient = await connectRedis();
 
   // Add the current question and answer to the conversation history
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
   if (conversationHistory.length > 0) {
     conversationHistory.push({
       answer: answer, score: score
@@ -384,7 +433,7 @@ export const generateQuestionForJD = asyncHandler(async (req, res) => {
     max_tokens: 1000,
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   const audioFileName = `question-${generateUniqueKey()}.mp3`;
   const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -414,7 +463,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
   const randomIndex = Math.floor(Math.random() * jobDescription.length);
 
-// Access the value at the random index
+  // Access the value at the random index
   jdDetails = jobDescription[randomIndex];
 
 
@@ -426,7 +475,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   console.log(req.body);
 
   let redisClient = await connectRedis();
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
   console.log("connected redis")
 
   if (conversationHistory.length > 0) {
@@ -448,7 +497,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
   historyPrompt += lastQuestion[lastQuestion.length - 1]?.question;
 
 
-  const adminInterview = await AdminCompanyInterview.findOne({ interview: interviewId }).populate('interview');
+  const adminInterview = await AdminInterview.findOne({ interview: interviewId }).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -481,9 +530,11 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
 
   console.log('wow')
   let difficulty = '';
-  if (adminInterview.easy_remaining > questionNo) {
+  const easyRemaining = adminInterview.easy_remaining || 0;
+  const mediumRemaining = adminInterview.medium_remaining || 0;
+  if (easyRemaining > questionNo) {
     difficulty = 'Easy';
-  } else if (adminInterview.medium_remaining + adminInterview.easy_remaining > questionNo) {
+  } else if (mediumRemaining + easyRemaining > questionNo) {
     difficulty = 'Medium';
   } else {
     difficulty = 'Hard';
@@ -648,7 +699,7 @@ export const generateQuestionForJDAdmin = asyncHandler(async (req, res) => {
     max_tokens: 1000,
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   const audioFileName = `question-${generateUniqueKey()}.mp3`;
   const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -678,7 +729,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
   console.log(req.body);
 
   let redisClient = await connectRedis();
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
   console.log("connected redis")
 
   if (conversationHistory.length > 0) {
@@ -694,7 +745,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
     return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ''}`;
   }).join("\n");
 
-  const adminInterview = await AdminVerbalInterview.findOne({ interview: interviewId }).populate('interview');
+  const adminInterview = await AdminInterview.findOne({ interview: interviewId }).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -728,11 +779,13 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
   let difficulty = '';
 
-  console.log(adminInterview.easy, adminInterview.medium, adminInterview.hard);
+  const easy = adminInterview.easy || 0;
+  const medium = adminInterview.medium || 0;
+  console.log(easy, medium, adminInterview.hard);
 
-  if (adminInterview.easy > questionNo) {
+  if (easy > questionNo) {
     difficulty = 'Easy';
-  } else if (adminInterview.medium + adminInterview.easy > questionNo) {
+  } else if (medium + easy > questionNo) {
     difficulty = 'Medium';
   } else {
     difficulty = 'Hard';
@@ -901,7 +954,7 @@ export const generateQuestionForVerbalAdmin = asyncHandler(async (req, res) => {
 
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   const audioFileName = `question-${generateUniqueKey()}.mp3`;
 
@@ -937,7 +990,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   const { subject, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
 
   let redisClient = await connectRedis();
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
   console.log("connected redis")
 
   if (conversationHistory.length > 0) {
@@ -949,7 +1002,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
   await redisClient.set(interviewId, JSON.stringify(conversationHistory));
 
-  const adminInterview = await AdminWrittenInterview.findOne({ interview: interviewId }).populate('interview');
+  const adminInterview = await AdminInterview.findOne({ interview: interviewId }).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -980,13 +1033,17 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
   }
 
   let difficulty;
-  if (adminInterview.essay > questionNo) {
+  const essay = adminInterview.essay || 0;
+  const jumbled = adminInterview.jumbled || 0;
+  const errorDetection = adminInterview.errorDetection || 0;
+  const fillInTheBlanks = adminInterview.fillInTheBlanks || 0;
+  if (essay > questionNo) {
     difficulty = 'essay';
-  } else if (adminInterview.jumbled + adminInterview.essay > questionNo) {
+  } else if (jumbled + essay > questionNo) {
     difficulty = 'jumbled';
-  } else if (adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
+  } else if (errorDetection + jumbled + essay > questionNo) {
     difficulty = 'errorDetection';
-  } else if (adminInterview.fillInTheBlanks + adminInterview.errorDetection + adminInterview.jumbled + adminInterview.essay > questionNo) {
+  } else if (fillInTheBlanks + errorDetection + jumbled + essay > questionNo) {
     difficulty = 'fillInTheBlanks';
   } else {
     difficulty = 'synonymsAndAntonyms';
@@ -1212,7 +1269,7 @@ export const generateQuestionForWrittenAdmin = asyncHandler(async (req, res) => 
 
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   const audioFileName = `question-${generateUniqueKey()}.mp3`;
 
@@ -1244,7 +1301,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
   const { subject, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
 
   let redisClient = await connectRedis();
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
 
   if (conversationHistory.length > 0) {
     conversationHistory.push({
@@ -1261,7 +1318,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
 
 
   console.log(interviewId)
-  const adminInterview = await AdminSubjectInterview.findOne({ interview: interviewId }).populate('interview');
+  const adminInterview = await AdminInterview.findOne({ interview: interviewId }).populate('interview');
 
   if (adminInterview === null) {
     return res.status(404).json(ApiError(404, "Interview not found"));
@@ -1292,9 +1349,11 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
   }
 
   let difficulty;
-  if (adminInterview.easy > questionNo) {
+  const easy = adminInterview.easy || 0;
+  const medium = adminInterview.medium || 0;
+  if (easy > questionNo) {
     difficulty = 'Easy';
-  } else if (adminInterview.medium + adminInterview.easy > questionNo) {
+  } else if (medium + easy > questionNo) {
     difficulty = 'Medium';
   } else {
     difficulty = 'Hard';
@@ -1394,7 +1453,7 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
     max_tokens: 1000,
   });
 
-  questionData = completion.choices[0].message.content.trim();
+  questionData = sanitizeText(completion.choices[0].message.content.trim());
   audioFileNameData = `question-${generateUniqueKey()}.mp3`;
   const audioFilePath = path.join(objectStorePath, audioFileNameData);
 
@@ -1423,7 +1482,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   const { svar, answer, score, interviewId, questionNo, adminInterviewId } = req.body;
 
   let redisClient = await connectRedis();
-  let conversationHistory = JSON.parse(await redisClient.get(interviewId));
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
 
   if (conversationHistory.length > 0) {
     conversationHistory.push({
@@ -1478,14 +1537,18 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
 
   let difficulty = '';
-  if (adminInterview.reading > questionNo) {
+  const reading = adminInterview.reading || 0;
+  const repeating = adminInterview.repeating || 0;
+  const short = adminInterview.short || 0;
+  const jumbled = adminInterview.jumbled || 0;
+  if (reading > questionNo) {
     difficulty = 'reading';
-  } else if (adminInterview.repeating + adminInterview.reading > questionNo) {
+  } else if (repeating + reading > questionNo) {
     difficulty = 'repeating';
-  } else if (adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
-    difficulty = 'short'
-  } else if (adminInterview.jumbled + adminInterview.short + adminInterview.repeating + adminInterview.reading > questionNo) {
-    difficulty = 'jumbled'
+  } else if (short + repeating + reading > questionNo) {
+    difficulty = 'short';
+  } else if (jumbled + short + repeating + reading > questionNo) {
+    difficulty = 'jumbled';
   } else {
     difficulty = 'comprehension';
   }
@@ -1515,7 +1578,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     })
 
     if ((questionNo - adminInterview.reading) < repeatingQuestions.length) {
-      const question = repeatingQuestions[questionNo - adminInterview.repeating].question;
+      const question = repeatingQuestions[questionNo - adminInterview.reading].question;
 
       const audioFileName = `question-${generateUniqueKey()}.mp3`;
       const audioFilePath = path.join(objectStorePath, audioFileName);
@@ -1650,7 +1713,7 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
     max_tokens: 1000,
   });
 
-  const question = completion.choices[0].message.content.trim();
+  const question = sanitizeText(completion.choices[0].message.content.trim());
 
   if (difficulty === "reading" || difficulty === "comprehension") {
     await saveSessionQuestions(interviewId, questionNo, question);
@@ -1671,11 +1734,11 @@ export const generateQuestionforSvarAdmin = asyncHandler(async (req, res) => {
   }
   await saveSessionQuestions(interviewId, questionNo, question);
 
-  if (difficulty == "repeating") {
+  if (difficulty === "repeating") {
     difficulty = "Listen and Speak"
-  } else if (difficulty == "short") {
+  } else if (difficulty === "short") {
     difficulty = "Choice Question"
-  } else if (difficulty == "jumbled") {
+  } else if (difficulty === "jumbled") {
     difficulty = "Jumbled Sentence"
   }
   const dataToSend = {
@@ -1757,7 +1820,7 @@ async function evaluateAnswerWithPrompt(answer, question) {
   //
 
   console.log(completion.choices[0].message.content);
-  return completion.choices[0].message.content;
+  return sanitizeText(completion.choices[0].message.content);
 }
 
 async function evaluateAnswerForSvar(answer, question, difficulty) {
@@ -1820,25 +1883,25 @@ async function evaluateAnswerForSvar(answer, question, difficulty) {
         messages: [{ role: "system", content: "You are a strict but constructive interviewer." }, {
           role: "user",
           content: prompt
-        }], model: "gpt-4o-mini", max_tokens: 1000,
-      });
+         }], model: "gpt-4o-mini", max_tokens: 1000,
+       });
 
-      const json = safeJSONParse(completion.choices[0].message.content);
+      const json = sanitizeObject(safeJSONParse(completion.choices[0].message.content));
 
-      break;
-    } catch (error) {
-      console.warn(error);
+       break;
+     } catch (error) {
+       console.warn(error);
       tries--;
     }
   }
 
   if (tries === 0) {
-    return {};
-  }
+     return {};
+   }
 
-  console.log(completion.choices[0].message.content);
+   console.log(completion.choices[0].message.content);
 
-  return completion.choices[0].message.content;
+   return sanitizeText(completion.choices[0].message.content);
 }
 
 async function textToSpeech(input, audioPath) {
@@ -1907,11 +1970,11 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
         expectedAnswer: feedback.expectedAnswer,
         interview: interviewId,
         student: req.user._id,
-        overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
-        grammar: feedback.grammarScore,
-        pronounciation: feedback.pronunciationScore,
-        correctness: feedback.correctnessScore,
-        grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
+         overallPerformance: feedback.overallScore <= 30 ? 0 : feedback.overallScore,
+         grammar: feedback.grammarScore,
+         pronunciation: feedback.pronunciationScore,
+         correctness: feedback.correctnessScore,
+         grammarExplanation: [feedback.grammarExplanation.Pros, feedback.grammarExplanation.Cons],
         pronunciationExplanation: [feedback.pronunciationExplanation.Pros, feedback.pronunciationExplanation.Cons],
         correctnessExplanation: [feedback.correctnessExplanation.Pros, feedback.correctnessExplanation.Cons]
       })
@@ -2010,14 +2073,14 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
       messages: [{ role: "system", content: "You are a strict but constructive english professor." }, {
         role: "user",
         content: prompt
-      }], model: "gpt-4o-mini", max_tokens: 1000,
-    });
+       }], model: "gpt-4o-mini", max_tokens: 1000,
+     });
 
-    const completionData = safeJSONParse(completion.choices[0].message.content);
+    const completionData = sanitizeObject(safeJSONParse(completion.choices[0].message.content));
 
-    await InterviewQuestion.create({
-      question: question,
-      answer: answer,
+     await InterviewQuestion.create({
+       question: question,
+       answer: answer,
       interview: interviewId,
       student: req.user._id,
       overallPerformance: completionData.overallScore <= 30 ? 0 : completionData.overallScore,
@@ -2027,13 +2090,13 @@ export const evaluateAnswerWritten = asyncHandler(async (req, res) => {
       vocabularyExplanation: [completionData.vocabularyExplanation.Pros, completionData.vocabularyExplanation.Cons],
       grammarExplanation: [completionData.grammarExplanation.Pros, completionData.grammarExplanation.Cons],
       expectedAnswer: completionData.expectedResponse
-    });
+     });
 
 
-    res.status(200).send(completion.choices[0].message.content);
-  } catch (err) {
-    return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
-  }
+     res.status(200).send(sanitizeText(completion.choices[0].message.content));
+   } catch (err) {
+     return res.status(500).json(ApiError(500, err.message || "Internal Server Error"));
+   }
 });
 
 export const evaluateAnswerSvar = asyncHandler(async (req, res) => {
@@ -2268,7 +2331,6 @@ export const continueInterview = async (req, res) => {
   return res.json(details);
 }
 
-
 export const parsePDFController = asyncHandler(async (req, res) => {
   if (!req.file) {
     return res.status(400).json(new ApiResponse(400, null, "No resume file uploaded"));
@@ -2277,7 +2339,9 @@ export const parsePDFController = asyncHandler(async (req, res) => {
   try {
     const filePath = req.file.path;
     const dataBuffer = fs.readFileSync(filePath);
-    const parsedData = await pdf(dataBuffer);
+    const parser = new PDFParse({ data: dataBuffer });
+    const parsedData = await parser.getText();
+    await parser.destroy();
     
     // Clean up temp file
     fs.unlinkSync(filePath);
@@ -2293,7 +2357,6 @@ export const parsePDFController = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiResponse(500, null, err.message || "Failed to parse PDF"));
   }
 });
-
 
 export const parseSavedResumeController = asyncHandler(async (req, res) => {
   try {
@@ -2313,7 +2376,9 @@ export const parseSavedResumeController = asyncHandler(async (req, res) => {
     }
 
     const dataBuffer = fs.readFileSync(absolutePath);
-    const parsedData = await pdf(dataBuffer);
+    const parser = new PDFParse({ data: dataBuffer });
+    const parsedData = await parser.getText();
+    await parser.destroy();
 
     return res.status(200).json(new ApiResponse(200, {
       text: parsedData.text
@@ -2321,4 +2386,88 @@ export const parseSavedResumeController = asyncHandler(async (req, res) => {
   } catch (err) {
     return res.status(500).json(new ApiResponse(500, null, err.message || "Failed to parse saved resume"));
   }
+});
+
+export const generateQuestionForResume = asyncHandler(async (req, res) => {
+  const { resumeText, answer, score, interviewId } = req.body;
+  const actualResumeText = resumeText || req.body.subject || "";
+
+  let redisClient = await connectRedis();
+  let conversationHistory = JSON.parse(await redisClient.get(interviewId)) || [];
+
+  if (conversationHistory.length > 0) {
+    const lastInteraction = conversationHistory[conversationHistory.length - 1];
+    if (lastInteraction) {
+      lastInteraction.answer = answer;
+      lastInteraction.score = score;
+    }
+  } else {
+    conversationHistory.push({ subject: actualResumeText });
+  }
+
+  let difficulty = "Medium";
+  if (score >= 70) {
+    difficulty = "Hard";
+  } else if (score < 40) {
+    difficulty = "Easy";
+  }
+
+  const historyPrompt = conversationHistory
+    .slice(1)
+    .map((interaction, index) => {
+      return `Q${index + 1}: ${interaction.subject}\nA${index + 1}: ${interaction.answer || ""}`;
+    })
+    .join("\n");
+
+  const diffInstruction = {
+    Easy: "Generate an easy, conceptual technical question about a core programming concept, framework, or skill listed in the resume. Focus on definition, basic usage, or simple components.",
+    Medium: "Generate a moderately difficult, practical technical question related to the projects or technologies mentioned in the resume. This can include architectural choices, troubleshooting, implementation details, or code snippet explanations.",
+    Hard: "Generate a highly challenging, scenario-based system design or advanced problem-solving question. The question should probe deep architectural decisions, performance optimization, scalability, or edge cases related to the projects and skills in the resume."
+  }[difficulty];
+
+  let prompt = `You are an expert technical interviewer. Here is the candidate's resume content:
+---
+${actualResumeText}
+---
+
+${historyPrompt ? `Here is the conversation history of the interview so far:\n${historyPrompt}\n` : ""}
+Your task is to generate the next interview question.
+Difficulty Level: ${difficulty}
+Instruction: ${diffInstruction}
+
+Make sure the question is direct, professional, and relevant to the candidate's background. Limit the question to 35 words. Avoid repeating concepts already tested in the conversation history. Do not include any markdown format other than simple text or code blocks if necessary.
+It is important that you do not send the answer to the question. I just want the question. Only the question text should be sent.`;
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      { role: "system", content: "You are a professional technical interviewer." },
+      { role: "user", content: prompt }
+    ],
+    model: "gpt-4o-mini",
+    max_tokens: 1000,
+  });
+
+  const question = sanitizeText(completion.choices[0].message.content.trim());
+
+  conversationHistory.push({ subject: question });
+  await redisClient.set(interviewId, JSON.stringify(conversationHistory));
+
+  const audioFileName = `question-${generateUniqueKey()}.mp3`;
+  const audioFilePath = path.join(objectStorePath, audioFileName);
+
+  const cleanedQuestion = question.replace(/```[\s\S]*?```/g, '');
+  await textToSpeech(cleanedQuestion, audioFilePath);
+
+  if (!fs.existsSync(audioFilePath)) {
+    return res.status(500).json({ error: 'Failed to generate audio' });
+  }
+
+  const dataToSend = {
+    question,
+    difficulty,
+    timer: timerObject[difficulty] || 90,
+    audioFileName
+  };
+
+  return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
 });

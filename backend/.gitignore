@@ -122,4 +122,8 @@ public/resumes/
 public/user-photos/
 
 
+# User uploaded assets
+public/resumes/
+public/user-photos/
+
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node

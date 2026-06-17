@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {createBrowserRouter, Outlet, RouterProvider, Link, useLocation} from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider, Link, useLocation, Navigate } from "react-router-dom";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ReviewBoard from "./components/dashboard/ReviewBoard";
@@ -86,18 +86,22 @@ const MainLayout = () => {
 // Define your routes using createBrowserRouter
 const router = createBrowserRouter([
   {
-    path: "/admin/login",
-    element: <AdminLogin/>,
+    path: "/",
+    element: <Navigate to="/admin/login" replace />,
   },
   {
-    element: <ProtectedRoute/>,
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
+  {
+    element: <ProtectedRoute />,
     children: [
       {
-        element: <MainLayout/>,
+        element: <MainLayout />,
         children: [
           {
             path: "/admin/dashboard",
-            element: <AdminDashboard/>,
+            element: <AdminDashboard />,
           },
           {
             path: "/admin/profile",
@@ -105,27 +109,27 @@ const router = createBrowserRouter([
           },
           {
             path: "/admin/schedule/company",
-            element: <CompanyInterview/>,
+            element: <CompanyInterview />,
           },
           {
             path: "/admin/schedule/written",
-            element: <WrittenInterview/>,
+            element: <WrittenInterview />,
           },
           {
             path: "/admin/schedule/subject",
-            element: <SubjectInterview/>,
+            element: <SubjectInterview />,
           },
           {
             path: "/admin/schedule/verbal",
-            element: <VerbalInterview/>,
+            element: <VerbalInterview />,
           },
           {
             path: "/admin/schedule/svar",
-            element: <SwarInterview/>,
+            element: <SwarInterview />,
           },
           {
             path: "/admin/review-board",
-            element: <ReviewBoard/>,
+            element: <ReviewBoard />,
           },
         ],
       },
@@ -144,8 +148,8 @@ const router = createBrowserRouter([
 const App = () => {
   return (
     <>
-      <RouterProvider router={router}/>
-      <Toaster position={'top-right'}/>
+      <RouterProvider router={router} />
+      <Toaster position={'top-right'} />
     </>
   );
 };

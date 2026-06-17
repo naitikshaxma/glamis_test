@@ -17,14 +17,14 @@ const generateAccessAndRefreshTokens = async (userId) => {
         const refreshToken = user.generateRefreshToken()
 
         user.refreshToken = refreshToken
-        user.save()
+        await user.save({ validateBeforeSave: false })
 
         return {
             accessToken,
             refreshToken
         }
     } catch (error) {
-        res.status(500).json(ApiError(500, error.message))
+        throw new Error(`Token generation failed: ${error.message}`);
     }
 }
 
@@ -33,28 +33,29 @@ const signup = asyncHandler(async (req, res) => {
     const { name, email_id, phone, password, confirm_password } = req.body;
 
     if (isEmpty(name) || isEmpty(email_id) || isEmpty(phone) || isEmpty(password) || isEmpty(confirm_password)) {
-        return res.status(200).json(ApiError(401, "All fields are required"))
+        return res.status(400).json(ApiError(400, "All fields are required"))
     }
 
     if (password !== confirm_password) {
-        return res.status(200).json(ApiError(401, "Password do not match"))
+        return res.status(400).json(ApiError(400, "Password do not match"))
     }
 
     console.log("yaha tak aa gye")
     const user = await User.findOne({ $or: [{ email_id }, { phone }] })
-    
+
     if (user && user.is_email_verified) {
-        return res.status(200).json(ApiError(400, "User already exists"))
+        return res.status(409).json(ApiError(409, "User already exists"))
     }
 
-    if(user && !user.is_email_verified){
+    if (user && !user.is_email_verified) {
         console.log("User already exists but email not verified");
         user.name = name;
         user.phone = phone;
         user.password = password;
         await user.save();
         const otp = createOtp();
-        await sendMail(email_id, "OTP Verification", OTPTemplate(otp))
+        console.log(`\n>>> [OTP VERIFICATION] OTP for ${email_id} is: ${otp} <<<\n`);
+        await sendMail(email_id, "OTP Verification", OTPTemplate(otp));
 
 
 
@@ -63,8 +64,8 @@ const signup = asyncHandler(async (req, res) => {
         let redisClient;
         try {
             redisClient = await connectRedis()
-            redisClient.set(email_id, otp);
-            redisClient.expire(email_id, 600);
+            await redisClient.set(email_id, otp);
+            await redisClient.expire(email_id, 600);
         } catch (error) {
             console.log("Error while connecting to Redis", error)
         }
@@ -75,8 +76,8 @@ const signup = asyncHandler(async (req, res) => {
     console.log("yaha tak aa gye 2")
 
     const otp = createOtp();
-
-    await sendMail(email_id, "OTP Verification", OTPTemplate(otp))
+    console.log(`\n>>> [OTP VERIFICATION] OTP for ${email_id} is: ${otp} <<<\n`);
+    await sendMail(email_id, "OTP Verification", OTPTemplate(otp));
 
 
 
@@ -85,8 +86,8 @@ const signup = asyncHandler(async (req, res) => {
     let redisClient;
     try {
         redisClient = await connectRedis()
-        redisClient.set(email_id, otp);
-        redisClient.expire(email_id, 600);
+        await redisClient.set(email_id, otp);
+        await redisClient.expire(email_id, 600);
     } catch (error) {
         console.log("Error while connecting to Redis", error)
     }
@@ -98,12 +99,12 @@ const signup = asyncHandler(async (req, res) => {
         password
     })
 
-    const createdUser = await User.findOne(userCreating._id).select(
+    const createdUser = await User.findOne({ _id: userCreating._id }).select(
         "-password -refreshToken"
     )
 
     if (!createdUser) {
-        return res.status(200).json(ApiError(500, "Something might be up with the server"))
+        return res.status(500).json(ApiError(500, "Something might be up with the server"))
     }
 
     return res.status(201).json(
@@ -150,7 +151,7 @@ const login = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(isUser._id).select("-password -refreshToken")
 
     const options = {
-        httpOnly: false, // can only be modified by server not by client-side
+        httpOnly: true, // can only be modified by server not by client-side
         secure: true
     }
 
@@ -198,7 +199,7 @@ const logout = asyncHandler(async (req, res) => {
         })
 
     const options = {
-        httpOnly: false, // can only be modified by server not by client-side
+        httpOnly: true, // can only be modified by server not by client-side
         secure: true
     }
 
@@ -212,7 +213,7 @@ const logout = asyncHandler(async (req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const { incomingRefreshToken } = req.cookies.refreshToken || req.header("Authorization")?.replace("Bearer ", "")
+    const incomingRefreshToken = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ", "");
     if (isEmpty(incomingRefreshToken)) {
         return res.status(404).json(ApiError(404, "Unauthorized Request"))
     }
@@ -233,7 +234,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id)
 
         const options = {
-            httpOnly: false,
+            httpOnly: true,
             secure: true
         }
 
@@ -308,13 +309,13 @@ const resendOTP = asyncHandler(async (req, res) => {
     }
 
     const otp = createOtp();
+    console.log(`\n>>> [OTP RESEND] OTP for ${email} is: ${otp} <<<\n`);
+    await sendMail(email, "OTP Verification", OTPTemplate(otp));
 
-    await sendMail(email, "OTP Verification", OTPTemplate(otp))
+     const redisClient = await connectRedis()
 
-    const redisClient = await connectRedis()
-
-    redisClient.set(email, otp);
-    redisClient.expire(email, 600);
+     await redisClient.set(email, otp);
+     await redisClient.expire(email, 600);
 
     return res.status(200).json(new ApiResponse(200, {}, "OTP Sent Successfully"))
 })
@@ -323,9 +324,7 @@ const verifyUser = asyncHandler(async (req, res) => {
     const { accessToken } = req.body;
 
     if (!accessToken) {
-        console.log("Access token missing");
-        // You can choose to log or handle this differently
-        return;
+        return res.status(401).json(ApiError(401, "Access token missing"));
     }
 
     try {
@@ -335,29 +334,26 @@ const verifyUser = asyncHandler(async (req, res) => {
         const user = await User.findById(decodedAccessToken._id);
 
         if (!user) {
-            console.log("User doesn't exist for the provided token");
-            // You can choose to log or handle this differently
-            return;
+            return res.status(404).json(ApiError(404, "User doesn't exist for the provided token"));
         }
 
         console.log("User verified successfully");
-        // You can proceed with your logic here, for example:
-        return res.status(200).json(new ApiResponse(200, "User verified successfully"));
+        return res.status(200).json(new ApiResponse(200, { user }, "User verified successfully"));
     } catch (error) {
-        // Log the error instead of sending an error response
+        // Send proper error response
         if (error.name === 'TokenExpiredError') {
-            console.log("Token has expired");
+            return res.status(401).json(ApiError(401, "Token has expired"));
         } else if (error.name === 'JsonWebTokenError') {
-            console.log("Invalid token");
+            return res.status(401).json(ApiError(401, "Invalid token"));
         } else {
-            console.log('An unexpected error occurred:', error);
+            return res.status(500).json(ApiError(500, error.message || 'An unexpected error occurred'));
         }
     }
 });
 
 
 
-    
+
 
 
 const addStudent = asyncHandler(async (req, res) => {
@@ -402,8 +398,8 @@ const updateStudent = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, student, "Student Updated Successfully"))
 });
 
-const forgotPassword = asyncHandler(async (req,res)=>{
-    const {email} = req.body;
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
     if (isEmpty(email)) {
         return res.status(401).json(ApiError(401, "Please Fill All the fields"))
     }
@@ -411,28 +407,28 @@ const forgotPassword = asyncHandler(async (req,res)=>{
     if (!user) {
         return res.status(404).json(ApiError(404, "User Doesn't Exists"))
     }
-    if(user && !user.is_email_verified){
+    if (user && !user.is_email_verified) {
         return res.status(401).json(ApiError(401, "Email is not verified"))
     }
-    
-    const otp = createOtp();
 
-    await sendMail(email, "Password Reset OTP", `You are receiving the otp because you requested for password reset OTP: ${otp}`)
+    const otp = createOtp();
+    console.log(`\n>>> [PASSWORD RESET OTP] OTP for ${email} is: ${otp} <<<\n`);
+    await sendMail(email, "Password Reset OTP", `You are receiving the otp because you requested for password reset OTP: ${otp}`);
 
     // push otp to redis cache
     let redisClient;
-    try {
-        redisClient = await connectRedis()
-        redisClient.set(email, otp);
-        redisClient.expire(email, 600);
-    } catch (error) {
+     try {
+         redisClient = await connectRedis()
+         await redisClient.set(email, otp);
+         await redisClient.expire(email, 600);
+     } catch (error) {
         console.log("Error while connecting to Redis", error)
     }
     return res.status(200).json(new ApiResponse(200, {}, "Password Reset OTP Send Successfully"));
 })
 
-const resetPassword = asyncHandler(async (req,res)=>{
-    const { email, otp, newPassword,confirmPassword } = req.body;
+const resetPassword = asyncHandler(async (req, res) => {
+    const { email, otp, newPassword, confirmPassword } = req.body;
 
     if (isEmpty(email) || isEmpty(otp) || isEmpty(newPassword) || isEmpty(confirmPassword)) {
         return res.status(401).json(ApiError(401, "Please Fill All the fields"))
@@ -448,85 +444,89 @@ const resetPassword = asyncHandler(async (req,res)=>{
 
     const expectedOTP = await redisClient.get(email)
 
-    if (expectedOTP!== otp) {
+    if (expectedOTP !== otp) {
         return res.status(401).json(ApiError(401, "Invalid OTP"))
     }
 
     if (expectedOTP === null) {
         return res.status(401).json(ApiError(401, "OTP Expired"))
     }
-    if(expectedOTP === otp){
+    if (expectedOTP === otp) {
         user.password = newPassword;
         await user.save();
     }
-    return res.status(200).json(new ApiResponse(200,{},"Password reset Successfully"))
+    return res.status(200).json(new ApiResponse(200, {}, "Password reset Successfully"))
 })
 
 const getUserDataForProfile = asyncHandler(async (req, res) => {
     // console.log(req.header("Authorization"))
-    const accessToken  = req.header("Authorization").replace("Bearer ","");
+    const accessToken = req.header("Authorization")?.replace("Bearer ", "");
     // console.log(accessToken) 
 
     if (!accessToken) {
         return res.status(400).json(ApiError(400, "Access token not present"))
     }
 
-    try{
-        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET); 
-        const student = await Student.findOne({user: decodedToken._id}).populate('user', '-password -refreshToken'); // select student data along with user data
+    try {
+        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        const student = await Student.findOne({ user: decodedToken._id }).populate('user', '-password -refreshToken'); // select student data along with user data
 
         if (!student) {
-            return res.status(404).json(ApiError(404, "User not found")); 
+            return res.status(404).json(ApiError(404, "User not found"));
         }
 
         return res.status(200).json(new ApiResponse(200, student, "User found successfully"))
-    } catch(err) {
-        console.log("Error in fetching user data: ", err); 
+    } catch (err) {
+        console.log("Error in fetching user data: ", err);
         return res.status(500).json(ApiError(500, err.message || "Internal Server Error"))
     }
 })
 
 const updateStudentData = asyncHandler(async (req, res) => {
-    const accessToken  = req.header("Authorization").replace("Bearer ","");
+    const accessToken = req.header("Authorization")?.replace("Bearer ", "");
 
     if (!accessToken) {
         return res.status(400).json(ApiError(400, "Access token not present"))
     }
 
     try {
-        const { section, course, branch } = req.body; 
-        let { semester } = req.body; 
-        semester = Number.parseInt(semester)
+         const { section, course, branch } = req.body;
+         let { semester } = req.body;
+         
+         // Handle Roman numeral conversion
+         if (typeof semester === 'string') {
+             const romanMap = {
+                 'I': 1, 'II': 2, 'III': 3, 'IV': 4,
+                 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8
+             };
+             semester = romanMap[semester] || parseInt(semester);
+         } else {
+             semester = Number.parseInt(semester);
+         }
 
-        switch(semester) {
-            case 'I': semester = 1; break; 
-            case 'II': semester = 2; break; 
-            case 'III': semester = 3; break; 
-            case 'IV': semester = 4; break; 
-            case 'V': semester = 5; break; 
-            case 'VI': semester = 6; break; 
-            case 'VII': semester = 7; break; 
-            case 'VIII': semester = 8; break; 
-        }
+         // Validate semester is within valid range
+         if (isNaN(semester) || semester < 1 || semester > 8) {
+             return res.status(400).json(ApiError(400, "Invalid semester value"));
+         }
 
-        const updateFields = {}; 
-        if (semester) updateFields.semester = semester; 
-        if (section) updateFields.section = section; 
-        if (branch) updateFields.branch = branch; 
-        if (course) updateFields.course = course; 
+         const updateFields = {};
+         if (semester) updateFields.semester = semester;
+         if (section) updateFields.section = section;
+         if (branch) updateFields.branch = branch;
+         if (course) updateFields.course = course;
 
-        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET); 
-        const updatedStudent = await Student.findOneAndUpdate({user: decodedToken._id}, updateFields, {new: true}); 
+        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        const updatedStudent = await Student.findOneAndUpdate({ user: decodedToken._id }, updateFields, { new: true });
         console.log(updatedStudent)
 
         if (!updatedStudent) {
-            return res.status(404).json(ApiError(404, "Student not updated")); 
+            return res.status(404).json(ApiError(404, "Student not updated"));
         }
 
         return res.status(200).json(new ApiResponse(200, updatedStudent, "User Updated Successfully"))
 
-    } catch(err) {
-        console.log(err); 
+    } catch (err) {
+        console.log(err);
         return res.status(500).json(ApiError(500, "Internal Server Err"))
     }
 })
@@ -571,34 +571,34 @@ const updatePersonalData = asyncHandler(async (req, res) => {
     }
 })
 
-const feedback = asyncHandler(async (req,res)=>{
+const feedback = asyncHandler(async (req, res) => {
     // console.log(req.body);
     let data = req.body;
     const emailObject = data.find(item => item.title === 'University Email Id');
     const email = emailObject ? emailObject.response : null;
     console.log(email);
-    if(email){
-       const student = await User.findOne({email_id:email});
-       student.feedback_submitted = true;
-       const updated_student = await student.save();
-       console.log(updated_student);
+    if (email) {
+        const student = await User.findOne({ email_id: email });
+        student.feedback_submitted = true;
+        const updated_student = await student.save();
+        console.log(updated_student);
     }
-    return res.status(200).json("working fine");    
+    return res.status(200).json("working fine");
 })
-const savePhoto = async (req,res)=>{
-    if(!req.file){
+const savePhoto = asyncHandler(async (req, res) => {
+    if (!req.file) {
         console.log("no photo uploaded");
-    }else{
-        const user = await User.findOne({email_id:req.user.email_id});
+    } else {
+        const user = await User.findOne({ email_id: req.user.email_id });
         console.log(user);
-        if(user.interview_photos.length <5){
+        if (user.interview_photos.length < 5) {
             user.interview_photos.push(`/user-photos/${req.file.filename}`);
         }
         await user.save();
-        console.log("uploaded",req.file.filename);
+        console.log("uploaded", req.file.filename);
     }
-    res.status(200).json({message:"photo save successfuly"});
-}
+    res.status(200).json({ message: "photo save successfuly" });
+})
 
 export {
     signup,
@@ -611,8 +611,8 @@ export {
     updateStudent,
     verifyUser,
     forgotPassword,
-    resetPassword, 
-    getUserDataForProfile, 
+    resetPassword,
+    getUserDataForProfile,
     updateStudentData,
     updatePersonalData,
     feedback,

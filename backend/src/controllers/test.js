@@ -32,7 +32,7 @@ const speechFile = path.resolve("./output.mp3");
 let conversationHistory = [];
 
 const openai = new OpenAI({
-    apiKey: "sk-proj-PsXMWFiMDxKdLZbI101yT3BlbkFJ0qxh9OOVAsT6cOxcugQi",
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function generateQuestion(subject) {

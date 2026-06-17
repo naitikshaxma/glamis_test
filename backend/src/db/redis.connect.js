@@ -25,27 +25,36 @@ const memoryClient = {
 };
 
 async function connectRedis() {
-        let redisURL = process.env.REDIS_URL;
+    if (!redisClient) {
+        const redisURL = process.env.REDIS_URL;
         if (redisURL) {
-            redisClient = redis.createClient({ url: redisURL }).on("error", (e) => {
-            console.error(`Failed to create the Redis client with error:`);
-            console.error(e);
-          });
-      
-          try {
-            await redisClient.connect();
-            console.log(`Connected to Redis successfully!`);
-            return redisClient;
-          } catch (e) {
-            console.error(`Connection to Redis failed with error:`);
-            console.error(e);
-          }
+            redisClient = redis.createClient({
+                url: redisURL,
+                socket: {
+                    reconnectStrategy: (retries) => {
+                        console.log(`Redis reconnecting, attempt: ${retries}`);
+                        return Math.min(retries * 50, 2000);
+                    }
+                }
+            }).on("error", (e) => {
+                console.error("Redis client error:", e);
+            });
+        } else {
+            console.log("Redis URL not configured. Using in-memory store for OTP (development mode).");
+            return memoryClient;
         }
+    }
+    if (!redisClient.isOpen) {
+        try {
+            await redisClient.connect();
+            console.log("Connected to Redis successfully!");
+        } catch (e) {
+            console.error("Connection to Redis failed, falling back to in-memory store:", e);
+            return memoryClient;
+        }
+    }
+    return redisClient;
+}
 
-        // Fallback to in-memory store for development
-        console.log("Redis URL not configured. Using in-memory store for OTP (development mode).");
-        return memoryClient;
-      }
-
-
+export { redisClient };
 export default connectRedis;

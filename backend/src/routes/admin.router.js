@@ -15,10 +15,13 @@ import {
   updateAdminProfile
 } from "../controllers/admin.controller.js";
 import updateFeedback from "../middlewares/updateFeedback.js";
-import isAuthenticated from "../middlewares/auth.middleware.js";
+import isAuthenticated, { isAdmin } from "../middlewares/auth.middleware.js";
 
 
 const router = Router();
+
+// Secure all admin routes
+router.use(isAuthenticated, isAdmin);
 
 router.post("/interview/company/create",updateFeedback, createCompanyInterview);
 router.post("/interview/subject/create",updateFeedback, createSubjectInterview);

@@ -22,6 +22,7 @@ import {
     interviewQuestionCount, tabSwitch, continueInterview,
     parsePDFController,
     parseSavedResumeController,
+    generateQuestionForResume,
 } from '../controllers/interview.controller.js';
 import { extractAnswerAudio, handleAudioUpload } from "../middlewares/interview.middleware.js";
 import isAuthenticated from "../middlewares/auth.middleware.js";
@@ -50,7 +51,7 @@ router.route("/getInterviewsHeld").get(isAuthenticated, getInterviewHeld);
 router.route("/getPartialDetailsByInterviewId").post(isAuthenticated, getPartialDetailsByInterviewId);
 router.route("/fetch").post(isAuthenticated, fetchAllInterviews);
 router.route("/fetchInterviewForSvar").post(isAuthenticated, fetchInterviewForSvar);
-router.route("/createInterviewByJDAdmin").post(createInterviewByJDAdmin);
+router.route("/createInterviewByJDAdmin").post(isAuthenticated, createInterviewByJDAdmin);
 router.route("/generateQuestionForJDAdmin").post(isAuthenticated, generateQuestionForJDAdmin);
 router.route("/generateQuestionForSubjectAdmin").post(isAuthenticated, generateQuestionForSubjectAdmin);
 router.route("/generateQuestionForWrittenAdmin").post(isAuthenticated, generateQuestionForWrittenAdmin);
@@ -64,6 +65,7 @@ router.route("/proc").post(isAuthenticated, tabSwitch);
 router.route("/proc/continue").post(isAuthenticated, continueInterview);
 router.route("/parse-pdf").post(isAuthenticated, uploadTemp.single("resume"), parsePDFController);
 router.route("/parse-saved-resume").post(isAuthenticated, parseSavedResumeController);
+router.route("/generateQuestionForResume").post(isAuthenticated, generateQuestionForResume);
 
 export default router;
 

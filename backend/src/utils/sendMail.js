@@ -3,6 +3,11 @@ import nodemailer from 'nodemailer';
 
 const sendMail = async (toEmail, subject, body) => {
   try {
+    // Validate email
+    if (!toEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
+      throw new Error("Invalid email address");
+    }
+
     // Check if SMTP is configured
     if (!process.env.SMTP_HOST || !process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
       console.log(`\n\n=== [DEV MODE] EMAIL INTERCEPTED ===`);
@@ -24,18 +29,17 @@ const sendMail = async (toEmail, subject, body) => {
 
     // send mail
     const info = await transporter.sendMail({
-      from: `GLAMIS`,
+      from: process.env.SMTP_FROM_NAME || `GLAMIS <${process.env.SMTP_EMAIL}>`,
       to: toEmail,
       subject: subject,
       html: body,
     });
 
-    return info;
+    return { success: true, info };
   } catch (err) {
     // clgDev(err.message);
     console.error(`[EMAIL ERROR] Failed to send email to ${toEmail}:`, err.message);
-    // Don't throw in development - just log the error
-    return null;
+    return { success: false, error: err.message };
   }
 };
 

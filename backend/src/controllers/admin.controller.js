@@ -1,4 +1,5 @@
 import {
+  AdminInterview,
   AdminCompanyInterview,
   AdminSubjectInterview,
   AdminSvarInterview,
@@ -15,7 +16,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { getAllAdminInterviews } from "../utils/crud.js";
 import {attendancePipeline} from "../pipelines/attendance.pipeline.js";
-const link = `https://glamis.in/myInterview/`;
+const link = process.env.INTERVIEW_BASE_URL || `https://glamis.in/myInterview/`;
 
 
 // ---------------------- Create Company Interview ----------------------
@@ -397,7 +398,8 @@ export const createSvarInterview = async (req, res) => {
           await interview.save();
 
           student.interview_taken.push(interview._id);
-          student.save();
+          await student.save();
+
           interviewIds.push(interview._id);
           try {
             await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, "Svar", link, date + ' at ' + from));
@@ -452,24 +454,16 @@ export const createSvarInterview = async (req, res) => {
 }
 
 
-// ---------------------- Fetch Interview by Interview ID ----------------------
-
-
 export const fetchAdminInterviewbyinterviewId = async (req, res) => {
   try {
     const { interviewId } = req.body;
 
-    let admin = await AdminCompanyInterview.findOne({ interview: { $in: interviewId } });
+    // Ensure interviewId is treated as array for $in operator
+    const interviewIdArray = Array.isArray(interviewId) ? interviewId : [interviewId];
+    const admin = await AdminInterview.findOne({ interview: { $in: interviewIdArray } });
 
     if (!admin) {
-      admin = await AdminSubjectInterview.findOne({ interview: { $in: interviewId } });
-    }
-    if (!admin) {
-      admin = await AdminWrittenInterview.findOne({ interview: { $in: interviewId } });
-    }
-
-    if (!admin) {
-      admin = await AdminVerbalInterview.findOne({ interview: { $in: interviewId } });
+      return res.status(404).json({ message: "Interview not found" });
     }
     
     if (!admin) {
@@ -504,7 +498,6 @@ export const fetchInterviewStatusCount = async (req, res) => {
       ...writtenInterviews,
       ...svarInterviews
     ];
-    
     const totalInterviews = allInterviews.length;
 
     let endedInterview = 0;
@@ -585,7 +578,7 @@ export const fetchInterviewByID = async (req, res) => {
       return res.status(400).json(ApiError(404, "Interview ID not sent"))
     }
 
-    const interview = await AdminSvarInterview.findOne({
+    const interview = await AdminInterview.findOne({
       interview: interviewId
     })
 
@@ -603,12 +596,7 @@ export const fetchInterviewByID = async (req, res) => {
 // ---------------------- CRUD Operations ----------------------
 
 export async function getInterviewByID(interviewId) {
-  const adminCompanyInterview = await AdminCompanyInterview.findById(interviewId);
-  const adminSubjectInterview = await AdminSubjectInterview.findById(interviewId);
-  const adminVerbalInterview = await AdminVerbalInterview.findById(interviewId);
-  const adminWrittenInterview = await AdminWrittenInterview.findById(interviewId);
-  const adminSvarInterview = await AdminSvarInterview.findById(interviewId);
-  return adminCompanyInterview || adminSubjectInterview || adminVerbalInterview || adminWrittenInterview || adminSvarInterview;
+  return await AdminInterview.findById(interviewId);
 }
 
 // ---------------------- Download Attendance ----------------------

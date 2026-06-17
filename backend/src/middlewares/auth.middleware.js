@@ -23,8 +23,16 @@ const isAuthenticated = asyncHandler(async(req, res, next) => {
         next()
     } catch (error) {
         console.log(error)
-        return res.status(500).json(ApiError(500, error?.message || "Internal Server Error in authMidlleware"))
+        return res.status(500).json(ApiError(500, error?.message || "Internal Server Error in authMiddleware"))
     }
 })
+
+export const isAdmin = asyncHandler(async (req, res, next) => {
+    if (req.user && req.user.is_admin === true) {
+        next();
+    } else {
+        return res.status(403).json(ApiError(403, "Forbidden: Admins only"));
+    }
+});
 
 export default isAuthenticated;

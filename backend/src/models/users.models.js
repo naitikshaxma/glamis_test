@@ -15,8 +15,9 @@ const userSchema = new mongoose.Schema({
         index: true
     },
     phone: {
-        type: Number,
-        length: 10,
+        type: String,
+        minLength: 10,
+        maxLength: 10,
         required: true,
         unique: true,
         index: true
@@ -27,7 +28,7 @@ const userSchema = new mongoose.Schema({
     },
     feedback_submitted:{
         type:Boolean,
-        default:true,
+        default:false,
     },
     interview_photos:{
         type:[String],

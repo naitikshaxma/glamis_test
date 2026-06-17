@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../../../hooks/useStickyState";
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
-import axios from "axios";
+import api from "../../../helpers/api";
 
 const domain = ["Cricket","Politics","Geo-Politics","Science","Technology","History","Economics","Current Affairs","General Knowledge","Geography"];
 
@@ -52,12 +52,24 @@ export default function WrittenInterview() {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/written/create`, {
-                name: interviewName, domain: domainName, date, from: duration.from, to: duration.to,
-                no_of_questions: noOfQuestions, essay: Number(essay) || 0, jumbled: Number(jumbled) || 0,
-                errorDetection: Number(errorDetection) || 0, fillInTheBlanks: Number(fillInTheBlanks) || 0,
-                synonymsAndAntonyms: Number(synonymsAndAntonyms) || 0, questions, students: emailObject, type: "written"
-            }, { headers: { "Content-Type": "application/json" } });
+            const response = await api.post(`/api/v1/admin/interview/written/create`, {
+                name: interviewName,
+                domain: domainName,
+                date,
+                from: duration.from,
+                to: duration.to,
+                no_of_questions: noOfQuestions,
+                essay: Number(essay) || 0,
+                jumbled: Number(jumbled) || 0,
+                errorDetection: Number(errorDetection) || 0,
+                fillInTheBlanks: Number(fillInTheBlanks) || 0,
+                synonymsAndAntonyms: Number(synonymsAndAntonyms) || 0,
+                questions,
+                students: emailObject,
+                type: "written"
+            }, {
+                headers: { "Content-Type": "application/json" }
+            });
             console.log("Form submitted successfully:", response.data);
             toast.success('Interview Created Successfully! 🎉');
             clearStickyStatePrefix("written_");
