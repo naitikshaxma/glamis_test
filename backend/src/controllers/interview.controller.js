@@ -1282,8 +1282,10 @@ export const generateQuestionForSubjectAdmin = asyncHandler(async (req, res) => 
       }
 
       const dataToSend = {
-        questionData: question,
-        audioFileName: audioFileName
+        question: question,
+        audioFileName: audioFileName,
+        difficulty: customQuestion.difficulty || "Medium",
+        timer: timerObject[customQuestion.difficulty || "Medium"] || 90
       };
       return res.status(200).json(new ApiResponse(200, dataToSend, "Question generated successfully"));
     }
