@@ -64,7 +64,17 @@ const MainLayout = ({ children }) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                                 </svg>
                             </button>
-                            <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">GLAMIS</h2>
+                            <div className="flex items-center gap-3">
+                                <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" alt="GLAMIS Logo" className="h-9 w-9" />
+                                <div className="text-left">
+                                    <h2 className="font-bold text-gray-800 leading-tight text-sm">
+                                        GLAMIS
+                                    </h2>
+                                    <p className="text-gray-500 text-[10px] font-medium tracking-wide">
+                                        Student Portal
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
