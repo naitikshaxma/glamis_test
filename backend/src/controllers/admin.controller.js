@@ -37,41 +37,45 @@ export const createCompanyInterview = async (req, res) => {
       questions,
       position,
       students,
-      type
+      type,
+      avatar_enabled
     } = req.body;
     // if not login then first login then redisect to this page
     // const link = `https://glamis.in/myInterviews/`;
     const studentEmails = students.map(s => s.email || s);
     const studentIds = [];
     const interviewIds = [];
+    const skipped = [];
     for (let i = 0; i < studentEmails.length; i++) {
       const user = await User.findOne({ email_id: studentEmails[i] });
-      if (user) {
-        const student = await Student.findOne({ user: user._id });
-        if (student) {
-          try {
-            await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, company, link, date + ' at ' + from));
-          } catch (error) {
-            console.log(error);
-          }
-          studentIds.push(student._id);
-          const interview = new Interview({
-            description: job_description,
-            start_time: date + 'T' + from,
-            end_time: date + 'T' + to,
-            title: `${name} | ${company} | ${position}`,
-            totalQuestions: no_of_questions,
-            type
-          });
-          await interview.save();
-
-          student.interview_taken.push(interview._id);
-          student.save();
-
-          interviewIds.push(interview._id);
-        }
+      const student = user ? await Student.findOne({ user: user._id }) : null;
+      if (!user || !student) {
+        // No account / no student profile yet (e.g. the student never logged in)
+        // — record it so the admin knows this email did NOT get the interview.
+        skipped.push(studentEmails[i]);
+        continue;
       }
+      try {
+        await sendMail(studentEmails[i], "Interview Invitation", InterviewInvitationTemplate(name, company, link, date + ' at ' + from));
+      } catch (error) {
+        console.log(error);
+      }
+      studentIds.push(student._id);
+      const interview = new Interview({
+        description: job_description,
+        start_time: date + 'T' + from,
+        end_time: date + 'T' + to,
+        title: `${name} | ${company} | ${position}`,
+        totalQuestions: no_of_questions,
+        type,
+        avatar_enabled: !!avatar_enabled
+      });
+      await interview.save();
 
+      student.interview_taken.push(interview._id);
+      student.save();
+
+      interviewIds.push(interview._id);
     }
 
     console.log(students);
@@ -106,22 +110,91 @@ export const createCompanyInterview = async (req, res) => {
       position,
       link,
       students: studentIds,
-      interview: interviewIds
+      interview: interviewIds,
+      avatar_enabled: !!avatar_enabled
     });
 
 
     // const newCompanyInterview = new AdminCompanyInterview({name, company, date, from, to, job_description, no_of_questions, easy_remaining, medium_remaining, hard_remaining, questions : questionIds, position, link });
     await newCompanyInterview.save();
     console.log('wow');
-    res.status(200).json({ message: "Company Interview Created Successfully", link: newCompanyInterview.link });
+    res.status(200).json({
+      message: skipped.length
+        ? `Company Interview created. ${studentIds.length} student(s) assigned; ${skipped.length} skipped — no account/profile (must sign up & log in once): ${skipped.join(", ")}`
+        : "Company Interview Created Successfully",
+      link: newCompanyInterview.link,
+      assigned: studentIds.length,
+      skipped,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 }
 
+// ---------------------- Fetch assigned students + status for a scheduled interview ----------------------
+
+export const fetchInterviewAssignees = async (req, res) => {
+  try {
+    const { adminInterviewId } = req.body;
+    if (!adminInterviewId) {
+      return res.status(400).json({ message: "adminInterviewId is required" });
+    }
+
+    const admin = await AdminInterview.findById(adminInterviewId)
+      .populate({ path: "students", populate: { path: "user", select: "name email_id" } });
+
+    if (!admin) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+
+    // Interview docs belonging to this scheduled interview (to correlate per student).
+    const interviewIdSet = new Set((admin.interview || []).map((id) => String(id)));
+    const now = new Date();
+
+    const assignees = [];
+    for (const student of (admin.students || [])) {
+      if (!student) continue;
+
+      const matchId = (student.interview_taken || [])
+        .map((id) => String(id))
+        .find((id) => interviewIdSet.has(id));
+
+      let status = "Not started";
+      let attempted = 0;
+      let total = admin.no_of_questions || 0;
+
+      if (matchId) {
+        const iv = await Interview.findById(matchId);
+        if (iv) {
+          attempted = iv.attemptedQuestions || 0;
+          total = iv.totalQuestions || total;
+          const ended = iv.end_time && new Date(iv.end_time) < now;
+          if (attempted === 0) status = ended ? "Missed" : "Not started";
+          else if ((total && attempted >= total) || ended) status = "Completed";
+          else status = "In progress";
+        }
+      }
+
+      assignees.push({
+        name: (student.user && student.user.name) || "—",
+        email: (student.user && student.user.email_id) || "—",
+        branch: student.branch || "",
+        rollNo: student.rollNo || "",
+        status,
+        attempted,
+        total,
+      });
+    }
+
+    return res.status(200).json({ assignees, count: assignees.length });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createSubjectInterview = async (req, res) => {
   try {
-    const { name, subject, date, from, to, no_of_questions, type, easy, medium, hard, questions, students } = req.body;
+    const { name, subject, date, from, to, no_of_questions, type, easy, medium, hard, questions, students, avatar_enabled } = req.body;
 
     // const link = `https://glamis.in/myInterviews/`;
     ;
@@ -145,7 +218,8 @@ export const createSubjectInterview = async (req, res) => {
             end_time: date + 'T' + to,
             title: `${name} | ${subject}`,
             totalQuestions: no_of_questions,
-            type
+            type,
+            avatar_enabled: !!avatar_enabled
           });
           await interview.save();
 
@@ -173,6 +247,7 @@ export const createSubjectInterview = async (req, res) => {
 
     const newSubjectInterview = new AdminSubjectInterview({
       name,
+      avatar_enabled: !!avatar_enabled,
       subject,
       date,
       from,
@@ -196,7 +271,7 @@ export const createSubjectInterview = async (req, res) => {
 
 export const createVerbalInterview = async (req, res) => {
   try {
-    const { name, date, from, to, no_of_questions, type, easy, medium, hard, questions, students } = req.body;
+    const { name, date, from, to, no_of_questions, type, easy, medium, hard, questions, students, avatar_enabled } = req.body;
 
     // const link = `https://glamis.in/myInterviews/`;
     const studentEmails = students.map(s => s.email || s);
@@ -221,7 +296,8 @@ export const createVerbalInterview = async (req, res) => {
             end_time: date + 'T' + to,
             title: `${name} | Communication round`,
             totalQuestions: no_of_questions,
-            type
+            type,
+            avatar_enabled: !!avatar_enabled
           });
           await interview.save();
 
@@ -253,6 +329,7 @@ export const createVerbalInterview = async (req, res) => {
 
     const newVerbalInterview = new AdminVerbalInterview({
       name,
+      avatar_enabled: !!avatar_enabled,
       date,
       from,
       to,
@@ -279,7 +356,7 @@ export const createWrittenInterview = async (req, res) => {
   try {
     const {
       name, domain, date, from, to, no_of_questions, fillInTheBlanks,
-      synonymsAndAntonyms, type, essay, jumbled, errorDetection, questions, students
+      synonymsAndAntonyms, type, essay, jumbled, errorDetection, questions, students, avatar_enabled
     } = req.body;
     // const link = `https://glamis.in/myInterviews/`;
 
@@ -304,7 +381,8 @@ export const createWrittenInterview = async (req, res) => {
             end_time: date + 'T' + to,
             title: `${name}`,
             totalQuestions: no_of_questions,
-            type
+            type,
+            avatar_enabled: !!avatar_enabled
           });
           await interview.save();
 
@@ -333,6 +411,7 @@ export const createWrittenInterview = async (req, res) => {
 
     const newWrittenInterview = new AdminWrittenInterview({
       name,
+      avatar_enabled: !!avatar_enabled,
       domain,
       date,
       from,
@@ -374,7 +453,8 @@ export const createSvarInterview = async (req, res) => {
       questions,
       comprehension,
       students,
-      type
+      type,
+      avatar_enabled
     } = req.body;
     // const link = `https://glamis.in/myInterviews/`;
 
@@ -393,7 +473,8 @@ export const createSvarInterview = async (req, res) => {
             start_time: date + 'T' + from,
             end_time: date + 'T' + to,
             title: `${name}`,
-            type: "Svar"
+            type: "Svar",
+            avatar_enabled: !!avatar_enabled
           });
           await interview.save();
 
@@ -427,6 +508,7 @@ export const createSvarInterview = async (req, res) => {
     console.log("came till here")
     const newWrittenInterview = new AdminSvarInterview({
       name,
+      avatar_enabled: !!avatar_enabled,
       domain: "Svar Interview",
       date,
       from,
@@ -544,11 +626,32 @@ export const fetchInterviewDetails = async (req, res) => {
     }
 
 
+    // Batch-load every per-student Interview doc on this page in one query,
+    // so we can show how many assignees have actually submitted (completed).
+    const allIvIds = [];
+    for (const interview of latestInterviews) {
+      for (const id of (interview.interview || [])) allIvIds.push(id);
+    }
+    const ivDocs = await Interview.find({ _id: { $in: allIvIds } })
+      .select("attemptedQuestions totalQuestions")
+      .lean();
+    const ivMap = new Map(ivDocs.map((d) => [String(d._id), d]));
+
     const interviews = [];
     for (let i = 0; i < latestInterviews.length; i++) {
       const interview = latestInterviews[i];
       // interview.date is a JS Date object from MongoDB, extract YYYY-MM-DD
       const dateStr = new Date(interview.date).toISOString().split('T')[0];
+
+      // Count assignees who finished all their questions.
+      let submitted = 0;
+      for (const id of (interview.interview || [])) {
+        const iv = ivMap.get(String(id));
+        if (!iv) continue;
+        const total = iv.totalQuestions || interview.no_of_questions || 0;
+        const attempted = iv.attemptedQuestions || 0;
+        if (attempted > 0 && total > 0 && attempted >= total) submitted++;
+      }
 
       interviews.push({
         company: interview.company || interview.subject || interview.domain || interview.type || 'N/A',
@@ -557,6 +660,7 @@ export const fetchInterviewDetails = async (req, res) => {
         date: dateStr,
         slot: `${interview.from} to ${interview.to}`,
         candidates: interview.students.length,
+        submitted,
         status: new Date(dateStr + 'T' + interview.to) > new Date() ? "Pending" : "Ended"
       });
     }

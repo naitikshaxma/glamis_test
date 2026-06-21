@@ -5,6 +5,7 @@ import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../.
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import api from "../../../helpers/api";
+import AvatarModeToggle from "./AvatarModeToggle";
 
 const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) => (
     <div className="flex flex-col mb-5">
@@ -28,6 +29,7 @@ export default function VerbalInterview() {
     const [hard, setHard] = useStickyState("", "verbal_hard");
     const [questions, setQuestions] = useStickyState([], "verbal_questions");
     const [emailObject, setEmailObject] = useStickyState([], "verbal_emailObject");
+    const [avatarEnabled, setAvatarEnabled] = useStickyState(false, "verbal_avatarEnabled");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && date && duration.from && duration.to && noOfQuestions) {
@@ -58,7 +60,8 @@ export default function VerbalInterview() {
                 hard: Number(hard) || 0,
                 questions,
                 students: emailObject,
-                type: "verbal"
+                type: "verbal",
+                avatar_enabled: avatarEnabled
             }, {
                 headers: { "Content-Type": "application/json" }
             });
@@ -67,7 +70,7 @@ export default function VerbalInterview() {
             clearStickyStatePrefix("verbal_");
             setCurrentStep(1); setInterviewName(""); setDate(""); setDuration({from:"", to:""});
             setNoOfQuestions(""); setEasy(""); setMedium(""); setHard("");
-            setQuestions([]); setEmailObject([]);
+            setQuestions([]); setEmailObject([]); setAvatarEnabled(false);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -128,6 +131,8 @@ export default function VerbalInterview() {
                                 <FormInput label="Medium" type="number" value={medium} onChange={(e) => setMedium(e.target.value)} max={7} />
                                 <FormInput label="Hard" type="number" value={hard} onChange={(e) => setHard(e.target.value)} max={5} />
                             </div>
+
+                            <AvatarModeToggle enabled={avatarEnabled} setEnabled={setAvatarEnabled} />
 
                             <hr className="my-6 border-gray-200" />
                             <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Students</Typography>

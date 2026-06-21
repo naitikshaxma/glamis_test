@@ -158,7 +158,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
                     </ListItemPrefix>
                     <Typography className={`mr-auto font-normal text-sm ${isScheduleActive ? "text-green-800 font-semibold" : "text-gray-600"}`}>
                       Schedule Interview
-                    </Typography>
+                    </Typography>             
                   </AccordionHeader>
                 </ListItem>
                 <AccordionBody className="py-1">

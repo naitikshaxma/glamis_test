@@ -12,7 +12,7 @@ import {
 import {Link, useSearchParams} from 'react-router-dom';
 import api from '../../helpers/api';
 
-const TABLE_HEAD = ["S.no", "Company", "Date", "Slot", "Candidates", "Status", "Action"];
+const TABLE_HEAD = ["S.no", "Company", "Date", "Slot", "Candidates", "Submitted", "Status", "Action"];
 
 export default function ReviewBoard() {
     const [search, setSearch] = useSearchParams();
@@ -21,6 +21,27 @@ export default function ReviewBoard() {
     const [pendingInterviews, setPendingInterviews] = useState(0);
     const [interviewDetails, setInterviewDetails] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
+
+    // Assigned-students viewer
+    const [assigneeOpen, setAssigneeOpen] = useState(false);
+    const [assignees, setAssignees] = useState([]);
+    const [assigneeTitle, setAssigneeTitle] = useState("");
+    const [assigneeLoading, setAssigneeLoading] = useState(false);
+
+    const viewAssignees = async (id, company) => {
+        setAssigneeTitle(company || "Interview");
+        setAssignees([]);
+        setAssigneeLoading(true);
+        setAssigneeOpen(true);
+        try {
+            const res = await api.post(`/api/v1/admin/interview/assignees`, { adminInterviewId: id });
+            setAssignees(res.data.assignees || []);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setAssigneeLoading(false);
+        }
+    };
 
     const handleAttendanceDownload = async (e) => {
         e.preventDefault();
@@ -194,7 +215,7 @@ export default function ReviewBoard() {
                             </tr>
                             </thead>
                             <tbody>
-                            {interviewDetails.map(({company, date, slot, candidates, status, _id}, index) => {
+                            {interviewDetails.map(({company, date, slot, candidates, submitted = 0, status, _id}, index) => {
                                 const isLast = index === interviewDetails.length - 1;
                                 const classes = `p-4 ${!isLast ? "border-b border-gray-50" : ""}`;
 
@@ -227,6 +248,17 @@ export default function ReviewBoard() {
                                         </td>
                                         <td className={classes}>
                                             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                                candidates > 0 && submitted >= candidates
+                                                    ? "bg-green-100 text-green-700"
+                                                    : submitted > 0
+                                                        ? "bg-blue-100 text-blue-700"
+                                                        : "bg-gray-100 text-gray-600"
+                                            }`}>
+                                                {submitted}/{candidates}
+                                            </span>
+                                        </td>
+                                        <td className={classes}>
+                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                                                 status === "Ended"
                                                     ? "bg-red-100 text-red-700"
                                                     : "bg-yellow-100 text-yellow-700"
@@ -235,12 +267,19 @@ export default function ReviewBoard() {
                                             </span>
                                         </td>
                                         <td className={classes}>
-                                            <a target="_blank"
-                                               href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/downloadAttendance/?interviewId=${_id}`}>
-                                                <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">
-                                                    Download
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => viewAssignees(_id, company)}
+                                                    className="bg-[#2c6031] hover:bg-[#1f4d26] text-white text-sm px-3 py-1.5 rounded-lg transition-colors">
+                                                    View
                                                 </button>
-                                            </a>
+                                                <a target="_blank"
+                                                   href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/interview/downloadAttendance/?interviewId=${_id}`}>
+                                                    <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">
+                                                        Download
+                                                    </button>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 );
@@ -256,6 +295,53 @@ export default function ReviewBoard() {
                     )}
                 </div>
             </Card>
+
+            {/* Assigned students viewer */}
+            <Dialog open={assigneeOpen} handler={() => setAssigneeOpen(false)} size="lg">
+                <DialogHeader>Assigned Students — {assigneeTitle}</DialogHeader>
+                <DialogBody className="max-h-[60vh] overflow-y-auto">
+                    {assigneeLoading ? (
+                        <Typography variant="small" className="text-gray-500">Loading…</Typography>
+                    ) : assignees.length === 0 ? (
+                        <Typography variant="small" className="text-gray-500">No students assigned.</Typography>
+                    ) : (
+                        <table className="w-full table-auto text-left">
+                            <thead>
+                                <tr>
+                                    {["#", "Name", "Email", "Branch", "Roll No", "Progress", "Status"].map((h) => (
+                                        <th key={h} className="bg-gray-50 p-2 border-b border-gray-100">
+                                            <Typography variant="small" className="font-semibold text-gray-500 text-xs uppercase">{h}</Typography>
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {assignees.map((a, i) => (
+                                    <tr key={a.email + i} className="hover:bg-gray-50">
+                                        <td className="p-2 text-sm text-gray-600">{i + 1}</td>
+                                        <td className="p-2 text-sm text-gray-800 font-medium">{a.name}</td>
+                                        <td className="p-2 text-sm text-gray-600">{a.email}</td>
+                                        <td className="p-2 text-sm text-gray-600">{a.branch || "—"}</td>
+                                        <td className="p-2 text-sm text-gray-600">{a.rollNo || "—"}</td>
+                                        <td className="p-2 text-sm text-gray-600">{a.attempted}/{a.total}</td>
+                                        <td className="p-2">
+                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                                a.status === "Completed" ? "bg-green-100 text-green-700"
+                                                    : a.status === "In progress" ? "bg-blue-100 text-blue-700"
+                                                        : a.status === "Missed" ? "bg-red-100 text-red-700"
+                                                            : "bg-yellow-100 text-yellow-700"
+                                            }`}>{a.status}</span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </DialogBody>
+                <DialogFooter>
+                    <Button variant="text" color="gray" onClick={() => setAssigneeOpen(false)}>Close</Button>
+                </DialogFooter>
+            </Dialog>
         </div>
     );
 }

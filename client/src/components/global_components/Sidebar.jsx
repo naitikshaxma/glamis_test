@@ -17,7 +17,34 @@ import axios from "axios";
 
 
 
-export default function Sidebar() {
+// Renders a sidebar nav item. When `locked` (the pre-interview lobby), the item
+// is dimmed and non-navigating so the student can't leave the proctored flow.
+function renderNavItem(item, index, locked, isActive) {
+    const content = (
+        <ListItem className={`rounded-lg text-sm py-2.5 ${
+            isActive(item.href)
+                ? "border-l-4 border-green-700 bg-green-50 text-green-800 font-semibold"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-800 border-l-4 border-transparent"
+        } ${locked ? "opacity-40 pointer-events-none" : ""}`}>
+            <ListItemPrefix>
+                <span className={isActive(item.href) ? "text-green-700" : "text-gray-400"}>
+                    {item.icon}
+                </span>
+            </ListItemPrefix>
+            {item.name}
+        </ListItem>
+    );
+    if (locked) {
+        return (
+            <div key={index} title="Finish or exit your interview to navigate" className="cursor-not-allowed">
+                {content}
+            </div>
+        );
+    }
+    return <Link to={item.href} key={index}>{content}</Link>;
+}
+
+export default function Sidebar({ locked = false }) {
 
     const navigate = useNavigate();
     const [tokenLeft, setTokenLeft] = useRecoilState(tokenState);
@@ -125,44 +152,14 @@ export default function Sidebar() {
                         Main
                     </Typography>
                     <List className="p-0 gap-1 mb-5">
-                        {mainItems.map((item, index) => (
-                            <Link to={item.href} key={index}>
-                                <ListItem className={`rounded-lg text-sm py-2.5 ${
-                                    isActive(item.href)
-                                        ? "border-l-4 border-green-700 bg-green-50 text-green-800 font-semibold"
-                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-800 border-l-4 border-transparent"
-                                }`}>
-                                    <ListItemPrefix>
-                                        <span className={isActive(item.href) ? "text-green-700" : "text-gray-400"}>
-                                            {item.icon}
-                                        </span>
-                                    </ListItemPrefix>
-                                    {item.name}
-                                </ListItem>
-                            </Link>
-                        ))}
+                        {mainItems.map((item, index) => renderNavItem(item, index, locked, isActive))}
                     </List>
 
                     <Typography variant="small" className="text-gray-400 font-semibold text-[11px] uppercase tracking-wider px-3 mb-2">
                         Actions
                     </Typography>
                     <List className="p-0 gap-1">
-                        {actionItems.map((item, index) => (
-                            <Link to={item.href} key={index}>
-                                <ListItem className={`rounded-lg text-sm py-2.5 ${
-                                    isActive(item.href)
-                                        ? "border-l-4 border-green-700 bg-green-50 text-green-800 font-semibold"
-                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-800 border-l-4 border-transparent"
-                                }`}>
-                                    <ListItemPrefix>
-                                        <span className={isActive(item.href) ? "text-green-700" : "text-gray-400"}>
-                                            {item.icon}
-                                        </span>
-                                    </ListItemPrefix>
-                                    {item.name}
-                                </ListItem>
-                            </Link>
-                        ))}
+                        {actionItems.map((item, index) => renderNavItem(item, index, locked, isActive))}
                     </List>
                 </nav>
 

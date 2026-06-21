@@ -12,7 +12,8 @@ import {
   fetchInterviewByID,
   fetchDashboardStats,
   getAdminProfile,
-  updateAdminProfile
+  updateAdminProfile,
+  fetchInterviewAssignees
 } from "../controllers/admin.controller.js";
 import updateFeedback from "../middlewares/updateFeedback.js";
 import isAuthenticated, { isAdmin } from "../middlewares/auth.middleware.js";
@@ -31,6 +32,7 @@ router.post("/interview/verbal/create",updateFeedback, createVerbalInterview);
 router.post("/interview/fetch", fetchAdminInterviewbyinterviewId);
 router.post("/interview/fetchInterviewStatusCount", fetchInterviewStatusCount);
 router.post("/interview/fetchInterviewDetails", fetchInterviewDetails);
+router.post("/interview/assignees", fetchInterviewAssignees);
 router.get("/interview/downloadAttendance", downloadAttendance);
 router.post("/interview/fetchSvarInterviewById", fetchInterviewByID)
 router.post("/dashboard/stats", fetchDashboardStats)

@@ -5,6 +5,7 @@ import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../.
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import api from "../../../helpers/api";
+import AvatarModeToggle from "./AvatarModeToggle";
 
 const domain = ["Cricket","Politics","Geo-Politics","Science","Technology","History","Economics","Current Affairs","General Knowledge","Geography"];
 
@@ -66,7 +67,8 @@ export default function WrittenInterview() {
                 synonymsAndAntonyms: Number(synonymsAndAntonyms) || 0,
                 questions,
                 students: emailObject,
-                type: "written"
+                type: "written",
+                avatar_enabled: false
             }, {
                 headers: { "Content-Type": "application/json" }
             });
@@ -146,6 +148,13 @@ export default function WrittenInterview() {
                                 <FormInput label="Fill in the Blanks" type="number" value={fillInTheBlanks} onChange={(e) => setFillInTheBlanks(e.target.value)} />
                                 <FormInput label="Synonyms & Antonyms" type="number" value={synonymsAndAntonyms} onChange={(e) => setSynonymsAndAntonyms(e.target.value)} />
                             </div>
+
+                            <AvatarModeToggle
+                                enabled={false}
+                                setEnabled={() => {}}
+                                disabled
+                                disabledReason="Written Skills is a typed assessment, so the real-time avatar interviewer isn't available for this type."
+                            />
 
                             <hr className="my-6 border-gray-200" />
                             <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Students</Typography>

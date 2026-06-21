@@ -8,6 +8,7 @@ import resultRouter from './routes/result.router.js';
 import objectRouter from './routes/object.router.js';
 import adminRouter from './routes/admin.router.js';
 import dashboardRouter from './routes/dashboard.router.js';
+import avatarRouter from './routes/avatar.router.js';
 import { RateLimiter15mins } from "./utils/RateLimiter.js";
 
 
@@ -46,6 +47,7 @@ app.use("/api/v1/result", resultRouter)
 app.use("/api/v1/objectStore", objectRouter)
 app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
+app.use("/api/v1/avatar", avatarRouter)
 
 
 // health check route
