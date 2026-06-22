@@ -5,6 +5,7 @@ import { useStickyState, clearStickyStatePrefix, useClearOnNavigate } from "../.
 import { Input, Button, Typography, Select, Option, Textarea } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import api from "../../../helpers/api";
+import AvatarModeToggle from "./AvatarModeToggle";
 
 const FormInput = ({ label, value, onChange, type = "text", placeholder, max }) => (
     <div className="flex flex-col mb-5">
@@ -30,6 +31,7 @@ export default function SwarInterview() {
     const [repeating, setRepeating] = useStickyState("", "svar_repeating");
     const [questions, setQuestions] = useStickyState([], "svar_questions");
     const [emailObject, setEmailObject] = useStickyState([], "svar_emailObject");
+    const [avatarEnabled, setAvatarEnabled] = useStickyState(false, "svar_avatarEnabled");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && date && duration.from && duration.to && noOfQuestions) {
@@ -62,7 +64,8 @@ export default function SwarInterview() {
                 comprehension: Number(comprehension) || 0,
                 questions,
                 students: emailObject,
-                type: "Svar"
+                type: "Svar",
+                avatar_enabled: avatarEnabled
             }, {
                 headers: { "Content-Type": "application/json" }
             });
@@ -71,7 +74,7 @@ export default function SwarInterview() {
             clearStickyStatePrefix("svar_");
             setCurrentStep(1); setInterviewName(""); setDate(""); setDuration({from:"", to:""});
             setNoOfQuestions(""); setReading(""); setShort(""); setJumbled("");
-            setComprehension(""); setRepeating(""); setQuestions([]); setEmailObject([]);
+            setComprehension(""); setRepeating(""); setQuestions([]); setEmailObject([]); setAvatarEnabled(false);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -136,6 +139,8 @@ export default function SwarInterview() {
                                 <FormInput label="Jumbled Sentences" type="number" value={jumbled} onChange={(e) => setJumbled(e.target.value)} />
                                 <FormInput label="Passage Comprehension" type="number" value={comprehension} onChange={(e) => setComprehension(e.target.value)} />
                             </div>
+
+                            <AvatarModeToggle enabled={avatarEnabled} setEnabled={setAvatarEnabled} />
 
                             <hr className="my-6 border-gray-200" />
                             <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Students</Typography>

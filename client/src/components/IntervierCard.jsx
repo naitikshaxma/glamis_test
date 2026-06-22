@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { bearerInstance as instance } from "../helpers/instance";
 import { toast } from "react-toastify";
 import { Tooltip } from "@mui/material";
+import { setAvatarSession, clearAvatarSession } from "../helpers/interviewSession";
 
 export default function InterviewCard({ props, status }) {
     const navigate = useNavigate();
@@ -24,6 +25,46 @@ export default function InterviewCard({ props, status }) {
         getUser();
     }, [])
     const handleInterview = async () => {
+        // The admin scheduled this slot as a real-time avatar interview: launch the
+        // native avatar studio directly (no text-interview create / token spend; the
+        // FastAPI agent drives it). The studio's own setup card gates camera/mic +
+        // fullscreen, so we skip the /system-check step used by the text flow.
+        if (props.avatar_enabled) {
+            const titleParts = (props.title || "").split(" | ");
+            const company = titleParts[1] || "";
+            const position = titleParts[2] || "";
+            let role;
+            let type = 'technical';
+            if (props.type === 'company') {
+                role = [position, company].filter(Boolean).join(' at ') || 'the role';
+            } else if (props.type === 'verbal' || props.type === 'Svar') {
+                role = 'Communication';
+                type = 'verbal';
+            } else if (props.type === 'written') {
+                role = props.description || 'Communication';
+                type = 'verbal';
+            } else {
+                // subject-based
+                role = props.description || 'the role';
+                if (/data structures|algorithm/i.test(props.description || "")) type = 'dsa';
+            }
+            setAvatarSession({
+                type,
+                role,
+                difficulty: 'medium',
+                count: Number(props.totalQuestions) || 5,
+                name: Cookies.get('fullName') || '',
+                // Admin-scheduled: the student can't change the configured settings.
+                locked: true,
+            });
+            navigate('/live');
+            return;
+        }
+
+        // Standard text interview — drop any stale avatar session so /live renders
+        // the text interview, not a previous avatar studio.
+        clearAvatarSession();
+
         try {
             let url = '';
             let redirect = '';
@@ -92,6 +133,11 @@ export default function InterviewCard({ props, status }) {
             <Typography color="blue-gray" className="mb-2">
                 {/* heading of inerview */}
                 <div className="font-bold">{props.title}</div>
+                {props.avatar_enabled && (
+                    <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-[#2b6030] bg-[#2b6030]/10 border border-[#2b6030]/20 rounded-full px-2 py-0.5">
+                        <i className='bx bx-user-voice'></i> Real-time Avatar
+                    </span>
+                )}
             </Typography>
             <Typography color="blue-gray">
                 {/* description of interview */}
@@ -129,7 +175,7 @@ export default function InterviewCard({ props, status }) {
             {status === 'active now' ? (<Button color="lightGreen"
                 className="w-full bg-[#2b6030] hover:bg-[#1c3d1f]"
                 onClick={handleInterview}
-            >Join Interview</Button>) : status === 'Upcoming Interview' ? (<Button color="lightGreen"
+            >{props.avatar_enabled ? 'Join Avatar Interview' : 'Join Interview'}</Button>) : status === 'Upcoming Interview' ? (<Button color="lightGreen"
                 className="w-full bg-yellow-900 hover:bg-yellow-800"
                 disabled
             >Coming Soon</Button>) : feedbackStatus ? <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href={`/history/detailed/${props._id}`}>View Result</a></button> : <Tooltip title="Please fill the feedback form"> <button className="bg-[#2b6030] text-white font-semibold px-4 py-2"><a href="/feedback">Feedback</a></button></Tooltip>}

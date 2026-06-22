@@ -6,3 +6,10 @@ node_modules/
 .DS_Store
 dist/
 build/
+
+# --- Local interview integration (Avatar Interviews + ai_mock_interview_agent), not in upstream ---
+# NOTE: .env / .env.* and node_modules/ are already ignored above (keeps API keys + deps out of git)
+_old_backup/
+.venv/
+__pycache__/
+GLAMIS_agent-master/**/*.db

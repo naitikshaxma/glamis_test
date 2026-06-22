@@ -12,6 +12,7 @@ import {
 } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import api from "../../../helpers/api";
+import AvatarModeToggle from "./AvatarModeToggle";
 
 const subjects = [
     "Data Structures and Algorithms",
@@ -51,6 +52,7 @@ export default function SubjectInterview() {
     const [hard, setHard] = useStickyState("", "subject_hard");
     const [questions, setQuestions] = useStickyState([], "subject_questions");
     const [emailObject, setEmailObject] = useStickyState([], "subject_emailObject");
+    const [avatarEnabled, setAvatarEnabled] = useStickyState(false, "subject_avatarEnabled");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && subjectName && date && duration.from && duration.to && noOfQuestions) {
@@ -82,7 +84,8 @@ export default function SubjectInterview() {
                 hard: Number(hard) || 0,
                 questions,
                 students: emailObject,
-                type: "subject"
+                type: "subject",
+                avatar_enabled: avatarEnabled
             }, {
                 headers: { "Content-Type": "application/json" }
             });
@@ -91,7 +94,7 @@ export default function SubjectInterview() {
             clearStickyStatePrefix("subject_");
             setCurrentStep(1); setInterviewName(""); setSubjectName(""); setDate(""); setDuration({from:"", to:""});
             setNoOfQuestions(""); setEasy(""); setMedium(""); setHard("");
-            setQuestions([]); setEmailObject([]);
+            setQuestions([]); setEmailObject([]); setAvatarEnabled(false);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -158,6 +161,8 @@ export default function SubjectInterview() {
                                 <FormInput label="Medium" type="number" value={medium} onChange={(e) => setMedium(e.target.value)} max={7} />
                                 <FormInput label="Hard" type="number" value={hard} onChange={(e) => setHard(e.target.value)} max={5} />
                             </div>
+
+                            <AvatarModeToggle enabled={avatarEnabled} setEnabled={setAvatarEnabled} />
 
                             <hr className="my-6 border-gray-200" />
                             <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Students</Typography>

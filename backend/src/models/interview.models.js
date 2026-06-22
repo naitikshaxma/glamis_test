@@ -48,6 +48,13 @@ const interviewSchema = new mongoose.Schema({
         type: String,
         default: "subject",
         required: true
+    },
+    // When true, the assigned student takes this interview with the real-time
+    // AI avatar (voice + video) instead of the text interview. Set by the admin
+    // when scheduling a company interview.
+    avatar_enabled: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 
@@ -184,6 +191,14 @@ const adminInterviewSchema = new mongoose.Schema({
     link: {
         type: String,
         required: true
+    },
+    // Whether assigned students take this scheduled interview with the real-time
+    // AI avatar interviewer. Set by the admin per interview type; mirrored onto
+    // each student's Interview doc. Lives on the base schema so every interview
+    // discriminator (company/subject/verbal/written/svar) inherits it.
+    avatar_enabled: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

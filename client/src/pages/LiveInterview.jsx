@@ -11,6 +11,8 @@ import {docco} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import Cookies from 'js-cookie';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import AvatarInterview from './AvatarInterview';
+import { getAvatarSession } from '../helpers/interviewSession';
 
 // Utility function to capitalize the first letter of a string
 const capitalize = (s) => {
@@ -38,7 +40,7 @@ const Timer = (props) => {
   );
 }
 
-const LiveInterview = () => {
+const TextLiveInterview = () => {
   const [open, setOpen] = useState(true);
   const videoRef = useRef(null);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
@@ -810,6 +812,14 @@ const LiveInterview = () => {
       )}
     </>
   );
+};
+
+// /live renders the native real-time avatar studio when a scheduled avatar
+// session is active; otherwise the standard text/audio interview.
+const LiveInterview = () => {
+  const avatarSession = getAvatarSession();
+  if (avatarSession) return <AvatarInterview session={avatarSession} />;
+  return <TextLiveInterview />;
 };
 
 export default LiveInterview;

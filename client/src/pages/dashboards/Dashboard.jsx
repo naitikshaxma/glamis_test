@@ -2,6 +2,7 @@ import React from 'react';
 import Cookies from 'js-cookie';
 import { Link } from 'react-router-dom';
 import { bearerInstance as instance } from "../../helpers/instance.js";
+import RecentlyScheduledInterview from "../../components/RecentlyScheduledInterview.jsx";
 
 const mockMenuItems = [
   {
@@ -145,7 +146,11 @@ const MockCard = ({ title, lessons, progress, accentClass, ringColor, bgClass, b
   );
 };
 
-const Dashboard = () => {
+// `scheduled` (the pending interview config) + `onStart` switch the dashboard
+// into pre-interview lobby mode: the header and the My Interviews grid are
+// replaced by the Recently Scheduled Interview card, while Statistics,
+// Leaderboard and Activity stay. Absent these props, this is the normal dashboard.
+const Dashboard = ({ scheduled = null, onStart, onExit } = {}) => {
   const [overallPercenatge, setOverallPercenatge] = React.useState(0);
   const [stats, setStats] = React.useState({
     completed: 0,
@@ -199,7 +204,8 @@ const Dashboard = () => {
 
   return (
     <div className="p-8 max-w-7xl mx-auto bg-slate-50/70 min-h-screen">
-      {/* Header */}
+      {/* Header — hidden in the pre-interview lobby */}
+      {!scheduled && (
       <div className="flex justify-between items-center mb-8 pb-4 border-b border-slate-200/60">
         <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight leading-normal">
           Hello <span className="text-[#2b6030] font-black">{Cookies.get("fullName") || "Student"}</span>, welcome back!
@@ -218,11 +224,14 @@ const Dashboard = () => {
           </Link>
         </div>
       </div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Content */}
         <div className="flex-1">
-          {/* Mock Cards Grid */}
+          {scheduled ? (
+            <RecentlyScheduledInterview pending={scheduled} onStart={onStart} onExit={onExit} />
+          ) : (
           <section className="mb-8">
             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">My Interviews</h2>
 
@@ -255,6 +264,7 @@ const Dashboard = () => {
               </div>
             </div>
           </section>
+          )}
         </div>
 
         {/* Right Sidebar */}

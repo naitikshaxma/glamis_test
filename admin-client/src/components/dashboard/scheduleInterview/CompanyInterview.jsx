@@ -12,6 +12,7 @@ import {
 } from "@material-tailwind/react";
 import { saveAs } from 'file-saver';
 import api from "../../../helpers/api";
+import AvatarModeToggle from "./AvatarModeToggle";
 
 const softwarePositions = [
     "Software Developer",
@@ -60,6 +61,7 @@ export default function CompanyInterview() {
     const [jobDescription, setJobDescription] = useStickyState("", "company_jobDescription");
     const [questions, setQuestions] = useStickyState([], "company_questions");
     const [emailObject, setEmailObject] = useStickyState([], "company_emailObject");
+    const [avatarEnabled, setAvatarEnabled] = useStickyState(false, "company_avatarEnabled");
 
     const handleNext = () => {
         if (currentStep === 1 && interviewName && companyName && date && duration.from && duration.to && noOfQuestions && position) {
@@ -106,16 +108,21 @@ export default function CompanyInterview() {
                 job_description: jobDescription,
                 questions : questions,
                 students: emailObject,
-                type: "company"
+                type: "company",
+                avatar_enabled: avatarEnabled
             }, {
                 headers: { "Content-Type": "application/json" }
             });
             console.log("Form submitted successfully:", response.data);
-            toast.success('Interview Created Successfully! 🎉');
+            if (response.data?.skipped?.length) {
+                toast(response.data.message, { icon: '⚠️', duration: 7000 });
+            } else {
+                toast.success('Interview Created Successfully! 🎉');
+            }
             clearStickyStatePrefix("company_");
             setCurrentStep(1); setInterviewName(""); setCompanyName(""); setDate(""); setDuration({from:"", to:""});
             setNoOfQuestions(""); setPosition(""); setEasy(""); setMedium(""); setHard("");
-            setJobDescription(""); setQuestions([]); setEmailObject([]);
+            setJobDescription(""); setQuestions([]); setEmailObject([]); setAvatarEnabled(false);
             navigate('/admin/dashboard');
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -200,6 +207,8 @@ export default function CompanyInterview() {
                                 <FormInput label="Medium" type="number" value={medium} onChange={(e) => setMedium(e.target.value)} max={7} />
                                 <FormInput label="Hard" type="number" value={hard} onChange={(e) => setHard(e.target.value)} max={5} />
                             </div>
+
+                            <AvatarModeToggle enabled={avatarEnabled} setEnabled={setAvatarEnabled} />
 
                             <hr className="my-6 border-gray-200" />
                             <Typography variant="small" className="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-4">Students</Typography>

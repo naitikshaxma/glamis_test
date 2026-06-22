@@ -7,16 +7,24 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import SidePic from '../assets/SidePic.png';
 import JDpic from '../assets/jd.png';
+import JDInterviewPic from '../assets/interview_by_jd.png';
+import CoreSubjectsPic from '../assets/interview_by_core_subjects.png';
+import WritingSkillsPic from '../assets/writing_skills_practice.png';
 import Resume from '../assets/sample.pdf';
 import { useNavigate } from 'react-router-dom';
 import isOnline from 'is-online';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { setPendingInterview } from '../helpers/interviewSession';
 
+// Standalone real-time Avatar Interview studio (Azure TTS avatar + AI agent).
+// Override with VITE_AVATAR_URL if it runs elsewhere.
+const AVATAR_BASE = import.meta.env.VITE_AVATAR_URL || 'http://localhost:8080';
 
 const steps = [
     'Select type of interview',
@@ -65,6 +73,7 @@ const topicsList = [
 export default function CreateInterview() {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = React.useState(0);
+    const [avatarMode, setAvatarMode] = React.useState(false);
     const handleNext = () => {
         // check if any thing is selected
         if (activeStep === 0) {
@@ -229,100 +238,31 @@ export default function CreateInterview() {
     }
 
 
-    const CreateInterview = async () => {
-        try {
-            if (interviewType === 'JD') {
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterviewByJD`, {
-                    company: selectedCompany,
-                    jobTitle: selectedJobTitle,
-                },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${Cookies.get('accessToken')}`
-                        }
-                    });
-                console.log(response.data);
-                if (response.data.statusCode === 200) {
-                    Cookies.set('interviewId', response.data.data._id);
-                    Cookies.set('selectedCompany', selectedCompany);
-                    Cookies.set('jobTitle', selectedJobTitle);
-                    Cookies.set('mockType', 'student-company');
-                    Cookies.set('delta', 10);
-                    Cookies.set('currentQuestion', 0);
-                    navigate('/live');
-                    console.log(company);
-                    console.log(jobTitle)
-                }
-            } else if (interviewType === 'Core Subjects') {
-                // create interview
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-                    subject: subject,
-                },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${Cookies.get('accessToken')}`
-                        }
-                    }
-                )
-                console.log(response.data);
-                if (response.data.statusCode === 200) {
-                    Cookies.set('interviewId', response.data.data._id);
-                    Cookies.set('subject', subject);
-                    Cookies.set('mockType', 'student-subject');
-                    Cookies.set('delta', 10);
-                    Cookies.set('currentQuestion', 0);
-                    navigate('/live');
-                }
-            } else if (interviewType === 'Written') {
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-                    subject: topic,
-                },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${Cookies.get('accessToken')}`
-                        }
-                    }
-                )
-                console.log(response.data);
-                if (response.data.statusCode === 200) {
-                    Cookies.set('interviewId', response.data.data._id);
-                    Cookies.set('subject', topic);
-                    Cookies.set('mockType', 'student-written');
-                    Cookies.set('delta', 10);
-                    Cookies.set('currentQuestion', 0);
-                    navigate('/written');
-                }
-            } else if (interviewType === 'Resume') {
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/interview/createInterview`, {
-                    subject: "Interview by Resume",
-                },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${Cookies.get('accessToken')}`
-                        }
-                    }
-                )
-                console.log(response.data);
-                if (response.data.statusCode === 200) {
-                    Cookies.set('interviewId', response.data.data._id);
-                    Cookies.set('subject', 'Interview by Resume');
-                    localStorage.setItem('resumeText', resumeText);
-                    Cookies.set('mockType', 'student-resume');
-                    Cookies.set('delta', 10);
-                    Cookies.set('currentQuestion', 0);
-                    navigate('/live');
-                }
-            }
-        } catch (error) {
-            console.error("Failed to create interview:", error);
-            const errMsg = error.response?.data?.message || "Failed to initiate interview";
-            toast.error(errMsg);
+    // The self-serve create logic now lives in launchInterviewSession()
+    // (helpers/interviewSession.js) and runs only at the final Start on the
+    // review screen — see the pre-interview lobby/review flow.
+
+    // Map the selected GLAMIS interview type/details to the avatar studio's
+    // agent params. The avatar now runs natively at /live (no separate app), so
+    // we just compute the params to carry through the schedule flow.
+    const avatarParams = () => {
+        let type = 'technical';
+        let role = 'the role';
+        if (interviewType === 'JD') {
+            type = 'technical';
+            role = [selectedJobTitle, selectedCompany].filter(Boolean).join(' at ') || 'the role';
+        } else if (interviewType === 'Core Subjects') {
+            type = /data structures|algorithm/i.test(subject) ? 'dsa' : 'technical';
+            role = subject || 'the role';
+        } else if (interviewType === 'Written') {
+            type = 'verbal';
+            role = topic || 'Communication';
+        } else if (interviewType === 'Resume') {
+            type = 'behavioral';
+            role = 'the role';
         }
-    }
+        return { type, role, difficulty: 'medium', count: 5 };
+    };
 
     return (
         <div className="flex w-full h-screen items-center justify-center">
@@ -358,6 +298,7 @@ export default function CreateInterview() {
 
                     {
                         activeStep === 0 &&
+                        <>
                         <div className="flex justify-between gap-5 my-5">
                             <CardContent className={` w-1/4 p-6
                         ${interviewType === 'JD' ? 'bg-gray-100' : ''}
@@ -372,7 +313,7 @@ export default function CreateInterview() {
                                 </Typography>
                                 <div className="flex w-24 h-24 m-5 items-center justify-center">
 
-                                    <img src={JDpic} className='w-full' />
+                                    <img src={JDInterviewPic} alt="Interview by JD" className='w-full' />
                                 </div>
                                 <Typography variant="body2" className="text-center">
                                     provide the job description and the system will generate the interview questions
@@ -416,7 +357,7 @@ export default function CreateInterview() {
                                 </Typography>
                                 <div className="flex w-24 h-24 m-5 items-center justify-center">
 
-                                    <img src={JDpic} className='w-full' />
+                                    <img src={CoreSubjectsPic} alt="Interview by Core Subjects" className='w-full' />
                                 </div>
                                 <Typography variant="body2">
                                     provide the core subjects and the system will generate the interview questions
@@ -431,20 +372,51 @@ export default function CreateInterview() {
                             duration-300`}
                                 onClick={() => {
                                     setInterviewType('Written');
+                                    setAvatarMode(false); // avatar interview is spoken; not applicable to writing practice
                                 }}>
                                 <Typography sx={{ fontSize: 20 }} color="text.primary" gutterBottom className="font-semibold">
                                     Writing Skills Practice
                                 </Typography>
                                 <div className="flex w-24 h-24 m-5 items-center justify-center">
 
-                                    <img src={JDpic} className='w-full' />
+                                    <img src={WritingSkillsPic} alt="Writing Skills Practice" className='w-full' />
                                 </div>
                                 <Typography variant="body2">
                                     this module will test your written english abilities
                                 </Typography>
                             </CardContent>
 
-                        </div>}
+                        </div>
+
+                        {/* Real-time Avatar Interview toggle — disabled for Writing Skills Practice (spoken avatar doesn't apply) */}
+                        {(() => {
+                            const avatarLocked = interviewType === 'Written';
+                            return (
+                                <div className={`flex items-center justify-between gap-4 my-3 p-4 rounded-lg border transition-colors
+                                    ${avatarLocked ? 'border-gray-200 bg-gray-100 opacity-60'
+                                        : avatarMode ? 'border-[#2b6030] bg-[#2b6030]/5' : 'border-gray-200 bg-gray-50'}`}>
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <i className='bx bx-user-voice text-[#2b6030] text-xl'></i>
+                                            <span className="font-semibold text-gray-800">Real-time Avatar Interview</span>
+                                        </div>
+                                        <span className="text-sm text-gray-500">
+                                            {avatarLocked
+                                                ? 'Not available for Writing Skills Practice — this is a typed exercise, not a spoken interview.'
+                                                : 'A live AI avatar speaks each question aloud and listens to your spoken answers, then gives a scored report. Opens the full-screen avatar studio.'}
+                                        </span>
+                                    </div>
+                                    <Switch
+                                        checked={avatarMode && !avatarLocked}
+                                        onChange={(e) => setAvatarMode(e.target.checked)}
+                                        color="success"
+                                        disabled={avatarLocked}
+                                        inputProps={{ 'aria-label': 'Enable real-time avatar interview' }}
+                                    />
+                                </div>
+                            );
+                        })()}
+                        </>}
 
 
                     {/* for jd take a job title expreience level hardness and jd */}
@@ -632,9 +604,10 @@ export default function CreateInterview() {
                     {/* 2 buttons flex flex end */}
 
                     <div className="flex justify-end gap-5 my-5">
+                        {activeStep !== 0 &&
                         <Button variant="outlined" color="success" onClick={handleBack}>
                             Back
-                        </Button>
+                        </Button>}
                         {
                             activeStep !== 2 &&
                             <Button variant="contained" color="success"
@@ -650,10 +623,33 @@ export default function CreateInterview() {
                                         toast.error("Please complete all system compatibility checks before entering the interview.");
                                         return;
                                     }
-                                    toast.success('Interview Created Successfully');
-                                    CreateInterview();
+                                    // Defer ALL interview logic to the final Start on the review
+                                    // screen. Here we only stash the selection, lock fullscreen
+                                    // (this click is the required user gesture), and enter the lobby.
+                                    // Avatar mode now runs natively at /live, so it goes through the
+                                    // same schedule flow — we just carry the avatar params along.
+                                    const config = {
+                                        interviewType,
+                                        selectedCompany,
+                                        selectedJobTitle,
+                                        subject,
+                                        topic,
+                                        resumeText,
+                                    };
+                                    if (avatarMode) {
+                                        config.avatarMode = true;
+                                        config.avatar = avatarParams();
+                                    }
+                                    setPendingInterview(config);
+                                    const fsEl = document.documentElement;
+                                    const reqFs = fsEl.requestFullscreen || fsEl.webkitRequestFullscreen;
+                                    if (reqFs) { try { reqFs.call(fsEl); } catch (e) { /* FullscreenGuard re-prompts */ } }
+                                    toast.success(avatarMode
+                                        ? 'Avatar interview scheduled — review and start it from the lobby.'
+                                        : 'Interview scheduled — review and start it from the lobby.');
+                                    navigate('/interview/lobby');
                                 }}>
-                                Start Interview
+                                {avatarMode ? 'Start Avatar Interview' : 'Schedule Interview'}
                             </Button>
                         }
                     </div>
