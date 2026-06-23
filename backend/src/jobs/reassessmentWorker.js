@@ -45,9 +45,14 @@ export async function executeReassessment(studentId, userId) {
   try {
     const settings = await AutomationSettings.findOne() || await AutomationSettings.create({});
 
+    console.log(`[Reassessment Worker] Processing profile updates for student ${studentId}`);
+
     // 1. Call FastAPI to compute updated readiness, weak subjects, and roadmap
     const { roadmap, assignments } = await generateAndStoreRecommendations(studentId, userId);
     
+    console.log(`[Reassessment Engine] readiness recalculated`);
+    console.log(`[Reassessment Engine] new roadmap generated`);
+    console.log(`[Reassessment Engine] new assignment created`);
     console.log(`[Reassessment Engine] Roadmap regenerated for student ${studentId}. Readiness score: ${roadmap.readinessScore}`);
 
     // Track progression history in the StudentAssignment or student profile.
@@ -92,8 +97,10 @@ export async function triggerReassessment(studentId, userId) {
     });
     console.log(`[Reassessment Queue] Enqueued reassessment for student ${studentId}`);
   } else {
+    console.log(`[Reassessment Queue] (Fallback) Enqueued reassessment for student ${studentId}`);
     console.log(`[Reassessment Fallback] Triggering in-process profile reassessment for student ${studentId}`);
     setTimeout(() => {
+      console.log(`[Reassessment Worker] (Fallback) Processing profile updates for student ${studentId}`);
       executeReassessment(studentId, userId).catch(err => {
         console.error("[Reassessment Fallback] executeReassessment failed:", err.message);
       });

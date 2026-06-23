@@ -11,7 +11,7 @@ async function loginAdmin() {
   const r = await fetch(`${NODE}/api/v1/users/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email_id: 'admin@glamis.in', password: 'demo123' })
+    body: JSON.stringify({ email: 'admin@glamis.in', password: 'demo123' })
   });
   const data = await r.json();
   console.log('Login status:', r.status);
@@ -29,7 +29,8 @@ async function getFirstStudent(token) {
   // Connect to DB
   await mongoose.connect(DB);
   const db = mongoose.connection.db;
-  const user = await db.collection('users').findOne({ is_admin: false });
+  // Use the seeded student whose password we know
+  const user = await db.collection('users').findOne({ email_id: 'student@glamis.in', is_admin: false });
   const student = await db.collection('students').findOne({ user: user._id });
   await mongoose.disconnect();
   
@@ -148,15 +149,11 @@ async function verifyDB(studentId) {
 // Step 7: Test student my-assignments endpoint
 async function loginStudent() {
   console.log('\n=== STUDENT LOGIN ===');
-  await mongoose.connect(DB);
-  const db = mongoose.connection.db;
-  const user = await db.collection('users').findOne({ is_admin: false });
-  await mongoose.disconnect();
-  
+  // Login with the known seeded student
   const r = await fetch(`${NODE}/api/v1/users/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email_id: user.email_id, password: 'Test@1234' })
+    body: JSON.stringify({ email: 'student@glamis.in', password: 'Test@1234' })
   });
   const data = await r.json();
   console.log('Student login status:', r.status);

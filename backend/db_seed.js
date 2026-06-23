@@ -20,14 +20,15 @@ async function run() {
         email_id: "admin@glamis.in",
         phone: uniquePhone,
         is_admin: true,
-        password: "adminpassword", // Will be hashed automatically by pre-save hook
+        password: "demo123",
         is_email_verified: true
       });
       console.log("Admin user created.");
     } else {
       admin.is_admin = true;
+      admin.password = "demo123";
       await admin.save();
-      console.log("Admin user found and verified is_admin = true.");
+      console.log("Admin user found, verified is_admin = true, password set to demo123.");
     }
 
     const token = admin.generateAccessToken();
@@ -44,10 +45,14 @@ async function run() {
         email_id: "student@glamis.in",
         phone: studentPhone,
         is_admin: false,
-        password: "studentpassword",
+        password: "Test@1234",
         is_email_verified: true
       });
       console.log("Student user created.");
+    } else {
+      studentUser.password = "Test@1234";
+      await studentUser.save();
+      console.log("Student user found, password set to Test@1234.");
     }
 
     let student = await Student.findOne({ user: studentUser._id });

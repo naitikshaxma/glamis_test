@@ -10,7 +10,7 @@ async function loginAdmin() {
   const r = await fetch(`${NODE}/api/v1/users/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'admin@glamis.com', password: 'password123' })
+    body: JSON.stringify({ email: 'admin@glamis.in', password: 'demo123' })
   });
   const data = await r.json();
   console.log('Admin login HTTP status:', r.status);
@@ -26,7 +26,8 @@ async function loginAdmin() {
 async function getFirstStudentInfo() {
   await mongoose.connect(DB);
   const db = mongoose.connection.db;
-  const user = await db.collection('users').findOne({ is_admin: false });
+  // Use the known seeded student
+  const user = await db.collection('users').findOne({ email_id: 'student@glamis.in', is_admin: false });
   const student = await db.collection('students').findOne({ user: user._id });
   await mongoose.disconnect();
   return { userId: user._id.toString(), studentId: student?._id?.toString(), name: user.name, email: user.email_id };

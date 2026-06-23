@@ -11,8 +11,8 @@
 const SPEECH_KEY = process.env.SPEECH_KEY;
 const SPEECH_REGION = process.env.SPEECH_REGION;
 // The agent runs on its own port (NOT 8000 — that's this backend). Set AGENT_URL
-// in .env to the FastAPI agent; default mirrors the avatar app's local setup.
-const AGENT_URL = (process.env.AGENT_URL || "http://localhost:8010").replace(/\/+$/, "");
+// in .env to the FastAPI agent; local dev typically uses port 8000 for the agent.
+const AGENT_URL = (process.env.AGENT_URL || "http://localhost:8000").replace(/\/+$|"/g, "");
 const AGENT_PREFIX = "/api/v1";
 const JSON_HEADERS = { "Content-Type": "application/json" };
 

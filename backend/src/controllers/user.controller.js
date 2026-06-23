@@ -115,6 +115,13 @@ const signup = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
     // todos : 
 
+    // Debug: log incoming origin and method for diagnosing CORS/network issues
+    try {
+        console.log(`[LOGIN REQUEST] origin=${req.headers.origin || 'none'} method=${req.method} path=${req.originalUrl}`);
+    } catch (e) {
+        console.log('[LOGIN REQUEST] failed to log headers', e.message);
+    }
+
     /*
 
     1. get email and password - done
@@ -152,7 +159,7 @@ const login = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true, // can only be modified by server not by client-side
-        secure: true
+        secure: process.env.NODE_ENV === 'production'
     }
 
     const isStudent = await Student.findOne({ user: isUser._id })
