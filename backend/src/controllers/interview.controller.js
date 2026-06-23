@@ -1,7 +1,17 @@
 import dotenv from "dotenv";
 dotenv.config({ override: true });
 import fs from "fs";
-import OpenAI from "openai";
+import OriginalOpenAI from "openai";
+const OpenAI = class ProxyOpenAI extends OriginalOpenAI {
+  constructor(...args) {
+    super(...args);
+    const originalCompletionsCreate = this.chat.completions.create.bind(this.chat.completions);
+    this.chat.completions.create = async (...createArgs) => {
+      console.log("[NODE_OPENAI_EXECUTED] for chat completions");
+      return originalCompletionsCreate(...createArgs);
+    };
+  }
+};
 import path from "path";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -28,6 +38,8 @@ import generateQuestionsPromptForWritten from "../utils/prompts/generateQuestion
 import { AdminCompanyInterview, InterviewQuestionsByAdmin } from "../models/interview.models.js";
 import { getAdminInterview, getSessionQuestions, saveSessionQuestions } from "../utils/crud.js";
 import mongoose from "mongoose";
+import { updateAssignmentStatus } from "../services/assignmentService.js";
+import { triggerReassessment } from "../jobs/reassessmentWorker.js";
 
 
 const objectStorePath = path.resolve(process.env.OBJECT_STORE_PATH || "../objectStore");
@@ -150,6 +162,11 @@ export const createInterviewByVerbalAdmin = asyncHandler(async (req, res) => {
   try {
     let redisClient = await connectRedis();
     await redisClient.set(String(interview._id), JSON.stringify([]));
+    
+    // Auto transition to in_progress
+    await updateAssignmentStatus(interview._id, "in_progress").catch(e => 
+      console.warn("Assignment update failed (non-fatal):", e.message)
+    );
   } catch (error) {
     console.log("Error while connecting to Redis", error);
     return res.status(500).json(ApiError(500, error.message || "Internal Server Error"));
@@ -168,6 +185,12 @@ export const createInterviewByJDAdmin = asyncHandler(async (req, res) => {
     const { interviewId } = req.body;
     let redisClient = await connectRedis();
     await redisClient.set(String(interviewId), JSON.stringify([]));
+    
+    // Auto transition to in_progress
+    await updateAssignmentStatus(interviewId, "in_progress").catch(e => 
+      console.warn("Assignment update failed (non-fatal):", e.message)
+    );
+    
     return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
   } catch (error) {
     console.log("Error while connecting to Redis", error);
@@ -194,6 +217,11 @@ export const createInterviewByWrittenAdmin = asyncHandler(async (req, res) => {
 
     await redisClient.set(String(interviewId), JSON.stringify([]));
 
+    // Auto transition to in_progress
+    await updateAssignmentStatus(interviewId, "in_progress").catch(e => 
+      console.warn("Assignment update failed (non-fatal):", e.message)
+    );
+
     return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
   } catch (error) {
     console.log("Error while connecting to Redis", error);
@@ -217,6 +245,11 @@ export const createInterviewBySvarAdmin = asyncHandler(async (req, res) => {
     let redisClient = await connectRedis();
 
     await redisClient.set(String(interviewId), JSON.stringify([]));
+
+    // Auto transition to in_progress
+    await updateAssignmentStatus(interviewId, "in_progress").catch(e => 
+      console.warn("Assignment update failed (non-fatal):", e.message)
+    );
 
     return res.status(200).json(new ApiResponse(200, {}, "Interview created successfully"));
   } catch (error) {
@@ -2155,9 +2188,19 @@ export const saveResultToDb = asyncHandler(async (req, res) => {
     const student = await Student.findOne({ user: currentUser._id });
     console.log("student ####", student);
 
+    // Auto transition to completed & trigger reassessment
+    await updateAssignmentStatus(interviewId, "completed").catch(e => 
+      console.warn("Assignment update failed (non-fatal):", e.message)
+    );
+
+    if (student) {
+      triggerReassessment(student._id, currentUser._id).catch(e =>
+        console.warn("Trigger reassessment failed (non-fatal):", e.message)
+      );
+    }
+
     // deleting all session questions after interview ends
     // await deleteSessionQuestions(interviewId);
-
 
     return res.status(200).json(new ApiResponse(200, { interviewId }, "Result saved successfully"));
   } catch (err) {

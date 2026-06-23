@@ -24,8 +24,13 @@ from app.services.speech_to_text_service import get_stt_service, SpeechToTextSer
 from app.services.text_to_speech_service import get_tts_service, TextToSpeechService
 from app.schemas.admin_task import AdminTaskRequest, AdminTaskResponse
 from app.agents.admin_task_agent import AdminTaskAgent
+from app.api.readiness_routes import readiness_router
+from app.api.assignment_routes import assignment_router
 
 router = APIRouter(tags=["interview"])
+router.include_router(readiness_router)
+router.include_router(assignment_router)
+
 
 
 @router.get("/health", response_model=HealthResponse)

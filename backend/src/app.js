@@ -9,6 +9,8 @@ import objectRouter from './routes/object.router.js';
 import adminRouter from './routes/admin.router.js';
 import dashboardRouter from './routes/dashboard.router.js';
 import avatarRouter from './routes/avatar.router.js';
+import assignmentRouter from './routes/assignment.router.js';
+import notificationRouter from './routes/notification.router.js';
 import { RateLimiter15mins } from "./utils/RateLimiter.js";
 
 
@@ -21,15 +23,21 @@ const publicPath = path.resolve("public");
 app.use("/api/v1/objectStore", express.static(objectStorePath));
 app.use("/public", express.static(publicPath));
 
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
+  : [
+      'https://glamis.in',
+      'https://admin.glamis.in',
+      'http://localhost:3000',
+      'http://localhost:4000',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:4000',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+
 app.use(cors({
-  origin: [
-    'https://glamis.in',
-    'https://admin.glamis.in',
-    'http://localhost:3000',
-    'http://localhost:4000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:4000'
-  ],
+  origin: allowedOrigins,
   credentials: true
 }));
 
@@ -48,6 +56,8 @@ app.use("/api/v1/objectStore", objectRouter)
 app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 app.use("/api/v1/avatar", avatarRouter)
+app.use("/api/v1", assignmentRouter)
+app.use("/api/v1/notifications", notificationRouter)
 
 
 // health check route

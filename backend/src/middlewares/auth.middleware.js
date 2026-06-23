@@ -19,10 +19,9 @@ const isAuthenticated = asyncHandler(async(req, res, next) => {
         }
 
         req.user = user
-        console.log("User is authenticated")
         next()
     } catch (error) {
-        console.log(error)
+        console.error("[Auth Middleware]", error?.message || error)
         return res.status(500).json(ApiError(500, error?.message || "Internal Server Error in authMiddleware"))
     }
 })

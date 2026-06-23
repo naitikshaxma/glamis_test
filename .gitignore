@@ -3,13 +3,61 @@ node_modules/
 .idea/
 .env
 .env.*
+.env.local
 .DS_Store
 dist/
 build/
 
-# --- Local interview integration (Avatar Interviews + ai_mock_interview_agent), not in upstream ---
-# NOTE: .env / .env.* and node_modules/ are already ignored above (keeps API keys + deps out of git)
-_old_backup/
-.venv/
+# --- Python ---
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.db
+*.sqlite3
+*.sqlite
+.pytest_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+
+# --- Logs & runtime artifacts ---
+uvicorn.log
+*.log
+npm-debug.log*
+dump.rdb
+*.rdb
+
+# --- Binary test/debug artifacts (should never be committed) ---
+*.webm
+*.mp3
+*.wav
+# EXCEPTION: keep public UI audio fallback files
+!client/public/not-available.mp3
+!client/public/not-available.webm
+
+# --- Backup / old implementations ---
+_old_backup/
+*.bak
+*.orig
+
+# --- GLAMIS Agent database files ---
 GLAMIS_agent-master/**/*.db
+tests/*.db
+
+# --- ML Backend ---
+ml-backend/dataset/
+*.pt
+*.pth
+runs/
+
+# --- Build & cache ---
+.vite/
+.next/
+.nuxt/
+coverage/

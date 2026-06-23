@@ -65,6 +65,7 @@ def _trace(msg: str) -> None:
     up live while an interview runs — e.g. watch it during an Avatar interview
     with: Get-Content uvicorn.log -Wait
     """
+    print("[FASTAPI_AGENT_EXECUTED]", flush=True)
     print(f"[agent] {msg}", flush=True)
 
 

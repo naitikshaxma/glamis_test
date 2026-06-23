@@ -1,6 +1,8 @@
 import redis from 'redis';
+import IORedis from 'ioredis';
 
 let redisClient;
+let ioRedisConnection;
 
 // In-memory fallback store for development (when Redis is not available)
 const memoryStore = new Map();
@@ -54,6 +56,30 @@ async function connectRedis() {
         }
     }
     return redisClient;
+}
+
+export function getIORedisConnection() {
+    if (!ioRedisConnection) {
+        const redisURL = process.env.REDIS_URL;
+        if (redisURL) {
+            try {
+                ioRedisConnection = new IORedis(redisURL, {
+                    maxRetriesPerRequest: null,
+                    lazyConnect: true,
+                });
+                ioRedisConnection.on("error", (err) => {
+                    console.error("IORedis connection error (non-fatal):", err.message);
+                });
+            } catch (err) {
+                console.error("IORedis instantiation failed:", err.message);
+                return null;
+            }
+        } else {
+            console.log("Redis URL not configured. getIORedisConnection returning null (fallback active).");
+            return null;
+        }
+    }
+    return ioRedisConnection;
 }
 
 export { redisClient };

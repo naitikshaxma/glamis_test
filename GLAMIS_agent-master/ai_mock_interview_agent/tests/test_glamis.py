@@ -1,14 +1,16 @@
-from __future__ import annotations
-
-from sqlalchemy.orm import Session
-
+from typing import Any
 from app.database.session import SessionLocal
 from app.models.interview import InterviewSession
+from app.memory.memory_manager import MemoryManager
 
 
-def get_session(session_id: str) -> InterviewSession | None:
+def get_session(session_id: str) -> Any | None:
     with SessionLocal() as db:
-        return db.get(InterviewSession, session_id)
+        manager = MemoryManager(db)
+        try:
+            return manager.get_session(session_id)
+        except ValueError:
+            return None
 
 
 def test_glamis_subject_interview_end_to_end(client) -> None:

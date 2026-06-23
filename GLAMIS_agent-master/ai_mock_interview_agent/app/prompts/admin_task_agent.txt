@@ -47,6 +47,6 @@ Generate a JSON object conforming to the AdminTaskPlan schema:
 
 ---
 User's Command:
-"{{ task }}"
+"${task}"
 
 Provide the structured JSON plan.

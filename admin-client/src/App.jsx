@@ -12,6 +12,8 @@ import ProtectedRoute from "./pages/Protectedroute";
 import SwarInterview from "./components/dashboard/scheduleInterview/SwarInterview";
 import {Toaster} from 'react-hot-toast';
 import AdminProfile from "./pages/AdminProfile";
+import AIAssignmentCenter from "./pages/AIAssignmentCenter";
+import AutomationCenter from "./pages/AutomationCenter";
 
 // Layout component that includes Sidebar
 const MainLayout = () => {
@@ -130,6 +132,14 @@ const router = createBrowserRouter([
           {
             path: "/admin/review-board",
             element: <ReviewBoard />,
+          },
+          {
+            path: "/admin/ai-assignments",
+            element: <AIAssignmentCenter />,
+          },
+          {
+            path: "/admin/automation-center",
+            element: <AutomationCenter />,
           },
         ],
       },
