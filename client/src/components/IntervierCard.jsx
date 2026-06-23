@@ -7,6 +7,23 @@ import { toast } from "react-toastify";
 import { Tooltip } from "@mui/material";
 import { setAvatarSession, clearAvatarSession } from "../helpers/interviewSession";
 
+function formatInterviewDuration(start, end, estimatedMinutes) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const startValid = !Number.isNaN(startDate.getTime());
+    const endValid = !Number.isNaN(endDate.getTime()) && endDate > startDate;
+    if (startValid && endValid) {
+        const durationMinutes = Math.round((endDate - startDate) / 60000);
+        if (durationMinutes > 0) {
+            return `${durationMinutes} minute${durationMinutes === 1 ? '' : 's'}`;
+        }
+    }
+    if (typeof estimatedMinutes === 'number' && estimatedMinutes > 0) {
+        return `${Math.round(estimatedMinutes)} minute${Math.round(estimatedMinutes) === 1 ? '' : 's'}`;
+    }
+    return "Not available";
+}
+
 export default function InterviewCard({ props, status }) {
     const navigate = useNavigate();
     const [company, setCompany] = useState();  // todo: fetch Company for jd
@@ -24,6 +41,13 @@ export default function InterviewCard({ props, status }) {
         }
         getUser();
     }, [])
+
+    const startDate = new Date(props.start_time);
+    const endDate = new Date(props.end_time);
+    const durationLabel = formatInterviewDuration(props.start_time, props.end_time, props.estimatedDurationMinutes);
+    const hasValidStart = !Number.isNaN(startDate.getTime());
+    const hasValidEnd = !Number.isNaN(endDate.getTime()) && endDate > startDate;
+
     const handleInterview = async () => {
         // The admin scheduled this slot as a real-time avatar interview: launch the
         // native avatar studio directly (no text-interview create / token spend; the
@@ -156,16 +180,15 @@ export default function InterviewCard({ props, status }) {
                 <hr />
                 <div className="flex justify-between my-2">
                     <div>
-                        <span className="font-bold">Date:</span> {(new Date(props.start_time)).toLocaleDateString()}
+                        <span className="font-bold">Date:</span> {hasValidStart ? startDate.toLocaleDateString() : 'Not available'}
                     </div>
                     <div>
-                        <span className="font-bold">Time:</span> {(new Date(props.start_time)).toLocaleTimeString()}
+                        <span className="font-bold">Time:</span> {hasValidStart ? startDate.toLocaleTimeString() : 'Not available'}
                     </div>
                 </div>
                 <div className="my-2">
                     <div>
-                        <span
-                            className="font-bold">Duration:</span> {(new Date(props.end_time) - new Date(props.start_time)) / 1000 / 60} minutes
+                        <span className="font-bold">Duration:</span> {durationLabel}
                     </div>
                 </div>
             </Typography>

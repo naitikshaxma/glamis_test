@@ -29,6 +29,7 @@ import {
   InterviewQuestion,
 } from "../models/interview.models.js"
 import { Student } from "../models/users.models.js"
+import { StudentAssignment } from "../models/studentAssignment.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import connectRedis from "../db/redis.connect.js"
 import generateQuestionsPrompt from "../utils/prompts/generateQuestions.js";
@@ -78,8 +79,14 @@ export const createInterview = asyncHandler(async (req, res) => {
       return res.status(400).json(ApiError(400, "Token finished. Please wait until tokens are refreshed."));
     }
 
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + 120 * 60000);
     const interview = await Interview.create({
-      start_time: new Date(), is_active: true, title: subject, description: subject
+      start_time: startTime,
+      end_time: endTime,
+      is_active: true,
+      title: subject,
+      description: subject
     })
 
     console.log("Interview created ####", interview);
@@ -123,8 +130,14 @@ export const createInterviewByJD = asyncHandler(async (req, res) => {
       return res.status(400).json(ApiError(400, "Token finished. Please wait until tokens are refreshed."));
     }
 
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + 120 * 60000);
     const interview = await Interview.create({
-      start_time: new Date(), is_active: true, title: jobTitle, description: actualCompany + " " + jobTitle,
+      start_time: startTime,
+      end_time: endTime,
+      is_active: true,
+      title: jobTitle,
+      description: actualCompany + " " + jobTitle,
     });
 
     console.log("Interview created ####", interview);
@@ -2262,11 +2275,36 @@ export const fetchAllInterviews = asyncHandler(async (req, res) => {
       res.status(404).json(ApiError(404, "Student not found"))
     }
 
-    const interviews = await Interview.find({ _id: { $in: student.interview_taken } })
+    const interviews = await Interview.find({ _id: { $in: student.interview_taken } }).lean();
 
-    // console.log(interviews)
+    const assignmentMap = new Map();
+    const assignments = await StudentAssignment.find({ interviewId: { $in: interviews.map((i) => i._id) } }, "interviewId estimatedDurationMinutes").lean();
+    assignments.forEach((assignment) => {
+      assignmentMap.set(String(assignment.interviewId), assignment.estimatedDurationMinutes);
+    });
 
-    return res.status(200).json(new ApiResponse(200, interviews, "Interviews fetched successfully"))
+    const enrichedInterviews = interviews.map((interview) => {
+      const estimatedDurationMinutes = assignmentMap.get(String(interview._id));
+      const hasValidEnd = interview.end_time && !Number.isNaN(new Date(interview.end_time).getTime()) && new Date(interview.end_time) > new Date(interview.start_time);
+      let fallbackEndTime = interview.end_time;
+      if (!hasValidEnd && interview.start_time) {
+        const startDate = new Date(interview.start_time);
+        if (!Number.isNaN(startDate.getTime())) {
+          const durationMinutes = typeof estimatedDurationMinutes === 'number' && estimatedDurationMinutes > 0
+            ? estimatedDurationMinutes
+            : 120;
+          fallbackEndTime = new Date(startDate.getTime() + durationMinutes * 60000);
+        }
+      }
+
+      return {
+        ...interview,
+        end_time: fallbackEndTime,
+        estimatedDurationMinutes: estimatedDurationMinutes || null,
+      };
+    });
+
+    return res.status(200).json(new ApiResponse(200, enrichedInterviews, "Interviews fetched successfully"))
   } catch (error) {
     console.error(`${new Date().toISOString()} - ${error}`)
     res.status(500).json(ApiError(500, error.message || "Internal Server Error"))

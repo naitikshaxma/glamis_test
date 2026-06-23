@@ -270,8 +270,6 @@ const Dashboard = ({ scheduled = null, onStart, onExit } = {}) => {
 
         {/* Right Sidebar */}
         <div className="w-full lg:w-80 space-y-6 flex-shrink-0">
-          {/* AI Assigned Interviews */}
-          <AIAssignedWidget />
           <div className="bg-white text-slate-800 p-6 rounded-2xl border border-slate-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.02)] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full filter blur-[30px]" />
             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Statistics</h2>

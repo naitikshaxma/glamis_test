@@ -28,22 +28,35 @@ const Interviews = () => {
 
     const [activeTab, setActiveTab] = useState("Ongoing Interview")
 
+    const parseDate = (value) => {
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? null : date;
+    };
+
     const renderContent = () => {
-    console.log(new Date());
+    const now = new Date();
     switch (activeTab) {
         case 'Ongoing Interview':
             const ongoingInterview = interviews.filter(interview => {
-                return new Date(interview.start_time) < new Date() && new Date(interview.end_time) > new Date();
+                const startDate = parseDate(interview.start_time);
+                const endDate = parseDate(interview.end_time);
+                if (!startDate) return false;
+                if (endDate) {
+                    return startDate < now && endDate > now;
+                }
+                return startDate <= now;
             });
             return <OngoingInterview ongoingInterview={ongoingInterview.reverse()} />;
         case 'Upcoming Interview':
             const upcomingInterview = interviews.filter(interview => {
-                return new Date(interview.start_time) > new Date();
+                const startDate = parseDate(interview.start_time);
+                return startDate ? startDate > now : false;
             });
             return <UpcomingInterview upcomingInterview={upcomingInterview.reverse()} />;
         case 'Past Interview':
             const pastInterview = interviews.filter(interview => {
-                return new Date(interview.end_time) < new Date();
+                const endDate = parseDate(interview.end_time);
+                return endDate ? endDate < now : false;
             });
             return <PastInterview pastInterview={pastInterview.reverse()} />;
         default:
